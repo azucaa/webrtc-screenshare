@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScreenCast · Share Screen PC Tanpa Aplikasi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="/" class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+      </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="brand-title">ScreenCast</span>
+          <span class="brand-badge">WebRTC P2P</span>
+        </div>
+      </div>
+    </a>
+    <div class="nav-status">
+      <span class="status-dot" id="serverStatusDot"></span>
+      <span id="serverStatusText">Menghubungkan...</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Navigation Tabs (Only shown if not directly joining a room) -->
+    <div class="tabs-container" id="tabsBar">
+      <div class="tabs-wrapper">
+        <button class="tab-btn active" id="tabHostBtn" onclick="switchTab('host')">
+          🖥️ Share Layar PC (Host)
+        </button>
+        <button class="tab-btn" id="tabViewerBtn" onclick="switchTab('viewer')">
+          📱 Nonton Layar (Viewer)
+        </button>
+      </div>
+    </div>
+
+    <!-- HOST SECTION -->
+    <div id="hostSection">
+      <!-- 1. Setup Card -->
+      <div class="card" id="hostSetupCard">
+        <div class="card-header">
+          <h2 class="card-title">Mulai Bagikan Layar PC</h2>
+          <p class="card-subtitle">
+            Bagikan layar monitor, aplikasi, atau tab browser tanpa aplikasi tambahan. Siapapun dapat menonton lewat link atau scan QR code dari HP / perangkat lain.
+          </p>
+        </div>
+
+        <div class="options-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="optAudio" checked>
+            <span>Sertakan Audio Sistem / Tab</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt60fps" checked>
+            <span>High Framerate (60 FPS)</span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary" id="btnStartShare" onclick="startHostSharing()" style="width:100%; font-size:1.05rem; padding:15px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+          Mulai Share Screen Sekarang
+        </button>
+      </div>
+
+      <!-- 2. Active Sharing Dashboard (Hidden until shared) -->
+      <div class="sharing-dash" id="hostActiveDash" style="display: none;">
+        <!-- Left: Live Preview -->
+        <div>
+          <div class="preview-container">
+            <video id="hostPreviewVideo" class="preview-video" autoplay playsinline muted></video>
+            <div class="preview-overlay">
+              <span class="status-dot online"></span>
+              <span>LIVE SHARING</span>
+              <span style="opacity:0.6; margin-left:8px;" id="hostViewerCount">0 Penonton</span>
+            </div>
+          </div>
+          <div style="margin-top: 14px; display:flex; gap:10px;">
+            <button class="btn btn-danger" onclick="stopHostSharing()" style="flex:1;">
+              🛑 Hentikan Share Screen
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Room Details & QR Code -->
+        <div>
+          <div class="room-info-box">
+            <span style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">
+              KODE ROOM ANDA
+            </span>
+            <div class="room-code-badge" id="displayRoomCode">------</div>
+            <div id="qrcodeBox" class="qr-wrapper"></div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
+              Arahkan kamera HP ke QR Code untuk langsung menonton tanpa install apapun.
+            </p>
+            <button class="btn btn-outline" onclick="copyShareLink()" style="width:100%;">
+              📋 Salin Link Nonton
+            </button>
+          </div>
+
+          <!-- Mini Chat for Host -->
+          <div class="chat-drawer">
+            <div class="chat-header">
+              <span>Live Chat Room</span>
+            </div>
+            <div class="chat-messages" id="hostChatBox"></div>
+            <div class="chat-input-bar">
+              <input type="text" id="hostChatInput" class="chat-input" placeholder="Ketik pesan..." onkeydown="if(event.key==='Enter') sendChat('host')">
+              <button class="btn btn-primary" onclick="sendChat('host')" style="padding:8px 14px;">Kirim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEWER SECTION -->
+    <div id="viewerSection" style="display: none;">
+      <!-- Enter Room Code Form (Shown if not yet connected) -->
+      <div class="card" id="viewerJoinCard" style="max-width:480px; margin:0 auto;">
+        <div class="card-header" style="text-align:center;">
+          <h2 class="card-title">Nonton Layar PC</h2>
+          <p class="card-subtitle">Masukkan Kode Room 6-digit untuk mulai menonton secara real-time.</p>
+        </div>
+        <div class="form-group">
+          <input type="text" id="inputRoomCode" class="input-text" placeholder="Contoh: 7K9X2B" maxlength="6" style="text-align:center; font-size:1.4rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;">
+        </div>
+        <button class="btn btn-primary" onclick="joinRoomByInput()" style="width:100%; padding:14px; font-size:1rem;">
+          Gabung & Nonton
+        </button>
+      </div>
+
+      <!-- Active Viewer Player Screen -->
+      <div class="viewer-container" id="viewerActiveScreen" style="display:none;">
+        <div class="viewer-player-wrap" id="viewerPlayerWrap">
+          <video id="viewerVideo" class="viewer-video" autoplay playsinline></video>
+          
+          <!-- Floating Controls -->
+          <div class="viewer-controls">
+            <span class="stats-pill" id="viewerStatsPill">Menghubungkan WebRTC...</span>
+            <button class="ctrl-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Aktifkan/Bisukan Suara">
+              🔊
+            </button>
+            <button class="ctrl-btn" onclick="toggleFullscreen()" title="Layar Penuh">
+              ⛶
+            </button>
+            <button class="ctrl-btn" onclick="toggleViewerChatDrawer()" title="Live Chat">
+              💬
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Overlay for Mobile/Viewer -->
+        <div id="viewerChatDrawer" class="chat-drawer" style="display:none; margin-top:14px;">
+          <div class="chat-header">
+            <span>Obrolan</span>
+            <button onclick="toggleViewerChatDrawer()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+          </div>
+          <div class="chat-messages" id="viewerChatBox"></div>
+          <div class="chat-input-bar">
+            <input type="text" id="viewerChatInput" class="chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
+            <button class="btn btn-primary" onclick="sendChat('viewer')" style="padding:8px 14px;">Kirim</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
