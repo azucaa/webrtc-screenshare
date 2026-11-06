@@ -31,6 +31,7 @@ const rtcConfig = {
 window.addEventListener('DOMContentLoaded', () => {
   initWebSocket();
   renderRecentRooms();
+  initKeyboardShortcuts();
 
   const playerWrap = document.getElementById('viewerPlayerWrap');
   if (playerWrap) {
@@ -341,8 +342,10 @@ async function handleViewerJoined(viewerId, totalViewers) {
       }
     } else if (event.track.kind === 'audio') {
       const audioEl = new Audio();
-      audioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+      const stream = event.streams[0] || new MediaStream([event.track]);
+      audioEl.srcObject = stream;
       audioEl.play().catch(() => {});
+      startVoiceActivityDetection(stream, 'hostPartnerBubble');
     }
   };
 
@@ -402,6 +405,7 @@ function handleViewerLeft(viewerId, totalViewers) {
 }
 
 function stopHostSharing() {
+  stopAllVoiceActivityDetection();
   stopFacecam();
   if (localMicStream) {
     localMicStream.getTracks().forEach((t) => t.stop());
@@ -567,8 +571,10 @@ function handleJoinedRoom(roomId, viewerId) {
       // If mic track from partner, play through an Audio element
       if (video.srcObject && event.streams[0] && video.srcObject.id !== event.streams[0].id) {
         const audioEl = new Audio();
-        audioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+        const stream = event.streams[0] || new MediaStream([event.track]);
+        audioEl.srcObject = stream;
         audioEl.play().catch(() => {});
+        startVoiceActivityDetection(stream, 'partnerFacecamBubble');
       }
     }
   };
@@ -587,6 +593,7 @@ function handleJoinedRoom(roomId, viewerId) {
 }
 
 function stopViewer() {
+  stopAllVoiceActivityDetection();
   document.body.classList.remove('is-watching');
   stopFacecam();
   if (localMicStream) {
@@ -847,7 +854,18 @@ function renderChatMessage(msg) {
   if (!container) return;
   const item = document.createElement('div');
   item.className = 'chat-msg';
-  item.innerHTML = `<span class="chat-sender">${escapeHtml(msg.sender)}:</span><span>${escapeHtml(msg.text)}</span><span class="chat-time">${msg.time}</span>`;
+  const senderName = msg.sender || 'Pesan';
+  const isHostSender = senderName.toLowerCase().includes('host');
+  const badgeClass = isHostSender ? 'host' : 'viewer';
+  const badgeLabel = isHostSender ? 'Host' : 'Viewer';
+
+  item.innerHTML = `
+    <div class="chat-msg-header">
+      <span class="sender-badge ${badgeClass}">${escapeHtml(badgeLabel)}</span>
+      <span class="chat-time">${escapeHtml(msg.time || '')}</span>
+    </div>
+    <div class="chat-msg-text">${escapeHtml(msg.text || '')}</div>
+  `;
   container.appendChild(item);
   container.scrollTop = container.scrollHeight;
 }
@@ -970,6 +988,7 @@ async function toggleSelfMic() {
     }
     isMicActive = true;
     updateMicButtonsUI(true);
+    startVoiceActivityDetection(localMicStream, currentRole === 'viewer' ? 'selfFacecamBubble' : 'hostSelfBubble');
     showToast('Mikrofon aktif.');
   } else {
     // Matikan Mikrofon (Bisu)
@@ -978,6 +997,8 @@ async function toggleSelfMic() {
     }
     isMicActive = false;
     updateMicButtonsUI(false);
+    stopVoiceActivityDetection('selfFacecamBubble');
+    stopVoiceActivityDetection('hostSelfBubble');
     showToast('Mikrofon dibisukan.');
   }
 }
@@ -1343,4 +1364,117 @@ function makeDraggable(el) {
 
   handle.addEventListener('pointerdown', onPointerDown);
   handle.addEventListener('touchstart', onPointerDown, { passive: false });
+}
+
+/* ========================================================
+ * 7. Web Audio Voice Activity Detector (Active Speaker)
+ * ======================================================== */
+const voiceDetectors = new Map();
+
+function startVoiceActivityDetection(stream, bubbleId) {
+  stopVoiceActivityDetection(bubbleId);
+  if (!stream || !stream.getAudioTracks || stream.getAudioTracks().length === 0) return;
+
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioCtx = new AudioContextClass();
+    const sourceNode = audioCtx.createMediaStreamSource(stream);
+    const analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.4;
+    sourceNode.connect(analyserNode);
+
+    const bufferLength = analyserNode.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    let releaseTimeout = null;
+
+    const intervalId = setInterval(() => {
+      analyserNode.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i];
+      }
+      const avg = sum / bufferLength;
+      const bubbleEl = document.getElementById(bubbleId);
+
+      // Volume threshold for active speaker
+      if (avg > 14) {
+        if (releaseTimeout) {
+          clearTimeout(releaseTimeout);
+          releaseTimeout = null;
+        }
+        if (bubbleEl && !bubbleEl.classList.contains('is-speaking')) {
+          bubbleEl.classList.add('is-speaking');
+        }
+      } else {
+        if (bubbleEl && bubbleEl.classList.contains('is-speaking') && !releaseTimeout) {
+          releaseTimeout = setTimeout(() => {
+            if (bubbleEl) bubbleEl.classList.remove('is-speaking');
+            releaseTimeout = null;
+          }, 350);
+        }
+      }
+    }, 100);
+
+    voiceDetectors.set(bubbleId, {
+      audioCtx,
+      sourceNode,
+      analyserNode,
+      intervalId,
+      clearHang: () => { if (releaseTimeout) clearTimeout(releaseTimeout); }
+    });
+  } catch (err) {
+    console.warn('Voice activity detection could not start:', err);
+  }
+}
+
+function stopVoiceActivityDetection(bubbleId) {
+  const detector = voiceDetectors.get(bubbleId);
+  if (detector) {
+    clearInterval(detector.intervalId);
+    if (detector.clearHang) detector.clearHang();
+    try {
+      detector.sourceNode.disconnect();
+      detector.audioCtx.close();
+    } catch (e) {}
+    voiceDetectors.delete(bubbleId);
+  }
+  const bubbleEl = document.getElementById(bubbleId);
+  if (bubbleEl) bubbleEl.classList.remove('is-speaking');
+}
+
+function stopAllVoiceActivityDetection() {
+  for (const bubbleId of voiceDetectors.keys()) {
+    stopVoiceActivityDetection(bubbleId);
+  }
+}
+
+/* ========================================================
+ * 8. Keyboard Shortcuts (21st.dev Utility Pattern)
+ *    F: Fullscreen | M: Suara Film | D: Mic | C/V: Kamera
+ * ======================================================== */
+function initKeyboardShortcuts() {
+  window.addEventListener('keydown', (e) => {
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+      return;
+    }
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+    const key = e.key.toLowerCase();
+    if (key === 'f') {
+      e.preventDefault();
+      toggleFullscreen();
+    } else if (key === 'm') {
+      e.preventDefault();
+      toggleViewerAudio();
+    } else if (key === 'd') {
+      e.preventDefault();
+      toggleSelfMic();
+    } else if (key === 'c' || key === 'v') {
+      e.preventDefault();
+      toggleFacecam();
+    }
+  });
 }

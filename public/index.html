@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=3.3">
+  <link rel="stylesheet" href="css/style.css?v=4.0">
 </head>
 <body>
 
@@ -95,13 +95,18 @@
         <div class="player-canvas" id="viewerPlayerWrap">
           <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
-          <!-- Floating Facecam Bubbles -->
+          <!-- Floating Facecam Bubbles (21st.dev Call Style) -->
           <!-- 1. Partner's Facecam (Host when viewing) -->
           <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="facecam-header" data-drag-handle>
               <span class="facecam-title">
                 <span class="facecam-status-dot online"></span>
                 <span id="partnerFacecamLabel">Host</span>
+                <span class="speaking-wave" title="Sedang berbicara">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </span>
               </span>
               <button class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Sembunyikan" aria-label="Sembunyikan">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -118,6 +123,11 @@
               <span class="facecam-title">
                 <span class="facecam-status-dot online"></span>
                 <span>Anda</span>
+                <span class="speaking-wave" title="Sedang berbicara">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </span>
               </span>
               <div class="facecam-tools">
                 <button class="facecam-tool-btn" id="btnFlipCam" onclick="flipFacecamCamera()" title="Putar Kamera Depan/Belakang" aria-label="Putar Kamera">
@@ -155,11 +165,11 @@
             </div>
           </div>
 
-          <!-- Bottom Floating HUD Controls (Simplified: Film Sound, Mic, Camera | Chat, Fullscreen) -->
+          <!-- Bottom Floating Liquid Glass HUD Dock (21st.dev Style with Tooltips & Micro-interactions) -->
           <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="hud-actions">
               <!-- 1. Suara Film (Speaker Mute / Unmute) -->
-              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara Film: Bisu / Aktif" aria-label="Beralih Suara Film">
+              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" data-tooltip="Suara Film (M)" aria-label="Beralih Suara Film">
                 <svg id="audioIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                   <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
@@ -170,7 +180,7 @@
               </button>
 
               <!-- 2. Mikrofon Sendiri (Mic Mute / Unmute) -->
-              <button class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" title="Mikrofon: Bisu / Bicara" aria-label="Beralih Mikrofon">
+              <button class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" data-tooltip="Mikrofon (D)" aria-label="Beralih Mikrofon">
                 <svg id="hudMicIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                   <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
@@ -181,7 +191,7 @@
               </button>
 
               <!-- 3. Kamera Sendiri (Camera On / Off) -->
-              <button class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" title="Kamera: Nyala / Mati" aria-label="Beralih Kamera Wajah">
+              <button class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" data-tooltip="Kamera (C)" aria-label="Beralih Kamera Wajah">
                 <svg id="hudCameraIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -191,14 +201,14 @@
               <div class="hud-divider" aria-hidden="true"></div>
 
               <!-- 4. Obrolan (Chat) -->
-              <button class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
+              <button class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" data-tooltip="Obrolan" aria-label="Buka Obrolan">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
               </button>
 
               <!-- 5. Layar Penuh (Fullscreen) -->
-              <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
+              <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" data-tooltip="Layar Penuh (F)" aria-label="Layar Penuh">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                 </svg>
@@ -324,6 +334,11 @@
                   <span class="facecam-title">
                     <span class="facecam-status-dot online"></span>
                     <span>Viewer</span>
+                    <span class="speaking-wave" title="Sedang berbicara">
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                    </span>
                   </span>
                 </div>
                 <div class="facecam-body">
@@ -336,6 +351,11 @@
                   <span class="facecam-title">
                     <span class="facecam-status-dot online"></span>
                     <span>Anda</span>
+                    <span class="speaking-wave" title="Sedang berbicara">
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                    </span>
                   </span>
                   <div class="facecam-tools">
                     <button class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera">
@@ -448,7 +468,7 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=3.3"></script>
-  <script src="js/app.js?v=3.3"></script>
+  <script src="js/qrcode.min.js?v=4.0"></script>
+  <script src="js/app.js?v=4.0"></script>
 </body>
 </html>
