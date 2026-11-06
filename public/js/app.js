@@ -41,13 +41,17 @@ function initWebSocket() {
   ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
-    document.getElementById('serverStatusDot').className = 'status-dot online';
-    document.getElementById('serverStatusText').textContent = 'Server Online';
+    const dot = document.getElementById('serverStatusDot');
+    if (dot) dot.className = 'status-indicator online';
+    const text = document.getElementById('serverStatusText');
+    if (text) text.textContent = 'Terhubung';
   };
 
   ws.onclose = () => {
-    document.getElementById('serverStatusDot').className = 'status-dot';
-    document.getElementById('serverStatusText').textContent = 'Terputus (Mencoba ulang...)';
+    const dot = document.getElementById('serverStatusDot');
+    if (dot) dot.className = 'status-indicator';
+    const text = document.getElementById('serverStatusText');
+    if (text) text.textContent = 'Terputus';
     setTimeout(initWebSocket, 2000);
   };
 
@@ -416,18 +420,29 @@ function toggleFullscreen() {
 
 function toggleViewerAudio() {
   const video = document.getElementById('viewerVideo');
+  if (!video) return;
   video.muted = !video.muted;
-  document.getElementById('btnAudioToggle').textContent = video.muted ? '🔇' : '🔊';
-  showToast(video.muted ? 'Suara dibisukan' : 'Suara diaktifkan');
+  const btn = document.getElementById('btnAudioToggle');
+  if (btn) {
+    if (video.muted) {
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`;
+      showToast('Suara dibisukan');
+    } else {
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+      showToast('Suara aktif');
+    }
+  }
 }
 
 function toggleViewerChatDrawer() {
   const drawer = document.getElementById('viewerChatDrawer');
+  if (!drawer) return;
   drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
 }
 
 function sendChat(role) {
   const input = document.getElementById(role === 'host' ? 'hostChatInput' : 'viewerChatInput');
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
   ws.send(JSON.stringify({ type: 'chat-message', text }));
@@ -454,7 +469,10 @@ function startStatsMonitor(pc) {
         const width = report.frameWidth || 0;
         const height = report.frameHeight || 0;
         if (width > 0) {
-          document.getElementById('viewerStatsPill').textContent = `${width}x${height} @ ${Math.round(fps)} FPS`;
+          const pill = document.getElementById('viewerStatsPill');
+          if (pill) {
+            pill.textContent = `${width}x${height} @ ${Math.round(fps)} FPS`;
+          }
         }
       }
     });
@@ -465,16 +483,28 @@ function copyShareLink() {
   if (!activeRoomId) return;
   const link = `${window.location.origin}/?room=${activeRoomId}`;
   navigator.clipboard.writeText(link).then(() => {
-    showToast('Link berhasil disalin ke clipboard!');
+    showToast('Tautan berhasil disalin ke papan klip');
   });
 }
 
 function switchTab(mode) {
   const isHost = mode === 'host';
-  document.getElementById('tabHostBtn').className = isHost ? 'tab-btn active' : 'tab-btn';
-  document.getElementById('tabViewerBtn').className = !isHost ? 'tab-btn active' : 'tab-btn';
-  document.getElementById('hostSection').style.display = isHost ? 'block' : 'none';
-  document.getElementById('viewerSection').style.display = !isHost ? 'block' : 'none';
+  const hostBtn = document.getElementById('tabHostBtn');
+  const viewerBtn = document.getElementById('tabViewerBtn');
+  
+  if (hostBtn) {
+    hostBtn.className = isHost ? 'segment-btn active' : 'segment-btn';
+    hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
+  }
+  if (viewerBtn) {
+    viewerBtn.className = !isHost ? 'segment-btn active' : 'segment-btn';
+    viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
+  }
+
+  const hostSec = document.getElementById('hostSection');
+  const viewerSec = document.getElementById('viewerSection');
+  if (hostSec) hostSec.style.display = isHost ? 'block' : 'none';
+  if (viewerSec) viewerSec.style.display = !isHost ? 'block' : 'none';
 }
 
 function showToast(text, type = 'info') {

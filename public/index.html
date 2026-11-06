@@ -3,208 +3,273 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScreenCast · Share Screen PC Tanpa Aplikasi</title>
+  <title>ScreenCast · Siaran Layar PC</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <a href="/" class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-          <line x1="8" y1="21" x2="16" y2="21"></line>
-          <line x1="12" y1="17" x2="12" y2="21"></line>
-        </svg>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </span>
+        <span class="brand-name">ScreenCast</span>
+      </a>
+
+      <div class="server-status" role="status" aria-live="polite">
+        <span class="status-indicator" id="serverStatusDot"></span>
+        <span class="status-label" id="serverStatusText">Menghubungkan...</span>
       </div>
-      <div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="brand-title">ScreenCast</span>
-          <span class="brand-badge">WebRTC P2P</span>
-        </div>
-      </div>
-    </a>
-    <div class="nav-status">
-      <span class="status-dot" id="serverStatusDot"></span>
-      <span id="serverStatusText">Menghubungkan...</span>
     </div>
   </header>
 
-  <main>
-    <!-- Navigation Tabs (Only shown if not directly joining a room) -->
-    <div class="tabs-container" id="tabsBar">
-      <div class="tabs-wrapper">
-        <button class="tab-btn active" id="tabHostBtn" onclick="switchTab('host')">
-          🖥️ Share Layar PC (Host)
+  <main class="app-main">
+    <!-- Role Switcher Segmented Control -->
+    <nav class="segment-nav" id="tabsBar" aria-label="Mode Aplikasi">
+      <div class="segmented-control" role="tablist">
+        <button class="segment-btn active" id="tabHostBtn" role="tab" aria-selected="true" onclick="switchTab('host')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span>Bagikan Layar</span>
         </button>
-        <button class="tab-btn" id="tabViewerBtn" onclick="switchTab('viewer')">
-          📱 Nonton Layar (Viewer)
+        <button class="segment-btn" id="tabViewerBtn" role="tab" aria-selected="false" onclick="switchTab('viewer')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2"></rect>
+            <line x1="12" y1="18" x2="12" y2="18.01"></line>
+          </svg>
+          <span>Tonton Layar</span>
         </button>
       </div>
-    </div>
+    </nav>
 
     <!-- HOST SECTION -->
-    <div id="hostSection">
+    <section id="hostSection" aria-labelledby="hostSetupHeading">
       <!-- 1. Setup Card -->
-      <div class="card" id="hostSetupCard">
-        <div class="card-header">
-          <h2 class="card-title">Mulai Bagikan Layar PC</h2>
-          <p class="card-subtitle">
-            Bagikan layar monitor, aplikasi, atau tab browser tanpa aplikasi tambahan. Siapapun dapat menonton lewat link atau scan QR code dari HP / perangkat lain.
+      <div class="panel" id="hostSetupCard">
+        <div class="panel-header">
+          <h1 class="panel-title" id="hostSetupHeading">Bagikan Layar Perangkat</h1>
+          <p class="panel-desc">
+            Kirimkan tampilan monitor, jendela aplikasi, atau tab peramban langsung ke perangkat lain tanpa perlu memasang aplikasi tambahan.
           </p>
         </div>
 
-        <div class="settings-grid">
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label" for="optMode">⚡ Mode Optimasi</label>
-            <select id="optMode" class="select-input">
-              <option value="motion" selected>🚀 Gerakan Mulus (Game / Video / Fullscreen)</option>
-              <option value="detail">📄 Teks Tajam (Dokumen / Kode / Presentasi)</option>
-            </select>
+        <div class="config-grid">
+          <div class="field-group">
+            <label class="field-label" for="optMode">Prioritas Aliran</label>
+            <div class="select-wrapper">
+              <select id="optMode" class="form-select">
+                <option value="motion" selected>Prioritas Gerak (Video, Game, Gerak Cepat)</option>
+                <option value="detail">Prioritas Ketajaman (Dokumen, Teks, Kode)</option>
+              </select>
+            </div>
+            <span class="field-hint">Mode gerak menjaga kecepatan bingkai tetap mulus saat layar penuh.</span>
           </div>
 
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label" for="optResolution">📐 Batas Resolusi</label>
-            <select id="optResolution" class="select-input">
-              <option value="1080p" selected>1080p Full HD (Stabil & Mulus)</option>
-              <option value="720p">720p HD (Ultra Ringan & Cepat)</option>
-              <option value="native">Resolusi Layar Penuh (Native)</option>
-            </select>
+          <div class="field-group">
+            <label class="field-label" for="optResolution">Batas Resolusi</label>
+            <div class="select-wrapper">
+              <select id="optResolution" class="form-select">
+                <option value="1080p" selected>1080p Full HD (Stabil & Hemat)</option>
+                <option value="720p">720p HD (Koneksi Terbatas)</option>
+                <option value="native">Resolusi Asli Layar</option>
+              </select>
+            </div>
+            <span class="field-hint">Membatasi resolusi ke 1080p disarankan untuk kestabilan framerate.</span>
           </div>
 
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label" for="optFps">🎞️ Target Framerate</label>
-            <select id="optFps" class="select-input">
-              <option value="60" selected>60 FPS (Super Smooth)</option>
-              <option value="30">30 FPS (Standar)</option>
-            </select>
+          <div class="field-group">
+            <label class="field-label" for="optFps">Target Kecepatan Bingkai</label>
+            <div class="select-wrapper">
+              <select id="optFps" class="form-select">
+                <option value="60" selected>60 FPS (Mulus)</option>
+                <option value="30">30 FPS (Standar)</option>
+              </select>
+            </div>
+            <span class="field-hint">Gunakan 60 FPS untuk pergerakan kursor dan video tanpa jeda.</span>
           </div>
         </div>
 
-        <div class="options-row">
-          <label class="checkbox-label">
+        <div class="toggles-row">
+          <label class="checkbox-control">
             <input type="checkbox" id="optAudio" checked>
-            <span>Sertakan Audio Sistem / Tab</span>
+            <span class="checkbox-box" aria-hidden="true"></span>
+            <span class="checkbox-text">Sertakan audio sistem atau tab</span>
           </label>
-          <label class="checkbox-label">
+          <label class="checkbox-control">
             <input type="checkbox" id="optHardwareAccel" checked>
-            <span>Akselerasi GPU Hardware (H.264 Prioritas)</span>
+            <span class="checkbox-box" aria-hidden="true"></span>
+            <span class="checkbox-text">Akselerasi perangkat keras GPU (H.264)</span>
           </label>
         </div>
 
-        <button class="btn btn-primary" id="btnStartShare" onclick="startHostSharing()" style="width:100%; font-size:1.05rem; padding:15px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polygon points="10 8 16 12 10 16 10 8"></polygon>
-          </svg>
-          Mulai Share Screen Sekarang
-        </button>
+        <div class="action-footer">
+          <button class="btn btn-primary btn-lg" id="btnStartShare" onclick="startHostSharing()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Mulai Berbagi Layar</span>
+          </button>
+        </div>
       </div>
 
-      <!-- 2. Active Sharing Dashboard (Hidden until shared) -->
-      <div class="sharing-dash" id="hostActiveDash" style="display: none;">
-        <!-- Left: Live Preview -->
-        <div>
-          <div class="preview-container">
-            <video id="hostPreviewVideo" class="preview-video" autoplay playsinline muted></video>
-            <div class="preview-overlay">
-              <span class="status-dot online"></span>
-              <span>LIVE SHARING</span>
-              <span style="opacity:0.6; margin-left:8px;" id="hostViewerCount">0 Penonton</span>
+      <!-- 2. Active Broadcast Workspace -->
+      <div class="broadcast-layout" id="hostActiveDash" style="display: none;">
+        <!-- Left: Monitor & Preview -->
+        <div class="broadcast-viewport-column">
+          <div class="monitor-card">
+            <div class="monitor-header">
+              <div class="stream-badge">
+                <span class="badge-dot"></span>
+                <span>SIARAN AKTIF</span>
+              </div>
+              <div class="monitor-meta" id="hostViewerCount">0 penonton terhubung</div>
             </div>
-          </div>
-          <div style="margin-top: 14px; display:flex; gap:10px;">
-            <button class="btn btn-danger" onclick="stopHostSharing()" style="flex:1;">
-              🛑 Hentikan Share Screen
-            </button>
+
+            <div class="video-stage">
+              <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
+            </div>
+
+            <div class="monitor-footer">
+              <button class="btn btn-danger" onclick="stopHostSharing()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                </svg>
+                <span>Hentikan Siaran</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Right: Room Details & QR Code -->
-        <div>
-          <div class="room-info-box">
-            <span style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">
-              KODE ROOM ANDA
-            </span>
-            <div class="room-code-badge" id="displayRoomCode">------</div>
-            <div id="qrcodeBox" class="qr-wrapper"></div>
-            <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
-              Arahkan kamera HP ke QR Code untuk langsung menonton tanpa install apapun.
-            </p>
-            <button class="btn btn-outline" onclick="copyShareLink()" style="width:100%;">
-              📋 Salin Link Nonton
+        <!-- Right: Join Details & Live Chat -->
+        <aside class="broadcast-aside-column">
+          <div class="panel room-meta-panel">
+            <div class="panel-section-title">Akses Penonton</div>
+            
+            <div class="code-container">
+              <span class="code-label">Kode Akses</span>
+              <div class="code-display" id="displayRoomCode">------</div>
+            </div>
+
+            <div class="qr-container">
+              <div id="qrcodeBox" class="qr-canvas"></div>
+            </div>
+            
+            <p class="qr-caption">Pindai kode QR dari ponsel untuk menonton seketika.</p>
+
+            <button class="btn btn-secondary w-full" onclick="copyShareLink()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Salin Tautan</span>
             </button>
           </div>
 
-          <!-- Mini Chat for Host -->
-          <div class="chat-drawer">
-            <div class="chat-header">
-              <span>Live Chat Room</span>
+          <!-- Chat Sidebar -->
+          <div class="panel chat-panel">
+            <div class="chat-bar">
+              <span class="chat-title">Obrolan Ruang</span>
             </div>
-            <div class="chat-messages" id="hostChatBox"></div>
-            <div class="chat-input-bar">
-              <input type="text" id="hostChatInput" class="chat-input" placeholder="Ketik pesan..." onkeydown="if(event.key==='Enter') sendChat('host')">
-              <button class="btn btn-primary" onclick="sendChat('host')" style="padding:8px 14px;">Kirim</button>
+            <div class="chat-thread" id="hostChatBox" aria-live="polite"></div>
+            <div class="chat-compose">
+              <input type="text" id="hostChatInput" class="form-input chat-input" placeholder="Kirim pesan..." onkeydown="if(event.key==='Enter') sendChat('host')">
+              <button class="btn btn-secondary btn-icon" onclick="sendChat('host')" aria-label="Kirim Pesan">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
-    </div>
+    </section>
 
     <!-- VIEWER SECTION -->
-    <div id="viewerSection" style="display: none;">
+    <section id="viewerSection" style="display: none;" aria-labelledby="viewerHeading">
       <!-- Enter Room Code Form (Shown if not yet connected) -->
-      <div class="card" id="viewerJoinCard" style="max-width:480px; margin:0 auto;">
-        <div class="card-header" style="text-align:center;">
-          <h2 class="card-title">Nonton Layar PC</h2>
-          <p class="card-subtitle">Masukkan Kode Room 6-digit untuk mulai menonton secara real-time.</p>
+      <div class="panel panel-centered" id="viewerJoinCard">
+        <div class="panel-header text-center">
+          <h1 class="panel-title" id="viewerHeading">Tonton Layar</h1>
+          <p class="panel-desc">Masukkan 6 karakter kode ruang siaran yang diberikan oleh penyiar.</p>
         </div>
-        <div class="form-group">
-          <input type="text" id="inputRoomCode" class="input-text" placeholder="Contoh: 7K9X2B" maxlength="6" style="text-align:center; font-size:1.4rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;">
+
+        <div class="field-group">
+          <label class="field-label sr-only" for="inputRoomCode">Kode Ruang</label>
+          <input type="text" id="inputRoomCode" class="form-input code-input" placeholder="KODE" maxlength="6" autocomplete="off" spellcheck="false">
         </div>
-        <button class="btn btn-primary" onclick="joinRoomByInput()" style="width:100%; padding:14px; font-size:1rem;">
-          Gabung & Nonton
+
+        <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
+          <span>Masuk ke Siaran</span>
         </button>
       </div>
 
-      <!-- Active Viewer Player Screen -->
-      <div class="viewer-container" id="viewerActiveScreen" style="display:none;">
-        <div class="viewer-player-wrap" id="viewerPlayerWrap">
-          <video id="viewerVideo" class="viewer-video" autoplay playsinline></video>
-          
-          <!-- Floating Controls -->
-          <div class="viewer-controls">
-            <span class="stats-pill" id="viewerStatsPill">Menghubungkan WebRTC...</span>
-            <button class="ctrl-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Aktifkan/Bisukan Suara">
-              🔊
-            </button>
-            <button class="ctrl-btn" onclick="toggleFullscreen()" title="Layar Penuh">
-              ⛶
-            </button>
-            <button class="ctrl-btn" onclick="toggleViewerChatDrawer()" title="Live Chat">
-              💬
-            </button>
+      <!-- Active Fullscreen Player -->
+      <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
+        <div class="player-canvas" id="viewerPlayerWrap">
+          <video id="viewerVideo" class="player-video" autoplay playsinline></video>
+
+          <!-- Floating HUD Controls -->
+          <div class="player-hud">
+            <div class="hud-stat" id="viewerStatsPill">Menghubungkan WebRTC...</div>
+            
+            <div class="hud-actions">
+              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara" aria-label="Beralih Suara">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </button>
+              <button class="hud-btn" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </button>
+              <button class="hud-btn" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Chat Overlay for Mobile/Viewer -->
-        <div id="viewerChatDrawer" class="chat-drawer" style="display:none; margin-top:14px;">
-          <div class="chat-header">
-            <span>Obrolan</span>
-            <button onclick="toggleViewerChatDrawer()" style="background:none; border:none; color:#fff; cursor:pointer;">✕</button>
+        <!-- Chat Overlay for Viewer -->
+        <div id="viewerChatDrawer" class="panel chat-panel viewer-chat-drawer" style="display: none;">
+          <div class="chat-bar">
+            <span class="chat-title">Obrolan Siaran</span>
+            <button class="chat-close-btn" onclick="toggleViewerChatDrawer()" aria-label="Tutup Obrolan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
-          <div class="chat-messages" id="viewerChatBox"></div>
-          <div class="chat-input-bar">
-            <input type="text" id="viewerChatInput" class="chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
-            <button class="btn btn-primary" onclick="sendChat('viewer')" style="padding:8px 14px;">Kirim</button>
+          <div class="chat-thread" id="viewerChatBox" aria-live="polite"></div>
+          <div class="chat-compose">
+            <input type="text" id="viewerChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
+            <button class="btn btn-secondary btn-icon" onclick="sendChat('viewer')" aria-label="Kirim Komentar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </main>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
   <script src="js/qrcode.min.js"></script>
