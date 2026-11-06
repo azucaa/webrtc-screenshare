@@ -149,43 +149,58 @@ function tuneSdpBitrate(sdp, bitrateKbps) {
 }
 
 async function startHostSharing() {
-  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
-    showToast('Peramban ini tidak mendukung siaran layar. (Di iOS/iPhone fitur ini dibatasi oleh Apple; gunakan Chrome di Android, PC, atau Mac).');
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isIOS) {
+    showToast('Apple membatasi siaran layar di peramban web iOS. Anda dapat menggunakan iPhone sebagai Penonton (Viewer).', 'error');
     return;
   }
 
-  const withAudio = document.getElementById('optAudio').checked;
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+    showToast('Peramban ini tidak mendukung siaran layar. Gunakan Chrome di Android, PC, atau Mac.');
+    return;
+  }
+
+  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const withAudio = isMobile ? false : (document.getElementById('optAudio') ? document.getElementById('optAudio').checked : false);
   const mode = document.getElementById('optMode') ? document.getElementById('optMode').value : 'motion';
   const resChoice = document.getElementById('optResolution') ? document.getElementById('optResolution').value : '1080p';
   const fps = parseInt(document.getElementById('optFps') ? document.getElementById('optFps').value : '60', 10) || 60;
 
-  const isPortrait = window.innerWidth < window.innerHeight;
-  const videoConstraints = {
-    frameRate: { ideal: fps, max: fps }
-  };
+  let displayConstraints;
+  if (isMobile) {
+    // Android Chrome hanya menerima constraint sederhana dan menolak audio capture
+    displayConstraints = {
+      video: true,
+      audio: false
+    };
+  } else {
+    const isPortrait = window.innerWidth < window.innerHeight;
+    const videoConstraints = {
+      frameRate: { ideal: fps, max: fps }
+    };
 
-  if (resChoice === '1080p') {
-    videoConstraints.width = { ideal: isPortrait ? 1080 : 1920 };
-    videoConstraints.height = { ideal: isPortrait ? 1920 : 1080 };
-  } else if (resChoice === '720p') {
-    videoConstraints.width = { ideal: isPortrait ? 720 : 1280 };
-    videoConstraints.height = { ideal: isPortrait ? 1280 : 720 };
+    if (resChoice === '1080p') {
+      videoConstraints.width = { ideal: isPortrait ? 1080 : 1920 };
+      videoConstraints.height = { ideal: isPortrait ? 1920 : 1080 };
+    } else if (resChoice === '720p') {
+      videoConstraints.width = { ideal: isPortrait ? 720 : 1280 };
+      videoConstraints.height = { ideal: isPortrait ? 1280 : 720 };
+    }
+
+    displayConstraints = {
+      video: videoConstraints,
+      audio: withAudio
+    };
   }
 
   try {
     try {
-      localStream = await navigator.mediaDevices.getDisplayMedia({
-        video: videoConstraints,
-        audio: withAudio
-      });
+      localStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
     } catch (captureErr) {
-      // Jika gagal karena audio tidak didukung di perangkat mobile tertentu, coba video saja
       if (withAudio) {
         console.warn('Audio capture failed, retrying video only:', captureErr);
-        localStream = await navigator.mediaDevices.getDisplayMedia({
-          video: videoConstraints,
-          audio: false
-        });
+        displayConstraints.audio = false;
+        localStream = await navigator.mediaDevices.getDisplayMedia(displayConstraints);
       } else {
         throw captureErr;
       }
@@ -362,7 +377,24 @@ function handleJoinedRoom(roomId, viewerId) {
     const video = document.getElementById('viewerVideo');
     if (video.srcObject !== event.streams[0]) {
       video.srcObject = event.streams[0];
-      video.play().catch(() => {});
+      video.muted = true; // Wajib dimatikan suaranya di awal agar diizinkan Autoplay oleh iOS & Android
+      
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Autoplay tertahan kebijakan browser, butuh interaksi pengguna:', err);
+          const statPill = document.getElementById('viewerStatsPill');
+          if (statPill) statPill.textContent = 'Ketuk video untuk memulai siaran';
+          
+          const startPlaybackOnTap = () => {
+            video.play().catch(() => {});
+            if (statPill) statPill.textContent = 'Stream Aktif (Terhubung)';
+            document.removeEventListener('click', startPlaybackOnTap);
+          };
+          document.addEventListener('click', startPlaybackOnTap, { once: true });
+        });
+      }
+      
       document.getElementById('viewerStatsPill').textContent = 'Stream Aktif (Terhubung)';
       startStatsMonitor(viewerPeerConnection);
     }
