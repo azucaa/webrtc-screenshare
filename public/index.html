@@ -7,9 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=4.0">
+  <link rel="stylesheet" href="css/style.css?v=4.2">
 </head>
 <body>
+  <!-- 21st.dev Mesh Drift Shader Background -->
+  <canvas id="meshDriftCanvas" class="mesh-drift-canvas" aria-hidden="true"></canvas>
 
   <!-- App Header -->
   <header class="app-header">
@@ -63,15 +65,68 @@
           <p class="panel-desc">Masukkan 6-karakter kode ruang siaran yang dibagikan oleh penyiar, atau langsung buka tautan.</p>
         </div>
 
-        <div class="field-group">
-          <label class="field-label sr-only" for="inputRoomCode">Kode Ruang</label>
-          <div class="code-input-group">
-            <input type="text" id="inputRoomCode" class="form-input code-input" placeholder="KODE" maxlength="6" autocomplete="off" spellcheck="false" autofocus>
-            <button class="btn btn-secondary btn-icon" id="btnPasteCode" onclick="pasteRoomCode()" title="Tempel dari Clipboard" aria-label="Tempel Kode">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <div class="otp-wrapper">
+          <label class="sr-only" for="inputRoomCode">Kode Ruang Siaran</label>
+          <div class="otp-interactive-area" onclick="focusOtpInput()">
+            <input
+              type="text"
+              id="inputRoomCode"
+              class="otp-real-input"
+              maxlength="6"
+              autocomplete="one-time-code"
+              autocapitalize="characters"
+              spellcheck="false"
+              autofocus
+              oninput="updateOtpSlots()"
+              onfocus="updateOtpSlots()"
+              onblur="updateOtpSlots()"
+              onkeydown="if(event.key==='Enter') joinRoomByInput()"
+            >
+            <div class="otp-container" aria-hidden="true">
+              <div class="otp-group">
+                <div class="otp-slot is-active is-empty" data-index="0">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="1">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="2">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+              </div>
+              <div class="otp-separator">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+              <div class="otp-group">
+                <div class="otp-slot is-empty" data-index="3">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="4">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="5">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="otp-helper-row">
+            <span class="otp-helper-text">6 karakter kode siaran</span>
+            <button type="button" class="otp-paste-btn" onclick="pasteRoomCode()" title="Tempel dari Clipboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
               </svg>
+              <span>Tempel Kode</span>
             </button>
           </div>
         </div>
@@ -468,7 +523,8 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=4.0"></script>
-  <script src="js/app.js?v=4.0"></script>
+  <script src="js/qrcode.min.js?v=4.2"></script>
+  <script src="js/app.js?v=4.2"></script>
+  <script src="js/mesh-drift.js?v=4.2"></script>
 </body>
 </html>

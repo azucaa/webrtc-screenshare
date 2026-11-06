@@ -58,6 +58,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ========================================================
+   21st.dev Mesh Drift Shader Background
+   ======================================================== */
+.mesh-drift-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.92;
+  transition: opacity 0.5s ease;
+}
+
+body.is-watching .mesh-drift-canvas {
+  display: none !important;
+}
+
 /* Accessible focus outlines across all interactive elements */
 :focus-visible {
   outline: 2px solid var(--border-active);
@@ -65,11 +84,13 @@ body {
 }
 
 /* ========================================================
-   Header & Navigation
+   Header & Navigation (Liquid Glass Aesthetic)
    ======================================================== */
 .app-header {
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-canvas);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 14, 20, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -136,6 +157,8 @@ body {
   margin: 0 auto;
   width: 100%;
   padding: 24px 20px 48px;
+  position: relative;
+  z-index: 1;
 }
 
 .segment-nav {
@@ -146,11 +169,14 @@ body {
 
 .segmented-control {
   display: inline-flex;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: rgba(18, 22, 31, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   padding: 3px;
   gap: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .segment-btn {
@@ -173,19 +199,22 @@ body {
 }
 
 .segment-btn.active {
-  background: var(--bg-surface-raised);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 /* ========================================================
-   Panels & Containers
+   Panels & Containers (Liquid Frosted Glass)
    ======================================================== */
 .panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: rgba(18, 22, 31, 0.76);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-lg);
   padding: 28px;
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .panel-centered {
@@ -281,20 +310,184 @@ body {
   outline: none;
 }
 
-.code-input-group {
+/* ========================================================
+   OTP Code Field (21st.dev v-field-20 by Cnippet)
+   ======================================================== */
+.otp-wrapper {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  margin: 16px 0 24px 0;
+  width: 100%;
 }
 
-.code-input {
+.otp-interactive-area {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: text;
+  width: 100%;
+}
+
+/* Invisible real input that handles all typing, paste, mobile keyboard, SMS autofill */
+.otp-real-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.001;
+  font-size: 16px; /* Prevents auto-zoom on iOS Safari */
+  z-index: 10;
+  cursor: text;
+  color: transparent;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.otp-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  width: 100%;
+}
+
+.otp-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.otp-slot {
+  position: relative;
+  width: 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(22, 27, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
   font-family: var(--font-mono);
-  font-size: 1.5rem;
+  font-size: 1.55rem;
   font-weight: 700;
-  letter-spacing: 0.25em;
-  text-align: center;
-  text-transform: uppercase;
-  padding: 12px;
+  color: #ffffff;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.otp-interactive-area:hover .otp-slot {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Active Slot (waiting for user input) */
+.otp-slot.is-active {
+  border-color: #58a6ff !important;
+  background: rgba(88, 166, 255, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.35), 0 4px 16px rgba(88, 166, 255, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+.otp-slot.is-filled {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Animated Blinking Caret (21st.dev Style) */
+.otp-caret {
+  display: none;
+  position: absolute;
+  width: 2px;
+  height: 24px;
+  background: #58a6ff;
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.6);
+  animation: otpCaretBlink 1s infinite ease-in-out;
+}
+
+.otp-slot.is-active.is-empty .otp-caret {
+  display: block;
+}
+
+@keyframes otpCaretBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.otp-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  padding: 0 2px;
+}
+
+.otp-separator svg {
+  opacity: 0.6;
+}
+
+.otp-helper-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 326px;
+  padding: 0 4px;
+}
+
+.otp-helper-text {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+.otp-paste-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 9px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.otp-paste-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.otp-paste-btn:active {
+  transform: scale(0.96);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .otp-container {
+    gap: 6px;
+  }
+  .otp-group {
+    gap: 4px;
+  }
+  .otp-slot {
+    width: 38px;
+    height: 48px;
+    font-size: 1.3rem;
+    border-radius: 9px;
+  }
+  .otp-helper-row {
+    max-width: 270px;
+  }
 }
 
 .recent-rooms-box {

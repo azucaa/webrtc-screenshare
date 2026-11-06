@@ -49,8 +49,13 @@ window.addEventListener('DOMContentLoaded', () => {
   if (roomParam) {
     switchTab('viewer');
     const input = document.getElementById('inputRoomCode');
-    if (input) input.value = roomParam.toUpperCase();
+    if (input) {
+      input.value = roomParam.toUpperCase();
+      updateOtpSlots();
+    }
     setTimeout(() => joinRoomByInput(), 400);
+  } else {
+    updateOtpSlots();
   }
 });
 
@@ -437,13 +442,53 @@ function stopHostSharing() {
 /* ========================================================
  * 3. Viewer Logic (Watching & Controls)
  * ======================================================== */
+function updateOtpSlots() {
+  const input = document.getElementById('inputRoomCode');
+  if (!input) return;
+  const raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  if (input.value !== raw) {
+    input.value = raw;
+  }
+  const val = raw;
+  const slots = document.querySelectorAll('.otp-slot');
+  const isFocused = (document.activeElement === input);
+
+  slots.forEach((slot, index) => {
+    const char = val[index] || '';
+    const charEl = slot.querySelector('.otp-val');
+    if (charEl) charEl.textContent = char;
+
+    slot.classList.toggle('is-filled', !!char);
+    slot.classList.toggle('is-empty', !char);
+
+    // Active slot: currently editing index, or last slot if full
+    const isActive = isFocused && (index === val.length || (val.length === 6 && index === 5));
+    slot.classList.toggle('is-active', isActive);
+  });
+}
+
+function focusOtpInput() {
+  const input = document.getElementById('inputRoomCode');
+  if (input) {
+    input.focus();
+    updateOtpSlots();
+  }
+}
+
 async function pasteRoomCode() {
   try {
     const text = await navigator.clipboard.readText();
     const clean = text.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     if (clean) {
-      document.getElementById('inputRoomCode').value = clean;
-      showToast('Kode berhasil ditempel');
+      const input = document.getElementById('inputRoomCode');
+      if (input) {
+        input.value = clean;
+        updateOtpSlots();
+        showToast('Kode ditempel: ' + clean);
+        if (clean.length === 6) {
+          setTimeout(() => joinRoomByInput(), 200);
+        }
+      }
     }
   } catch (err) {
     showToast('Izinkan akses clipboard atau ketik kode manual');
@@ -479,7 +524,11 @@ function renderRecentRooms() {
       chip.className = 'recent-room-chip';
       chip.textContent = code;
       chip.onclick = () => {
-        document.getElementById('inputRoomCode').value = code;
+        const input = document.getElementById('inputRoomCode');
+        if (input) {
+          input.value = code;
+          updateOtpSlots();
+        }
         joinRoomByInput();
       };
       list.appendChild(chip);
