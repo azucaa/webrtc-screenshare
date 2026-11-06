@@ -24,6 +24,12 @@ window.addEventListener('DOMContentLoaded', () => {
   initWebSocket();
   renderRecentRooms();
 
+  const playerWrap = document.getElementById('viewerPlayerWrap');
+  if (playerWrap) {
+    playerWrap.addEventListener('mousemove', resetHudTimer);
+    playerWrap.addEventListener('touchstart', resetHudTimer, { passive: true });
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const roomParam = urlParams.get('room');
   if (roomParam) {
@@ -242,19 +248,32 @@ function handleRoomCreated(roomId) {
   document.getElementById('hostActiveDash').style.display = 'grid';
   document.getElementById('displayRoomCode').textContent = roomId;
 
-  // Generate dynamic QR Code for mobile
+  // Direct Clickable URL & Button to open in new tab
   const joinUrl = `${window.location.origin}/?room=${roomId}`;
-  const qrContainer = document.getElementById('qrcodeBox');
-  qrContainer.innerHTML = '';
-  new QRCode(qrContainer, {
-    text: joinUrl,
-    width: 140,
-    height: 140,
-    colorDark: '#0a0e17',
-    colorLight: '#ffffff'
-  });
+  const directLinkEl = document.getElementById('roomDirectLink');
+  if (directLinkEl) {
+    directLinkEl.href = joinUrl;
+    directLinkEl.textContent = joinUrl;
+  }
+  const btnOpenTab = document.getElementById('btnOpenRoomTab');
+  if (btnOpenTab) {
+    btnOpenTab.href = joinUrl;
+  }
 
-  showToast(`Room ${roomId} aktif! Silakan bagikan link.`);
+  // Generate dynamic QR Code for mobile
+  const qrContainer = document.getElementById('qrcodeBox');
+  if (qrContainer) {
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+      text: joinUrl,
+      width: 140,
+      height: 140,
+      colorDark: '#0a0e17',
+      colorLight: '#ffffff'
+    });
+  }
+
+  showToast(`Ruang ${roomId} aktif! Tautan langsung telah disiapkan.`);
 }
 
 async function handleViewerJoined(viewerId, totalViewers) {
@@ -563,10 +582,71 @@ async function handleWebRTCSignal(data) {
  * ======================================================== */
 function toggleFullscreen() {
   const wrap = document.getElementById('viewerPlayerWrap');
-  if (!document.fullscreenElement) {
-    wrap.requestFullscreen().catch(() => {});
+  const video = document.getElementById('viewerVideo');
+  if (!wrap) return;
+
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || wrap.classList.contains('is-fullscreen');
+
+  if (isFs) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+    wrap.classList.remove('is-fullscreen');
   } else {
-    document.exitFullscreen().catch(() => {});
+    if (wrap.requestFullscreen) {
+      wrap.requestFullscreen().catch(() => {
+        if (video && video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
+        } else {
+          wrap.classList.add('is-fullscreen');
+        }
+      });
+    } else if (wrap.webkitRequestFullscreen) {
+      wrap.webkitRequestFullscreen();
+    } else if (video && video.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+    } else {
+      wrap.classList.add('is-fullscreen');
+    }
+  }
+}
+
+document.addEventListener('fullscreenchange', handleFullscreenStateChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenStateChange);
+
+function handleFullscreenStateChange() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const wrap = document.getElementById('viewerPlayerWrap');
+  if (wrap) {
+    if (isFs) {
+      wrap.classList.add('is-fullscreen');
+    } else {
+      wrap.classList.remove('is-fullscreen');
+    }
+  }
+  resetHudTimer();
+}
+
+let hudInactivityTimer = null;
+function resetHudTimer() {
+  const top = document.getElementById('playerTopBar');
+  const bottom = document.getElementById('playerBottomHud');
+  if (!top || !bottom) return;
+
+  top.classList.remove('hud-hidden');
+  bottom.classList.remove('hud-hidden');
+
+  clearTimeout(hudInactivityTimer);
+  const wrap = document.getElementById('viewerPlayerWrap');
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || (wrap && wrap.classList.contains('is-fullscreen'));
+  
+  if (isFs) {
+    hudInactivityTimer = setTimeout(() => {
+      top.classList.add('hud-hidden');
+      bottom.classList.add('hud-hidden');
+    }, 3500);
   }
 }
 

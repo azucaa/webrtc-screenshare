@@ -296,19 +296,39 @@
               <div class="code-display" id="displayRoomCode">------</div>
             </div>
 
+            <!-- Clickable Direct Link -->
+            <div class="direct-link-box">
+              <span class="direct-link-label">Tautan Langsung:</span>
+              <a id="roomDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="direct-link-url" title="Klik untuk membuka siaran">
+                Membuat tautan...
+              </a>
+            </div>
+
             <div class="qr-container">
               <div id="qrcodeBox" class="qr-canvas"></div>
             </div>
             
-            <p class="qr-caption">Pindai kode QR dari ponsel untuk menonton seketika.</p>
+            <p class="qr-caption">Pindai kode QR atau klik tombol di bawah untuk langsung menonton.</p>
 
-            <button class="btn btn-secondary w-full" onclick="copyShareLink()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <span>Salin Tautan</span>
-            </button>
+            <div class="room-action-buttons">
+              <!-- Direct Button to Open Room in New Tab -->
+              <a id="btnOpenRoomTab" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" style="text-decoration:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                <span>Buka Siaran Langsung (Tab Baru)</span>
+              </a>
+
+              <button class="btn btn-secondary w-full" onclick="copyShareLink()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Salin Tautan</span>
+              </button>
+            </div>
           </div>
 
           <!-- Chat Sidebar -->
