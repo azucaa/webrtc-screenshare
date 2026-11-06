@@ -55,14 +55,41 @@
           </p>
         </div>
 
+        <div class="settings-grid">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="optMode">⚡ Mode Optimasi</label>
+            <select id="optMode" class="select-input">
+              <option value="motion" selected>🚀 Gerakan Mulus (Game / Video / Fullscreen)</option>
+              <option value="detail">📄 Teks Tajam (Dokumen / Kode / Presentasi)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="optResolution">📐 Batas Resolusi</label>
+            <select id="optResolution" class="select-input">
+              <option value="1080p" selected>1080p Full HD (Stabil & Mulus)</option>
+              <option value="720p">720p HD (Ultra Ringan & Cepat)</option>
+              <option value="native">Resolusi Layar Penuh (Native)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="optFps">🎞️ Target Framerate</label>
+            <select id="optFps" class="select-input">
+              <option value="60" selected>60 FPS (Super Smooth)</option>
+              <option value="30">30 FPS (Standar)</option>
+            </select>
+          </div>
+        </div>
+
         <div class="options-row">
           <label class="checkbox-label">
             <input type="checkbox" id="optAudio" checked>
             <span>Sertakan Audio Sistem / Tab</span>
           </label>
           <label class="checkbox-label">
-            <input type="checkbox" id="opt60fps" checked>
-            <span>High Framerate (60 FPS)</span>
+            <input type="checkbox" id="optHardwareAccel" checked>
+            <span>Akselerasi GPU Hardware (H.264 Prioritas)</span>
           </label>
         </div>
 

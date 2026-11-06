@@ -102,24 +102,89 @@ function initWebSocket() {
 /* ========================================================
  * 2. Host Logic (Screen Capture & Streaming)
  * ======================================================== */
+function preferH264Codec(pc) {
+  if (typeof RTCRtpSender.getCapabilities !== 'function') return;
+  const capabilities = RTCRtpSender.getCapabilities('video');
+  if (!capabilities || !capabilities.codecs) return;
+
+  const h264 = [];
+  const others = [];
+  for (const c of capabilities.codecs) {
+    if (c.mimeType.toLowerCase() === 'video/h264') {
+      h264.push(c);
+    } else {
+      others.push(c);
+    }
+  }
+  const preferred = [...h264, ...others];
+
+  pc.getTransceivers().forEach((transceiver) => {
+    if (transceiver.sender && transceiver.sender.track && transceiver.sender.track.kind === 'video') {
+      if (typeof transceiver.setCodecPreferences === 'function') {
+        try {
+          transceiver.setCodecPreferences(preferred);
+        } catch (e) {
+          console.warn('Could not set codec preference:', e);
+        }
+      }
+    }
+  });
+}
+
+function tuneSdpBitrate(sdp, bitrateKbps) {
+  const lines = sdp.split('\r\n');
+  const newLines = [];
+  for (let line of lines) {
+    newLines.push(line);
+    if (line.startsWith('m=video')) {
+      newLines.push(`b=AS:${bitrateKbps}`);
+      newLines.push(`b=TIAS:${bitrateKbps * 1000}`);
+    }
+  }
+  return newLines.join('\r\n');
+}
+
 async function startHostSharing() {
   const withAudio = document.getElementById('optAudio').checked;
-  const is60Fps = document.getElementById('opt60fps').checked;
+  const mode = document.getElementById('optMode') ? document.getElementById('optMode').value : 'motion';
+  const resChoice = document.getElementById('optResolution') ? document.getElementById('optResolution').value : '1080p';
+  const fps = parseInt(document.getElementById('optFps') ? document.getElementById('optFps').value : '60', 10) || 60;
+
+  const videoConstraints = {
+    frameRate: { ideal: fps, max: fps }
+  };
+
+  if (resChoice === '1080p') {
+    videoConstraints.width = { ideal: 1920, max: 1920 };
+    videoConstraints.height = { ideal: 1080, max: 1080 };
+  } else if (resChoice === '720p') {
+    videoConstraints.width = { ideal: 1280, max: 1280 };
+    videoConstraints.height = { ideal: 720, max: 720 };
+  } else {
+    videoConstraints.width = { ideal: 1920 };
+    videoConstraints.height = { ideal: 1080 };
+  }
 
   try {
     localStream = await navigator.mediaDevices.getDisplayMedia({
-      video: {
-        frameRate: { ideal: is60Fps ? 60 : 30, max: 60 },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      },
+      video: videoConstraints,
       audio: withAudio
     });
 
-    // Detect if user clicks "Stop Sharing" on browser floating bar
-    localStream.getVideoTracks()[0].onended = () => {
-      stopHostSharing();
-    };
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+      // KUNCI UTAMA FPS MULUS:
+      // Browser secara default menyetel contentHint ke 'detail' untuk screenshare,
+      // yang sengaja memotong FPS ke 5-10 fps saat gambar bergerak/fullscreen.
+      // Menyetel ke 'motion' memaksa browser memprioritaskan 60/30 FPS lancar!
+      if ('contentHint' in videoTrack) {
+        videoTrack.contentHint = mode;
+      }
+
+      videoTrack.onended = () => {
+        stopHostSharing();
+      };
+    }
 
     currentRole = 'host';
     document.getElementById('hostPreviewVideo').srcObject = localStream;
@@ -162,9 +227,42 @@ async function handleViewerJoined(viewerId, totalViewers) {
   const pc = new RTCPeerConnection(rtcConfig);
   peerConnections.set(viewerId, pc);
 
+  const mode = document.getElementById('optMode') ? document.getElementById('optMode').value : 'motion';
+  const fps = parseInt(document.getElementById('optFps') ? document.getElementById('optFps').value : '60', 10) || 60;
+  const useH264 = document.getElementById('optHardwareAccel') ? document.getElementById('optHardwareAccel').checked : true;
+
   // Add local video/audio tracks
+  let videoSender = null;
   if (localStream) {
-    localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+    localStream.getTracks().forEach((track) => {
+      const sender = pc.addTrack(track, localStream);
+      if (track.kind === 'video') {
+        videoSender = sender;
+      }
+    });
+  }
+
+  // Prefer H.264 Hardware Acceleration if supported
+  if (useH264) {
+    preferH264Codec(pc);
+  }
+
+  // Apply sender parameters (framerate & bitrate optimization)
+  if (videoSender) {
+    try {
+      const params = videoSender.getParameters();
+      if (!params.encodings || params.encodings.length === 0) {
+        params.encodings = [{}];
+      }
+      const bitrateBps = (fps === 60 ? 6000 : 4000) * 1000;
+      params.encodings[0].maxBitrate = bitrateBps;
+      params.encodings[0].maxFramerate = fps;
+      // maintain-framerate mencegah WebRTC memotong FPS jadi patah-patah
+      params.degradationPreference = (mode === 'motion') ? 'maintain-framerate' : 'maintain-resolution';
+      await videoSender.setParameters(params);
+    } catch (e) {
+      console.warn('Sender parameter adjustment error:', e);
+    }
   }
 
   // ICE Candidates
@@ -178,9 +276,10 @@ async function handleViewerJoined(viewerId, totalViewers) {
     }
   };
 
-  // Create Offer
+  // Create Offer with tuned SDP for high bitrate
   const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
+  const tunedSdp = tuneSdpBitrate(offer.sdp, fps === 60 ? 6000 : 4000);
+  await pc.setLocalDescription(new RTCSessionDescription({ type: 'offer', sdp: tunedSdp }));
 
   ws.send(JSON.stringify({
     type: 'signal',
