@@ -440,6 +440,7 @@ function joinRoomByInput() {
 
 function handleJoinedRoom(roomId, viewerId) {
   saveRecentRoom(roomId);
+  document.body.classList.add('is-watching');
 
   const roomDisplay = document.getElementById('viewerCurrentRoom');
   if (roomDisplay) roomDisplay.textContent = 'RUANG: ' + roomId;
@@ -490,6 +491,7 @@ function handleJoinedRoom(roomId, viewerId) {
 }
 
 function stopViewer() {
+  document.body.classList.remove('is-watching');
   if (viewerPeerConnection) {
     viewerPeerConnection.close();
     viewerPeerConnection = null;
@@ -503,15 +505,23 @@ function stopViewer() {
   showToast('Siaran telah dihentikan.');
 }
 
+let viewerFitMode = 'contain';
 function toggleViewerFit() {
   const video = document.getElementById('viewerVideo');
   if (!video) return;
-  if (video.style.objectFit === 'cover') {
-    video.style.objectFit = 'contain';
-    showToast('Tampilan: Pas Layar');
-  } else {
+
+  if (viewerFitMode === 'contain') {
+    viewerFitMode = 'cover';
     video.style.objectFit = 'cover';
-    showToast('Tampilan: Penuh (Cover)');
+    showToast('Tampilan: Penuh (Zoom tanpa bingkai)');
+  } else if (viewerFitMode === 'cover') {
+    viewerFitMode = 'fill';
+    video.style.objectFit = 'fill';
+    showToast('Tampilan: Rentang Penuh (Stretch)');
+  } else {
+    viewerFitMode = 'contain';
+    video.style.objectFit = 'contain';
+    showToast('Tampilan: Pas Asli (Contain)');
   }
 }
 
@@ -720,6 +730,7 @@ function copyShareLink() {
 }
 
 function switchTab(mode) {
+  document.body.classList.remove('is-watching');
   const isHost = mode === 'host';
   const hostBtn = document.getElementById('tabHostBtn');
   const viewerBtn = document.getElementById('tabViewerBtn');
