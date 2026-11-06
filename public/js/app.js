@@ -149,31 +149,47 @@ function tuneSdpBitrate(sdp, bitrateKbps) {
 }
 
 async function startHostSharing() {
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+    showToast('Peramban ini tidak mendukung siaran layar. (Di iOS/iPhone fitur ini dibatasi oleh Apple; gunakan Chrome di Android, PC, atau Mac).');
+    return;
+  }
+
   const withAudio = document.getElementById('optAudio').checked;
   const mode = document.getElementById('optMode') ? document.getElementById('optMode').value : 'motion';
   const resChoice = document.getElementById('optResolution') ? document.getElementById('optResolution').value : '1080p';
   const fps = parseInt(document.getElementById('optFps') ? document.getElementById('optFps').value : '60', 10) || 60;
 
+  const isPortrait = window.innerWidth < window.innerHeight;
   const videoConstraints = {
     frameRate: { ideal: fps, max: fps }
   };
 
   if (resChoice === '1080p') {
-    videoConstraints.width = { ideal: 1920, max: 1920 };
-    videoConstraints.height = { ideal: 1080, max: 1080 };
+    videoConstraints.width = { ideal: isPortrait ? 1080 : 1920 };
+    videoConstraints.height = { ideal: isPortrait ? 1920 : 1080 };
   } else if (resChoice === '720p') {
-    videoConstraints.width = { ideal: 1280, max: 1280 };
-    videoConstraints.height = { ideal: 720, max: 720 };
-  } else {
-    videoConstraints.width = { ideal: 1920 };
-    videoConstraints.height = { ideal: 1080 };
+    videoConstraints.width = { ideal: isPortrait ? 720 : 1280 };
+    videoConstraints.height = { ideal: isPortrait ? 1280 : 720 };
   }
 
   try {
-    localStream = await navigator.mediaDevices.getDisplayMedia({
-      video: videoConstraints,
-      audio: withAudio
-    });
+    try {
+      localStream = await navigator.mediaDevices.getDisplayMedia({
+        video: videoConstraints,
+        audio: withAudio
+      });
+    } catch (captureErr) {
+      // Jika gagal karena audio tidak didukung di perangkat mobile tertentu, coba video saja
+      if (withAudio) {
+        console.warn('Audio capture failed, retrying video only:', captureErr);
+        localStream = await navigator.mediaDevices.getDisplayMedia({
+          video: videoConstraints,
+          audio: false
+        });
+      } else {
+        throw captureErr;
+      }
+    }
 
     const videoTrack = localStream.getVideoTracks()[0];
     if (videoTrack) {
