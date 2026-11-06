@@ -10,11 +10,12 @@ const peerConnections = new Map(); // viewerId -> RTCPeerConnection
 // Viewer state
 let viewerPeerConnection = null;
 
-// Facecam state
+// Facecam & Mic state
 let localCamStream = null;
-let isCamMuted = false;
-let currentCamFacingMode = 'user'; // 'user' or 'environment'
+let localMicStream = null;
 let isFacecamActive = false;
+let isMicActive = false;
+let currentCamFacingMode = 'user'; // 'user' or 'environment'
 let partnerCamTrackId = null;
 
 // Public STUN servers for NAT traversal over internet
@@ -315,10 +316,15 @@ async function handleViewerJoined(viewerId, totalViewers) {
     });
   }
 
-  // If Host has active Facecam, also stream host camera to this viewer
+  // If Host has active Facecam or Mic, also stream them to this viewer
   if (localCamStream) {
     localCamStream.getTracks().forEach((track) => {
       pc.addTrack(track, localCamStream);
+    });
+  }
+  if (localMicStream) {
+    localMicStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localMicStream);
     });
   }
 
@@ -397,6 +403,13 @@ function handleViewerLeft(viewerId, totalViewers) {
 
 function stopHostSharing() {
   stopFacecam();
+  if (localMicStream) {
+    localMicStream.getTracks().forEach((t) => t.stop());
+    localMicStream = null;
+  }
+  isMicActive = false;
+  updateMicButtonsUI(false);
+
   const hostPartnerVideo = document.getElementById('hostPartnerCamVideo');
   if (hostPartnerVideo) hostPartnerVideo.srcObject = null;
   const hostPartnerBubble = document.getElementById('hostPartnerBubble');
@@ -498,10 +511,15 @@ function handleJoinedRoom(roomId, viewerId) {
 
   viewerPeerConnection = new RTCPeerConnection(rtcConfig);
 
-  // If Viewer has active Facecam, add camera tracks
+  // If Viewer has active Facecam or Mic, add tracks
   if (localCamStream) {
     localCamStream.getTracks().forEach((track) => {
       viewerPeerConnection.addTrack(track, localCamStream);
+    });
+  }
+  if (localMicStream) {
+    localMicStream.getTracks().forEach((track) => {
+      viewerPeerConnection.addTrack(track, localMicStream);
     });
   }
 
@@ -571,6 +589,13 @@ function handleJoinedRoom(roomId, viewerId) {
 function stopViewer() {
   document.body.classList.remove('is-watching');
   stopFacecam();
+  if (localMicStream) {
+    localMicStream.getTracks().forEach((t) => t.stop());
+    localMicStream = null;
+  }
+  isMicActive = false;
+  updateMicButtonsUI(false);
+
   const partnerVideo = document.getElementById('partnerFacecamVideo');
   if (partnerVideo) partnerVideo.srcObject = null;
   const partnerBubble = document.getElementById('partnerFacecamBubble');
@@ -895,12 +920,109 @@ function escapeHtml(str) {
 }
 
 /* ========================================================
- * 6. Couple's Floating Facecam Logic & Dragging
+ * 6. Simplified Controls: Mic, Camera & Dragging
  * ======================================================== */
+async function toggleSelfMic() {
+  if (!isMicActive) {
+    // Nyalakan Mikrofon
+    if (!localMicStream) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Peramban ini tidak mendukung akses mikrofon.', 'error');
+        return;
+      }
+      try {
+        localMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        console.error('Akses mic gagal:', err);
+        showToast('Gagal mengakses mikrofon: ' + (err.message || 'Izin ditolak'), 'error');
+        return;
+      }
+
+      const audioTrack = localMicStream.getAudioTracks()[0];
+      if (currentRole === 'viewer' && viewerPeerConnection) {
+        viewerPeerConnection.addTrack(audioTrack, localMicStream);
+        try {
+          const offer = await viewerPeerConnection.createOffer();
+          await viewerPeerConnection.setLocalDescription(offer);
+          ws.send(JSON.stringify({
+            type: 'signal',
+            signal: { sdp: viewerPeerConnection.localDescription }
+          }));
+        } catch (e) {
+          console.warn('Renegotiate mic offer error:', e);
+        }
+      } else if (currentRole === 'host') {
+        peerConnections.forEach(async (pc, vId) => {
+          pc.addTrack(audioTrack, localMicStream);
+          try {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            ws.send(JSON.stringify({
+              type: 'signal',
+              targetViewerId: vId,
+              signal: { sdp: pc.localDescription }
+            }));
+          } catch (e) {}
+        });
+      }
+    } else {
+      localMicStream.getAudioTracks().forEach(t => t.enabled = true);
+    }
+    isMicActive = true;
+    updateMicButtonsUI(true);
+    showToast('Mikrofon aktif.');
+  } else {
+    // Matikan Mikrofon (Bisu)
+    if (localMicStream) {
+      localMicStream.getAudioTracks().forEach(t => t.enabled = false);
+    }
+    isMicActive = false;
+    updateMicButtonsUI(false);
+    showToast('Mikrofon dibisukan.');
+  }
+}
+
+function updateMicButtonsUI(isActive) {
+  const viewerMicBtn = document.getElementById('btnMicToggle');
+  const hostMicBtn = document.getElementById('btnHostMicToggle');
+  const hostMicLabel = document.getElementById('hostMicBtnLabel');
+
+  const unmutedSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`;
+  const mutedSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`;
+
+  if (viewerMicBtn) {
+    if (isActive) {
+      viewerMicBtn.classList.remove('is-muted');
+      viewerMicBtn.classList.add('is-active');
+      viewerMicBtn.innerHTML = unmutedSvg;
+      viewerMicBtn.title = 'Mikrofon: Aktif (Klik untuk Bisu)';
+    } else {
+      viewerMicBtn.classList.remove('is-active');
+      viewerMicBtn.classList.add('is-muted');
+      viewerMicBtn.innerHTML = mutedSvg;
+      viewerMicBtn.title = 'Mikrofon: Bisu (Klik untuk Bicara)';
+    }
+  }
+
+  if (hostMicBtn) {
+    const hostIcon = hostMicBtn.querySelector('svg');
+    if (hostIcon) {
+      hostIcon.outerHTML = isActive
+        ? unmutedSvg.replace('width="18" height="18"', 'width="14" height="14"')
+        : mutedSvg.replace('width="18" height="18"', 'width="14" height="14"');
+    }
+    if (hostMicLabel) hostMicLabel.textContent = isActive ? 'Mic: Aktif' : 'Mic: Mati';
+    if (isActive) {
+      hostMicBtn.classList.add('active');
+    } else {
+      hostMicBtn.classList.remove('active');
+    }
+  }
+}
+
 async function toggleFacecam() {
   if (isFacecamActive) {
     stopFacecam();
-    showToast('Facecam dimatikan.');
   } else {
     await startFacecam();
   }
@@ -919,25 +1041,12 @@ async function startFacecam() {
         facingMode: currentCamFacingMode,
         width: { ideal: 480 },
         height: { ideal: 480 }
-      },
-      audio: true
+      }
     });
-  } catch (err) {
-    console.warn('Audio capture failed, trying video only:', err);
-    try {
-      camStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: currentCamFacingMode,
-          width: { ideal: 480 },
-          height: { ideal: 480 }
-        },
-        audio: false
-      });
-    } catch (vErr) {
-      console.error('Camera access failed:', vErr);
-      showToast('Gagal mengakses kamera: ' + (vErr.message || 'Izin ditolak'), 'error');
-      return;
-    }
+  } catch (vErr) {
+    console.error('Camera access failed:', vErr);
+    showToast('Gagal mengakses kamera: ' + (vErr.message || 'Izin ditolak'), 'error');
+    return;
   }
 
   localCamStream = camStream;
@@ -947,12 +1056,9 @@ async function startFacecam() {
   if (currentRole === 'viewer') {
     const selfVideo = document.getElementById('selfFacecamVideo');
     const selfBubble = document.getElementById('selfFacecamBubble');
-    const btnToggle = document.getElementById('btnFacecamToggle');
     if (selfVideo) selfVideo.srcObject = localCamStream;
     if (selfBubble) selfBubble.style.display = 'flex';
-    if (btnToggle) btnToggle.classList.add('active');
 
-    // Add camera tracks to viewer peer connection and renegotiate
     if (viewerPeerConnection) {
       localCamStream.getTracks().forEach((track) => {
         viewerPeerConnection.addTrack(track, localCamStream);
@@ -971,14 +1077,9 @@ async function startFacecam() {
   } else if (currentRole === 'host') {
     const hostSelfVideo = document.getElementById('hostSelfCamVideo');
     const hostSelfBubble = document.getElementById('hostSelfBubble');
-    const btnHostToggle = document.getElementById('btnHostFacecamToggle');
-    const hostLabel = document.getElementById('hostFacecamBtnLabel');
     if (hostSelfVideo) hostSelfVideo.srcObject = localCamStream;
     if (hostSelfBubble) hostSelfBubble.style.display = 'flex';
-    if (btnHostToggle) btnHostToggle.classList.add('active');
-    if (hostLabel) hostLabel.textContent = 'Matikan Facecam';
 
-    // Add camera tracks to all connected viewers and renegotiate
     for (const [vId, pc] of peerConnections.entries()) {
       localCamStream.getTracks().forEach((track) => {
         pc.addTrack(track, localCamStream);
@@ -997,6 +1098,8 @@ async function startFacecam() {
     }
   }
 
+  updateCameraButtonsUI(true);
+
   // Notify peer(s)
   const camVideoTrack = localCamStream.getVideoTracks()[0];
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -1007,7 +1110,7 @@ async function startFacecam() {
     }));
   }
 
-  showToast('Facecam aktif. Anda dapat menggeser posisi kamera di layar.');
+  showToast('Kamera aktif.');
 }
 
 function stopFacecam() {
@@ -1028,12 +1131,7 @@ function stopFacecam() {
   const hostSelfVideo = document.getElementById('hostSelfCamVideo');
   if (hostSelfVideo) hostSelfVideo.srcObject = null;
 
-  const btnToggle = document.getElementById('btnFacecamToggle');
-  if (btnToggle) btnToggle.classList.remove('active');
-  const btnHostToggle = document.getElementById('btnHostFacecamToggle');
-  if (btnHostToggle) btnHostToggle.classList.remove('active');
-  const hostLabel = document.getElementById('hostFacecamBtnLabel');
-  if (hostLabel) hostLabel.textContent = 'Aktifkan Facecam';
+  updateCameraButtonsUI(false);
 
   // Notify peer(s)
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -1041,6 +1139,44 @@ function stopFacecam() {
       type: 'facecam-status',
       enabled: false
     }));
+  }
+
+  showToast('Kamera dimatikan.');
+}
+
+function updateCameraButtonsUI(isActive) {
+  const viewerCamBtn = document.getElementById('btnCameraToggle');
+  const hostCamBtn = document.getElementById('btnHostCameraToggle');
+  const hostCamLabel = document.getElementById('hostCameraBtnLabel');
+
+  const onSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`;
+  const offSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
+  if (viewerCamBtn) {
+    if (isActive) {
+      viewerCamBtn.classList.add('is-active');
+      viewerCamBtn.innerHTML = onSvg;
+      viewerCamBtn.title = 'Kamera: Aktif (Klik untuk Matikan)';
+    } else {
+      viewerCamBtn.classList.remove('is-active');
+      viewerCamBtn.innerHTML = offSvg;
+      viewerCamBtn.title = 'Kamera: Mati (Klik untuk Nyalakan)';
+    }
+  }
+
+  if (hostCamBtn) {
+    const hostIcon = hostCamBtn.querySelector('svg');
+    if (hostIcon) {
+      hostIcon.outerHTML = isActive
+        ? onSvg.replace('width="18" height="18"', 'width="14" height="14"')
+        : offSvg.replace('width="18" height="18"', 'width="14" height="14"');
+    }
+    if (hostCamLabel) hostCamLabel.textContent = isActive ? 'Kamera: Aktif' : 'Kamera: Mati';
+    if (isActive) {
+      hostCamBtn.classList.add('active');
+    } else {
+      hostCamBtn.classList.remove('active');
+    }
   }
 }
 
@@ -1088,32 +1224,6 @@ async function flipFacecamCamera() {
   }
 }
 
-function toggleSelfFacecamMic() {
-  if (!localCamStream) return;
-  const audioTrack = localCamStream.getAudioTracks()[0];
-  if (!audioTrack) {
-    showToast('Mikrofon kamera tidak tersedia');
-    return;
-  }
-
-  audioTrack.enabled = !audioTrack.enabled;
-  isCamMuted = !audioTrack.enabled;
-
-  const btnViewer = document.getElementById('btnSelfMic');
-  const btnHost = document.getElementById('btnHostSelfMic');
-  [btnViewer, btnHost].forEach((btn) => {
-    if (btn) {
-      if (isCamMuted) {
-        btn.classList.add('muted');
-        showToast('Mikrofon facecam dibisukan');
-      } else {
-        btn.classList.remove('muted');
-        showToast('Mikrofon facecam aktif');
-      }
-    }
-  });
-}
-
 function togglePartnerBubbleVisibility() {
   const bubble = document.getElementById('partnerFacecamBubble');
   if (bubble) {
@@ -1127,13 +1237,13 @@ function handleFacecamStatus(data) {
     if (currentRole === 'viewer') {
       const bubble = document.getElementById('partnerFacecamBubble');
       const label = document.getElementById('partnerFacecamLabel');
-      if (label) label.textContent = data.from === 'host' ? 'Host (Pasangan)' : 'Pasangan';
+      if (label) label.textContent = data.from === 'host' ? 'Host' : 'Viewer';
       if (bubble) bubble.style.display = 'flex';
-      showToast('Pasangan mengaktifkan kamera wajah.');
+      showToast(data.from === 'host' ? 'Host menyalakan kamera.' : 'Viewer menyalakan kamera.');
     } else if (currentRole === 'host') {
       const bubble = document.getElementById('hostPartnerBubble');
       if (bubble) bubble.style.display = 'flex';
-      showToast('Penonton mengaktifkan kamera wajah.');
+      showToast('Viewer menyalakan kamera.');
     }
   } else {
     partnerCamTrackId = null;
@@ -1142,13 +1252,13 @@ function handleFacecamStatus(data) {
       const video = document.getElementById('partnerFacecamVideo');
       if (bubble) bubble.style.display = 'none';
       if (video) video.srcObject = null;
-      showToast('Pasangan mematikan kamera wajah.');
+      showToast(data.from === 'host' ? 'Host mematikan kamera.' : 'Viewer mematikan kamera.');
     } else if (currentRole === 'host') {
       const bubble = document.getElementById('hostPartnerBubble');
       const video = document.getElementById('hostPartnerCamVideo');
       if (bubble) bubble.style.display = 'none';
       if (video) video.srcObject = null;
-      showToast('Penonton mematikan kamera wajah.');
+      showToast('Viewer mematikan kamera.');
     }
   }
 }

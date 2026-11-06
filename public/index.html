@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=3.2">
+  <link rel="stylesheet" href="css/style.css?v=3.3">
 </head>
 <body>
 
@@ -95,15 +95,15 @@
         <div class="player-canvas" id="viewerPlayerWrap">
           <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
-          <!-- Floating Facecam Bubbles for Couple / Watch Party -->
-          <!-- 1. Partner's Facecam (Incoming) -->
+          <!-- Floating Facecam Bubbles -->
+          <!-- 1. Partner's Facecam (Host when viewing) -->
           <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="facecam-header" data-drag-handle>
               <span class="facecam-title">
-                <span class="facecam-status-dot"></span>
-                <span id="partnerFacecamLabel">Pasangan</span>
+                <span class="facecam-status-dot online"></span>
+                <span id="partnerFacecamLabel">Host</span>
               </span>
-              <button class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Tutup Tampilan Facecam" aria-label="Tutup Tampilan Facecam">
+              <button class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Sembunyikan" aria-label="Sembunyikan">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
@@ -117,16 +117,13 @@
             <div class="facecam-header" data-drag-handle>
               <span class="facecam-title">
                 <span class="facecam-status-dot online"></span>
-                <span>Kamera Anda</span>
+                <span>Anda</span>
               </span>
               <div class="facecam-tools">
                 <button class="facecam-tool-btn" id="btnFlipCam" onclick="flipFacecamCamera()" title="Putar Kamera Depan/Belakang" aria-label="Putar Kamera">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                 </button>
-                <button class="facecam-tool-btn" id="btnSelfMic" onclick="toggleSelfFacecamMic()" title="Bisu / Nyalakan Mic" aria-label="Beralih Mikrofon">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                </button>
-                <button class="facecam-close-btn" onclick="toggleFacecam()" title="Matikan Kamera" aria-label="Matikan Kamera">
+                <button class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera" aria-label="Tutup Kamera">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
@@ -158,12 +155,12 @@
             </div>
           </div>
 
-          <!-- Bottom Floating HUD Controls -->
+          <!-- Bottom Floating HUD Controls (Simplified: Film Sound, Mic, Camera | Chat, Fullscreen) -->
           <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="hud-actions">
-              <!-- Audio Toggle -->
-              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara (Bisu)" aria-label="Beralih Suara">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <!-- 1. Suara Film (Speaker Mute / Unmute) -->
+              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara Film: Bisu / Aktif" aria-label="Beralih Suara Film">
+                <svg id="audioIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                   <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
                   <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
@@ -172,43 +169,38 @@
                 </svg>
               </button>
 
-              <!-- Aspect Ratio Toggle (Fit vs Fill) -->
-              <button class="hud-btn" id="btnFitToggle" onclick="toggleViewerFit()" title="Pas Layar / Isi Layar" aria-label="Beralih Ukuran Layar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <polyline points="9 21 3 21 3 15"></polyline>
-                  <line x1="21" y1="3" x2="14" y2="10"></line>
-                  <line x1="3" y1="21" x2="10" y2="14"></line>
+              <!-- 2. Mikrofon Sendiri (Mic Mute / Unmute) -->
+              <button class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" title="Mikrofon: Bisu / Bicara" aria-label="Beralih Mikrofon">
+                <svg id="hudMicIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
               </button>
 
-              <!-- Picture-in-Picture (PiP) -->
-              <button class="hud-btn" id="btnPipToggle" onclick="toggleViewerPiP()" title="Picture in Picture (Jendela Mengambang)" aria-label="Jendela Mengambang">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                  <rect x="12" y="10" width="8" height="8" rx="1"></rect>
+              <!-- 3. Kamera Sendiri (Camera On / Off) -->
+              <button class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" title="Kamera: Nyala / Mati" aria-label="Beralih Kamera Wajah">
+                <svg id="hudCameraIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               </button>
 
-              <!-- Facecam Toggle (Couple Camera) -->
-              <button class="hud-btn" id="btnFacecamToggle" onclick="toggleFacecam()" title="Aktifkan Facecam Pasangan" aria-label="Beralih Kamera Wajah">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M23 7l-7 5 7 5V7z"></path>
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                </svg>
-              </button>
+              <div class="hud-divider" aria-hidden="true"></div>
 
-              <!-- Fullscreen -->
-              <button class="hud-btn" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                </svg>
-              </button>
-
-              <!-- Chat Drawer -->
-              <button class="hud-btn" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
+              <!-- 4. Obrolan (Chat) -->
+              <button class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+
+              <!-- 5. Layar Penuh (Fullscreen) -->
+              <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                 </svg>
               </button>
             </div>
@@ -326,12 +318,12 @@
             <div class="video-stage">
               <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
 
-              <!-- Floating Facecam for Host (Partner video & self preview) -->
+              <!-- Floating Facecam for Host (Viewer video & self preview) -->
               <div id="hostPartnerBubble" class="facecam-bubble host-facecam-bubble" style="display: none;">
                 <div class="facecam-header" data-drag-handle>
                   <span class="facecam-title">
                     <span class="facecam-status-dot online"></span>
-                    <span>Pasangan (Penonton)</span>
+                    <span>Viewer</span>
                   </span>
                 </div>
                 <div class="facecam-body">
@@ -343,13 +335,10 @@
                 <div class="facecam-header" data-drag-handle>
                   <span class="facecam-title">
                     <span class="facecam-status-dot online"></span>
-                    <span>Kamera Host</span>
+                    <span>Anda</span>
                   </span>
                   <div class="facecam-tools">
-                    <button class="facecam-tool-btn" id="btnHostSelfMic" onclick="toggleSelfFacecamMic()" title="Bisu / Nyalakan Mic">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                    </button>
-                    <button class="facecam-close-btn" onclick="toggleFacecam()" title="Matikan Kamera">
+                    <button class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                   </div>
@@ -361,15 +350,27 @@
             </div>
 
             <div class="monitor-footer">
-              <button class="btn btn-secondary" id="btnHostFacecamToggle" onclick="toggleFacecam()" title="Beralih Kamera Facecam Host">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M23 7l-7 5 7 5V7z"></path>
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                </svg>
-                <span id="hostFacecamBtnLabel">Aktifkan Facecam</span>
-              </button>
-              <button class="btn btn-danger" onclick="stopHostSharing()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <div class="monitor-footer-tools">
+                <button class="btn btn-secondary btn-sm" id="btnHostMicToggle" onclick="toggleSelfMic()" title="Bisu / Nyalakan Mikrofon">
+                  <svg id="hostMicIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  <span id="hostMicBtnLabel">Mic: Mati</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnHostCameraToggle" onclick="toggleFacecam()" title="Nyalakan / Matikan Kamera">
+                  <svg id="hostCameraIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                  <span id="hostCameraBtnLabel">Kamera: Mati</span>
+                </button>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="stopHostSharing()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                 </svg>
                 <span>Hentikan Siaran</span>
@@ -447,7 +448,7 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=3.2"></script>
-  <script src="js/app.js?v=3.2"></script>
+  <script src="js/qrcode.min.js?v=3.3"></script>
+  <script src="js/app.js?v=3.3"></script>
 </body>
 </html>
