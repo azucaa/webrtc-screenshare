@@ -22,11 +22,14 @@ const rtcConfig = {
 // Auto initialize based on URL params
 window.addEventListener('DOMContentLoaded', () => {
   initWebSocket();
+  renderRecentRooms();
+
   const urlParams = new URLSearchParams(window.location.search);
   const roomParam = urlParams.get('room');
   if (roomParam) {
     switchTab('viewer');
-    document.getElementById('inputRoomCode').value = roomParam.toUpperCase();
+    const input = document.getElementById('inputRoomCode');
+    if (input) input.value = roomParam.toUpperCase();
     setTimeout(() => joinRoomByInput(), 400);
   }
 });
@@ -349,12 +352,62 @@ function stopHostSharing() {
 }
 
 /* ========================================================
- * 3. Viewer Logic (Watching & Stats)
+ * 3. Viewer Logic (Watching & Controls)
  * ======================================================== */
+async function pasteRoomCode() {
+  try {
+    const text = await navigator.clipboard.readText();
+    const clean = text.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    if (clean) {
+      document.getElementById('inputRoomCode').value = clean;
+      showToast('Kode berhasil ditempel');
+    }
+  } catch (err) {
+    showToast('Izinkan akses clipboard atau ketik kode manual');
+  }
+}
+
+function saveRecentRoom(roomId) {
+  try {
+    let recent = JSON.parse(localStorage.getItem('screencast_recent') || '[]');
+    recent = recent.filter(r => r !== roomId);
+    recent.unshift(roomId);
+    if (recent.length > 4) recent = recent.slice(0, 4);
+    localStorage.setItem('screencast_recent', JSON.stringify(recent));
+    renderRecentRooms();
+  } catch (e) {}
+}
+
+function renderRecentRooms() {
+  const box = document.getElementById('viewerRecentRooms');
+  const list = document.getElementById('recentRoomsList');
+  if (!box || !list) return;
+
+  try {
+    const recent = JSON.parse(localStorage.getItem('screencast_recent') || '[]');
+    if (recent.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = 'block';
+    list.innerHTML = '';
+    recent.forEach(code => {
+      const chip = document.createElement('button');
+      chip.className = 'recent-room-chip';
+      chip.textContent = code;
+      chip.onclick = () => {
+        document.getElementById('inputRoomCode').value = code;
+        joinRoomByInput();
+      };
+      list.appendChild(chip);
+    });
+  } catch (e) {}
+}
+
 function joinRoomByInput() {
   const code = document.getElementById('inputRoomCode').value.trim().toUpperCase();
   if (code.length < 4) {
-    showToast('Masukkan kode room yang valid.', 'error');
+    showToast('Masukkan kode ruang yang valid.');
     return;
   }
   currentRole = 'viewer';
@@ -367,9 +420,14 @@ function joinRoomByInput() {
 }
 
 function handleJoinedRoom(roomId, viewerId) {
+  saveRecentRoom(roomId);
+
+  const roomDisplay = document.getElementById('viewerCurrentRoom');
+  if (roomDisplay) roomDisplay.textContent = 'RUANG: ' + roomId;
+
   document.getElementById('viewerJoinCard').style.display = 'none';
   document.getElementById('viewerActiveScreen').style.display = 'flex';
-  document.getElementById('tabsBar').style.display = 'none'; // Hide tabs for focused view
+  document.getElementById('tabsBar').style.display = 'none'; // Fokus penuh ke siaran
 
   viewerPeerConnection = new RTCPeerConnection(rtcConfig);
 
@@ -409,7 +467,7 @@ function handleJoinedRoom(roomId, viewerId) {
     }
   };
 
-  showToast(`Berhasil masuk ke Room ${roomId}!`);
+  showToast(`Tersambung ke Ruang ${roomId}`);
 }
 
 function stopViewer() {
@@ -421,6 +479,52 @@ function stopViewer() {
   document.getElementById('viewerJoinCard').style.display = 'block';
   document.getElementById('tabsBar').style.display = 'flex';
   document.getElementById('viewerVideo').srcObject = null;
+  currentRole = null;
+  activeRoomId = null;
+  showToast('Siaran telah dihentikan.');
+}
+
+function toggleViewerFit() {
+  const video = document.getElementById('viewerVideo');
+  if (!video) return;
+  if (video.style.objectFit === 'cover') {
+    video.style.objectFit = 'contain';
+    showToast('Tampilan: Pas Layar');
+  } else {
+    video.style.objectFit = 'cover';
+    showToast('Tampilan: Penuh (Cover)');
+  }
+}
+
+async function toggleViewerPiP() {
+  const video = document.getElementById('viewerVideo');
+  if (!video) return;
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+    } else if (document.pictureInPictureEnabled) {
+      await video.requestPictureInPicture();
+    } else {
+      showToast('Picture-in-Picture tidak didukung di peramban ini');
+    }
+  } catch (err) {
+    console.warn('PiP error:', err);
+  }
+}
+
+function toggleHudVisibility() {
+  const top = document.getElementById('playerTopBar');
+  const bottom = document.getElementById('playerBottomHud');
+  if (!top || !bottom) return;
+
+  const isHidden = top.classList.contains('hud-hidden');
+  if (isHidden) {
+    top.classList.remove('hud-hidden');
+    bottom.classList.remove('hud-hidden');
+  } else {
+    top.classList.add('hud-hidden');
+    bottom.classList.add('hud-hidden');
+  }
 }
 
 /* ========================================================

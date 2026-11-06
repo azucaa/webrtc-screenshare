@@ -281,6 +281,12 @@ body {
   outline: none;
 }
 
+.code-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .code-input {
   font-family: var(--font-mono);
   font-size: 1.5rem;
@@ -289,6 +295,51 @@ body {
   text-align: center;
   text-transform: uppercase;
   padding: 12px;
+}
+
+.recent-rooms-box {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-muted);
+  text-align: left;
+}
+
+.recent-rooms-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.recent-rooms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recent-room-chip {
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.recent-room-chip:hover {
+  border-color: var(--border-active);
+  background: #292e36;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.8rem;
 }
 
 .toggles-row {
@@ -673,6 +724,54 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.player-top-bar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 20;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.player-top-bar > * {
+  pointer-events: auto;
+}
+
+.player-top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.player-room-chip {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 10px;
+}
+
+.player-top-right {
+  display: flex;
+  align-items: center;
+}
+
+.hud-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .player-video {

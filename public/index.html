@@ -33,7 +33,14 @@
     <!-- Role Switcher Segmented Control -->
     <nav class="segment-nav" id="tabsBar" aria-label="Mode Aplikasi">
       <div class="segmented-control" role="tablist">
-        <button class="segment-btn active" id="tabHostBtn" role="tab" aria-selected="true" onclick="switchTab('host')">
+        <button class="segment-btn active" id="tabViewerBtn" role="tab" aria-selected="true" onclick="switchTab('viewer')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2"></rect>
+            <line x1="12" y1="18" x2="12" y2="18.01"></line>
+          </svg>
+          <span>Tonton Layar</span>
+        </button>
+        <button class="segment-btn" id="tabHostBtn" role="tab" aria-selected="false" onclick="switchTab('host')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="3" width="20" height="14" rx="2"></rect>
             <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -41,18 +48,148 @@
           </svg>
           <span>Bagikan Layar</span>
         </button>
-        <button class="segment-btn" id="tabViewerBtn" role="tab" aria-selected="false" onclick="switchTab('viewer')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="5" y="2" width="14" height="20" rx="2"></rect>
-            <line x1="12" y1="18" x2="12" y2="18.01"></line>
-          </svg>
-          <span>Tonton Layar</span>
-        </button>
       </div>
     </nav>
 
-    <!-- HOST SECTION -->
-    <section id="hostSection" aria-labelledby="hostSetupHeading">
+    <!-- VIEWER SECTION (Focused & Default) -->
+    <section id="viewerSection" aria-labelledby="viewerHeading">
+      <!-- Enter Room Code Form (Shown if not yet connected) -->
+      <div class="panel panel-centered" id="viewerJoinCard">
+        <div class="panel-header text-center">
+          <h1 class="panel-title" id="viewerHeading">Tonton Layar</h1>
+          <p class="panel-desc">Masukkan 6-karakter kode ruang siaran yang dibagikan oleh penyiar, atau langsung buka tautan.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label sr-only" for="inputRoomCode">Kode Ruang</label>
+          <div class="code-input-group">
+            <input type="text" id="inputRoomCode" class="form-input code-input" placeholder="KODE" maxlength="6" autocomplete="off" spellcheck="false" autofocus>
+            <button class="btn btn-secondary btn-icon" id="btnPasteCode" onclick="pasteRoomCode()" title="Tempel dari Clipboard" aria-label="Tempel Kode">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Mulai Menonton</span>
+        </button>
+
+        <!-- Recent Rooms Quick Rejoin -->
+        <div id="viewerRecentRooms" class="recent-rooms-box" style="display: none;">
+          <span class="recent-rooms-label">Ruang Sebelumnya:</span>
+          <div id="recentRoomsList" class="recent-rooms-list"></div>
+        </div>
+      </div>
+
+      <!-- Active Fullscreen Player Workspace -->
+      <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
+        <div class="player-canvas" id="viewerPlayerWrap">
+          <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="toggleHudVisibility()"></video>
+
+          <!-- Top Status Bar Inside Player -->
+          <div class="player-top-bar" id="playerTopBar">
+            <div class="player-top-left">
+              <span class="stream-badge">
+                <span class="badge-dot"></span>
+                <span>LANGSUNG</span>
+              </span>
+              <span class="player-room-chip" id="viewerCurrentRoom">RUANG: ------</span>
+              <span class="hud-stat" id="viewerStatsPill">Menghubungkan WebRTC...</span>
+            </div>
+            <div class="player-top-right">
+              <button class="btn btn-secondary btn-sm" onclick="stopViewer()" title="Keluar dari Siaran">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Keluar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Floating HUD Controls -->
+          <div class="player-hud" id="playerBottomHud">
+            <div class="hud-actions">
+              <!-- Audio Toggle -->
+              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara (Bisu)" aria-label="Beralih Suara">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
+
+              <!-- Aspect Ratio Toggle (Fit vs Fill) -->
+              <button class="hud-btn" id="btnFitToggle" onclick="toggleViewerFit()" title="Pas Layar / Isi Layar" aria-label="Beralih Ukuran Layar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <polyline points="9 21 3 21 3 15"></polyline>
+                  <line x1="21" y1="3" x2="14" y2="10"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+              </button>
+
+              <!-- Picture-in-Picture (PiP) -->
+              <button class="hud-btn" id="btnPipToggle" onclick="toggleViewerPiP()" title="Picture in Picture (Jendela Mengambang)" aria-label="Jendela Mengambang">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <rect x="12" y="10" width="8" height="8" rx="1"></rect>
+                </svg>
+              </button>
+
+              <!-- Fullscreen -->
+              <button class="hud-btn" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </button>
+
+              <!-- Chat Drawer -->
+              <button class="hud-btn" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Overlay for Viewer -->
+        <div id="viewerChatDrawer" class="panel chat-panel viewer-chat-drawer" style="display: none;">
+          <div class="chat-bar">
+            <span class="chat-title">Obrolan Siaran</span>
+            <button class="chat-close-btn" onclick="toggleViewerChatDrawer()" aria-label="Tutup Obrolan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-thread" id="viewerChatBox" aria-live="polite"></div>
+          <div class="chat-compose">
+            <input type="text" id="viewerChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
+            <button class="btn btn-secondary btn-icon" onclick="sendChat('viewer')" aria-label="Kirim Komentar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOST SECTION (Hidden by default, accessible via switcher) -->
+    <section id="hostSection" style="display: none;" aria-labelledby="hostSetupHeading">
       <!-- 1. Setup Card -->
       <div class="panel" id="hostSetupCard">
         <div class="panel-header">
@@ -191,83 +328,6 @@
             </div>
           </div>
         </aside>
-      </div>
-    </section>
-
-    <!-- VIEWER SECTION -->
-    <section id="viewerSection" style="display: none;" aria-labelledby="viewerHeading">
-      <!-- Enter Room Code Form (Shown if not yet connected) -->
-      <div class="panel panel-centered" id="viewerJoinCard">
-        <div class="panel-header text-center">
-          <h1 class="panel-title" id="viewerHeading">Tonton Layar</h1>
-          <p class="panel-desc">Masukkan 6 karakter kode ruang siaran yang diberikan oleh penyiar.</p>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label sr-only" for="inputRoomCode">Kode Ruang</label>
-          <input type="text" id="inputRoomCode" class="form-input code-input" placeholder="KODE" maxlength="6" autocomplete="off" spellcheck="false">
-        </div>
-
-        <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
-          <span>Masuk ke Siaran</span>
-        </button>
-      </div>
-
-      <!-- Active Fullscreen Player -->
-      <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
-        <div class="player-canvas" id="viewerPlayerWrap">
-          <video id="viewerVideo" class="player-video" autoplay playsinline muted></video>
-
-          <!-- Floating HUD Controls -->
-          <div class="player-hud">
-            <div class="hud-stat" id="viewerStatsPill">Menghubungkan WebRTC...</div>
-            
-            <div class="hud-actions">
-              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara (Bisu)" aria-label="Beralih Suara">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                  <line x1="12" y1="19" x2="12" y2="23"></line>
-                  <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-              </button>
-              <button class="hud-btn" onclick="toggleFullscreen()" title="Layar Penuh" aria-label="Layar Penuh">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                </svg>
-              </button>
-              <button class="hud-btn" onclick="toggleViewerChatDrawer()" title="Obrolan" aria-label="Buka Obrolan">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chat Overlay for Viewer -->
-        <div id="viewerChatDrawer" class="panel chat-panel viewer-chat-drawer" style="display: none;">
-          <div class="chat-bar">
-            <span class="chat-title">Obrolan Siaran</span>
-            <button class="chat-close-btn" onclick="toggleViewerChatDrawer()" aria-label="Tutup Obrolan">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-          <div class="chat-thread" id="viewerChatBox" aria-live="polite"></div>
-          <div class="chat-compose">
-            <input type="text" id="viewerChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
-            <button class="btn btn-secondary btn-icon" onclick="sendChat('viewer')" aria-label="Kirim Komentar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   </main>
