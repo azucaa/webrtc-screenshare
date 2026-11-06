@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <link rel="stylesheet" href="css/style.css?v=3.1">
 </head>
 <body>
 
@@ -96,7 +96,7 @@
           <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
           <!-- Top Status Bar Inside Player -->
-          <div class="player-top-bar" id="playerTopBar">
+          <div class="player-top-bar" id="playerTopBar" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="player-top-left">
               <span class="stream-badge">
                 <span class="badge-dot"></span>
@@ -118,7 +118,7 @@
           </div>
 
           <!-- Bottom Floating HUD Controls -->
-          <div class="player-hud" id="playerBottomHud">
+          <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="hud-actions">
               <!-- Audio Toggle -->
               <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" title="Suara (Bisu)" aria-label="Beralih Suara">
@@ -358,7 +358,7 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=3.0"></script>
-  <script src="js/app.js?v=3.0"></script>
+  <script src="js/qrcode.min.js?v=3.1"></script>
+  <script src="js/app.js?v=3.1"></script>
 </body>
 </html>

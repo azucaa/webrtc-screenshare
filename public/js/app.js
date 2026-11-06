@@ -26,8 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const playerWrap = document.getElementById('viewerPlayerWrap');
   if (playerWrap) {
-    playerWrap.addEventListener('mousemove', resetHudTimer);
-    playerWrap.addEventListener('touchstart', resetHudTimer, { passive: true });
+    playerWrap.addEventListener('mousemove', () => showHud(3500));
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -488,6 +487,7 @@ function handleJoinedRoom(roomId, viewerId) {
   };
 
   showToast(`Tersambung ke Ruang ${roomId}`);
+  showHud(4000);
 }
 
 function stopViewer() {
@@ -542,38 +542,68 @@ async function toggleViewerPiP() {
 }
 
 let lastPlayerTapTime = 0;
-let singleTapTimeout = null;
+let singleTapTimer = null;
+let hudTimer = null;
+let isHudVisible = true;
 
-function handlePlayerTap(e) {
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastPlayerTapTime;
-  
-  if (tapLength < 350 && tapLength > 0) {
-    // Double tap: toggle zoom fit immediately
-    clearTimeout(singleTapTimeout);
-    toggleViewerFit();
-    lastPlayerTapTime = 0;
-  } else {
-    // Single tap: toggle HUD controls
-    lastPlayerTapTime = currentTime;
-    singleTapTimeout = setTimeout(() => {
-      toggleHudVisibility();
-    }, 250);
-  }
-}
-
-function toggleHudVisibility() {
+function showHud(autoHideMs = 4000) {
   const top = document.getElementById('playerTopBar');
   const bottom = document.getElementById('playerBottomHud');
   if (!top || !bottom) return;
 
-  const isHidden = top.classList.contains('hud-hidden');
-  if (isHidden) {
-    top.classList.remove('hud-hidden');
-    bottom.classList.remove('hud-hidden');
+  top.classList.remove('hud-hidden');
+  bottom.classList.remove('hud-hidden');
+  isHudVisible = true;
+
+  clearTimeout(hudTimer);
+  if (autoHideMs > 0) {
+    hudTimer = setTimeout(() => {
+      hideHud();
+    }, autoHideMs);
+  }
+}
+
+function hideHud() {
+  const top = document.getElementById('playerTopBar');
+  const bottom = document.getElementById('playerBottomHud');
+  if (!top || !bottom) return;
+
+  top.classList.add('hud-hidden');
+  bottom.classList.add('hud-hidden');
+  isHudVisible = false;
+  clearTimeout(hudTimer);
+}
+
+function toggleHud() {
+  if (isHudVisible) {
+    hideHud();
   } else {
-    top.classList.add('hud-hidden');
-    bottom.classList.add('hud-hidden');
+    showHud(4000);
+  }
+}
+
+function handlePlayerTap(e) {
+  if (e && e.target && (e.target.closest('#playerTopBar') || e.target.closest('#playerBottomHud'))) {
+    showHud(4000);
+    return;
+  }
+
+  const now = Date.now();
+  const timeSinceLast = now - lastPlayerTapTime;
+
+  if (timeSinceLast < 320 && timeSinceLast > 0) {
+    clearTimeout(singleTapTimer);
+    singleTapTimer = null;
+    lastPlayerTapTime = 0;
+    toggleViewerFit();
+    showHud(2500);
+  } else {
+    lastPlayerTapTime = now;
+    clearTimeout(singleTapTimer);
+    singleTapTimer = setTimeout(() => {
+      toggleHud();
+      singleTapTimer = null;
+    }, 250);
   }
 }
 
@@ -657,28 +687,7 @@ function handleFullscreenStateChange() {
       wrap.classList.remove('is-fullscreen');
     }
   }
-  resetHudTimer();
-}
-
-let hudInactivityTimer = null;
-function resetHudTimer() {
-  const top = document.getElementById('playerTopBar');
-  const bottom = document.getElementById('playerBottomHud');
-  if (!top || !bottom) return;
-
-  top.classList.remove('hud-hidden');
-  bottom.classList.remove('hud-hidden');
-
-  clearTimeout(hudInactivityTimer);
-  const wrap = document.getElementById('viewerPlayerWrap');
-  const isFs = document.fullscreenElement || document.webkitFullscreenElement || (wrap && wrap.classList.contains('is-fullscreen'));
-  
-  if (isFs) {
-    hudInactivityTimer = setTimeout(() => {
-      top.classList.add('hud-hidden');
-      bottom.classList.add('hud-hidden');
-    }, 3500);
-  }
+  showHud(4000);
 }
 
 function toggleViewerAudio() {
