@@ -145,6 +145,33 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'facecam-status': {
+        const targetRoom = rooms.get(currentRoomId);
+        if (!targetRoom) return;
+        const payload = JSON.stringify({
+          type: 'facecam-status',
+          from: userRole,
+          fromViewerId: viewerId,
+          enabled: data.enabled,
+          camTrackId: data.camTrackId
+        });
+        if (userRole === 'host') {
+          targetRoom.viewers.forEach(vWs => {
+            if (vWs.readyState === WebSocket.OPEN) vWs.send(payload);
+          });
+        } else if (userRole === 'viewer') {
+          if (targetRoom.hostWs && targetRoom.hostWs.readyState === WebSocket.OPEN) {
+            targetRoom.hostWs.send(payload);
+          }
+          targetRoom.viewers.forEach((vWs, vId) => {
+            if (vId !== viewerId && vWs.readyState === WebSocket.OPEN) {
+              vWs.send(payload);
+            }
+          });
+        }
+        break;
+      }
+
       case 'chat-message': {
         const targetRoom = rooms.get(currentRoomId);
         if (!targetRoom) return;

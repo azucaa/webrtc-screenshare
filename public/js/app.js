@@ -10,6 +10,13 @@ const peerConnections = new Map(); // viewerId -> RTCPeerConnection
 // Viewer state
 let viewerPeerConnection = null;
 
+// Facecam state
+let localCamStream = null;
+let isCamMuted = false;
+let currentCamFacingMode = 'user'; // 'user' or 'environment'
+let isFacecamActive = false;
+let partnerCamTrackId = null;
+
 // Public STUN servers for NAT traversal over internet
 const rtcConfig = {
   iceServers: [
@@ -28,6 +35,12 @@ window.addEventListener('DOMContentLoaded', () => {
   if (playerWrap) {
     playerWrap.addEventListener('mousemove', () => showHud(3500));
   }
+
+  // Initialize draggable facecam bubbles
+  ['partnerFacecamBubble', 'selfFacecamBubble', 'hostPartnerBubble', 'hostSelfBubble'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) makeDraggable(el);
+  });
 
   const urlParams = new URLSearchParams(window.location.search);
   const roomParam = urlParams.get('room');
@@ -102,6 +115,10 @@ function initWebSocket() {
 
       case 'chat-message':
         renderChatMessage(data);
+        break;
+
+      case 'facecam-status':
+        handleFacecamStatus(data);
         break;
 
       case 'error':
@@ -298,6 +315,31 @@ async function handleViewerJoined(viewerId, totalViewers) {
     });
   }
 
+  // If Host has active Facecam, also stream host camera to this viewer
+  if (localCamStream) {
+    localCamStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localCamStream);
+    });
+  }
+
+  // Handle incoming streams from viewer (e.g. viewer's facecam/mic)
+  pc.ontrack = (event) => {
+    if (event.track.kind === 'video') {
+      const partnerVideo = document.getElementById('hostPartnerCamVideo');
+      const partnerBubble = document.getElementById('hostPartnerBubble');
+      if (partnerVideo) {
+        partnerVideo.srcObject = event.streams[0] || new MediaStream([event.track]);
+      }
+      if (partnerBubble) {
+        partnerBubble.style.display = 'flex';
+      }
+    } else if (event.track.kind === 'audio') {
+      const audioEl = new Audio();
+      audioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+      audioEl.play().catch(() => {});
+    }
+  };
+
   // Prefer H.264 Hardware Acceleration if supported
   if (useH264) {
     preferH264Codec(pc);
@@ -354,6 +396,12 @@ function handleViewerLeft(viewerId, totalViewers) {
 }
 
 function stopHostSharing() {
+  stopFacecam();
+  const hostPartnerVideo = document.getElementById('hostPartnerCamVideo');
+  if (hostPartnerVideo) hostPartnerVideo.srcObject = null;
+  const hostPartnerBubble = document.getElementById('hostPartnerBubble');
+  if (hostPartnerBubble) hostPartnerBubble.style.display = 'none';
+
   if (localStream) {
     localStream.getTracks().forEach((t) => t.stop());
     localStream = null;
@@ -450,30 +498,60 @@ function handleJoinedRoom(roomId, viewerId) {
 
   viewerPeerConnection = new RTCPeerConnection(rtcConfig);
 
+  // If Viewer has active Facecam, add camera tracks
+  if (localCamStream) {
+    localCamStream.getTracks().forEach((track) => {
+      viewerPeerConnection.addTrack(track, localCamStream);
+    });
+  }
+
   viewerPeerConnection.ontrack = (event) => {
     const video = document.getElementById('viewerVideo');
-    if (video.srcObject !== event.streams[0]) {
-      video.srcObject = event.streams[0];
-      video.muted = true; // Wajib dimatikan suaranya di awal agar diizinkan Autoplay oleh iOS & Android
-      
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('Autoplay tertahan kebijakan browser, butuh interaksi pengguna:', err);
-          const statPill = document.getElementById('viewerStatsPill');
-          if (statPill) statPill.textContent = 'Ketuk video untuk memulai siaran';
-          
-          const startPlaybackOnTap = () => {
-            video.play().catch(() => {});
-            if (statPill) statPill.textContent = 'Stream Aktif (Terhubung)';
-            document.removeEventListener('click', startPlaybackOnTap);
-          };
-          document.addEventListener('click', startPlaybackOnTap, { once: true });
-        });
+    const isScreenSet = video.srcObject && video.srcObject.getVideoTracks && video.srcObject.getVideoTracks().length > 0;
+
+    if (event.track.kind === 'video') {
+      if (!isScreenSet) {
+        // First video track received is Screen Share
+        video.srcObject = event.streams[0] || new MediaStream([event.track]);
+        video.muted = true; // Wajib dimatikan suaranya di awal agar diizinkan Autoplay oleh iOS & Android
+        
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn('Autoplay tertahan kebijakan browser, butuh interaksi pengguna:', err);
+            const statPill = document.getElementById('viewerStatsPill');
+            if (statPill) statPill.textContent = 'Ketuk video untuk memulai siaran';
+            
+            const startPlaybackOnTap = () => {
+              video.play().catch(() => {});
+              if (statPill) statPill.textContent = 'Stream Aktif (Terhubung)';
+              document.removeEventListener('click', startPlaybackOnTap);
+            };
+            document.addEventListener('click', startPlaybackOnTap, { once: true });
+          });
+        }
+        
+        document.getElementById('viewerStatsPill').textContent = 'Stream Aktif (Terhubung)';
+        startStatsMonitor(viewerPeerConnection);
+      } else {
+        // Second video track received is Partner's Facecam
+        const partnerVideo = document.getElementById('partnerFacecamVideo');
+        const partnerBubble = document.getElementById('partnerFacecamBubble');
+        if (partnerVideo) {
+          partnerVideo.srcObject = event.streams[0] || new MediaStream([event.track]);
+          partnerVideo.play().catch(() => {});
+        }
+        if (partnerBubble) {
+          partnerBubble.style.display = 'flex';
+        }
       }
-      
-      document.getElementById('viewerStatsPill').textContent = 'Stream Aktif (Terhubung)';
-      startStatsMonitor(viewerPeerConnection);
+    } else if (event.track.kind === 'audio') {
+      // If mic track from partner, play through an Audio element
+      if (video.srcObject && event.streams[0] && video.srcObject.id !== event.streams[0].id) {
+        const audioEl = new Audio();
+        audioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+        audioEl.play().catch(() => {});
+      }
     }
   };
 
@@ -492,6 +570,12 @@ function handleJoinedRoom(roomId, viewerId) {
 
 function stopViewer() {
   document.body.classList.remove('is-watching');
+  stopFacecam();
+  const partnerVideo = document.getElementById('partnerFacecamVideo');
+  if (partnerVideo) partnerVideo.srcObject = null;
+  const partnerBubble = document.getElementById('partnerFacecamBubble');
+  if (partnerBubble) partnerBubble.style.display = 'none';
+
   if (viewerPeerConnection) {
     viewerPeerConnection.close();
     viewerPeerConnection = null;
@@ -617,6 +701,16 @@ async function handleWebRTCSignal(data) {
 
     if (data.signal.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.signal.sdp));
+      // If viewer sent an offer (renegotiation for facecam), host creates and sends answer
+      if (data.signal.sdp.type === 'offer') {
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        ws.send(JSON.stringify({
+          type: 'signal',
+          targetViewerId: data.fromViewerId,
+          signal: { sdp: pc.localDescription }
+        }));
+      }
     } else if (data.signal.candidate) {
       await pc.addIceCandidate(new RTCIceCandidate(data.signal.candidate));
     }
@@ -625,13 +719,15 @@ async function handleWebRTCSignal(data) {
 
     if (data.signal.sdp) {
       await viewerPeerConnection.setRemoteDescription(new RTCSessionDescription(data.signal.sdp));
-      const answer = await viewerPeerConnection.createAnswer();
-      await viewerPeerConnection.setLocalDescription(answer);
+      if (data.signal.sdp.type === 'offer') {
+        const answer = await viewerPeerConnection.createAnswer();
+        await viewerPeerConnection.setLocalDescription(answer);
 
-      ws.send(JSON.stringify({
-        type: 'signal',
-        signal: { sdp: viewerPeerConnection.localDescription }
-      }));
+        ws.send(JSON.stringify({
+          type: 'signal',
+          signal: { sdp: viewerPeerConnection.localDescription }
+        }));
+      }
     } else if (data.signal.candidate) {
       await viewerPeerConnection.addIceCandidate(new RTCIceCandidate(data.signal.candidate));
     }
@@ -796,4 +892,345 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/* ========================================================
+ * 6. Couple's Floating Facecam Logic & Dragging
+ * ======================================================== */
+async function toggleFacecam() {
+  if (isFacecamActive) {
+    stopFacecam();
+    showToast('Facecam dimatikan.');
+  } else {
+    await startFacecam();
+  }
+}
+
+async function startFacecam() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast('Peramban ini tidak mendukung akses kamera webcam.', 'error');
+    return;
+  }
+
+  let camStream;
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: currentCamFacingMode,
+        width: { ideal: 480 },
+        height: { ideal: 480 }
+      },
+      audio: true
+    });
+  } catch (err) {
+    console.warn('Audio capture failed, trying video only:', err);
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: currentCamFacingMode,
+          width: { ideal: 480 },
+          height: { ideal: 480 }
+        },
+        audio: false
+      });
+    } catch (vErr) {
+      console.error('Camera access failed:', vErr);
+      showToast('Gagal mengakses kamera: ' + (vErr.message || 'Izin ditolak'), 'error');
+      return;
+    }
+  }
+
+  localCamStream = camStream;
+  isFacecamActive = true;
+
+  // Show self preview
+  if (currentRole === 'viewer') {
+    const selfVideo = document.getElementById('selfFacecamVideo');
+    const selfBubble = document.getElementById('selfFacecamBubble');
+    const btnToggle = document.getElementById('btnFacecamToggle');
+    if (selfVideo) selfVideo.srcObject = localCamStream;
+    if (selfBubble) selfBubble.style.display = 'flex';
+    if (btnToggle) btnToggle.classList.add('active');
+
+    // Add camera tracks to viewer peer connection and renegotiate
+    if (viewerPeerConnection) {
+      localCamStream.getTracks().forEach((track) => {
+        viewerPeerConnection.addTrack(track, localCamStream);
+      });
+      try {
+        const offer = await viewerPeerConnection.createOffer();
+        await viewerPeerConnection.setLocalDescription(offer);
+        ws.send(JSON.stringify({
+          type: 'signal',
+          signal: { sdp: viewerPeerConnection.localDescription }
+        }));
+      } catch (negErr) {
+        console.warn('Renegotiation error:', negErr);
+      }
+    }
+  } else if (currentRole === 'host') {
+    const hostSelfVideo = document.getElementById('hostSelfCamVideo');
+    const hostSelfBubble = document.getElementById('hostSelfBubble');
+    const btnHostToggle = document.getElementById('btnHostFacecamToggle');
+    const hostLabel = document.getElementById('hostFacecamBtnLabel');
+    if (hostSelfVideo) hostSelfVideo.srcObject = localCamStream;
+    if (hostSelfBubble) hostSelfBubble.style.display = 'flex';
+    if (btnHostToggle) btnHostToggle.classList.add('active');
+    if (hostLabel) hostLabel.textContent = 'Matikan Facecam';
+
+    // Add camera tracks to all connected viewers and renegotiate
+    for (const [vId, pc] of peerConnections.entries()) {
+      localCamStream.getTracks().forEach((track) => {
+        pc.addTrack(track, localCamStream);
+      });
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({
+          type: 'signal',
+          targetViewerId: vId,
+          signal: { sdp: pc.localDescription }
+        }));
+      } catch (negErr) {
+        console.warn('Host camera renegotiation error:', negErr);
+      }
+    }
+  }
+
+  // Notify peer(s)
+  const camVideoTrack = localCamStream.getVideoTracks()[0];
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'facecam-status',
+      enabled: true,
+      camTrackId: camVideoTrack ? camVideoTrack.id : null
+    }));
+  }
+
+  showToast('Facecam aktif. Anda dapat menggeser posisi kamera di layar.');
+}
+
+function stopFacecam() {
+  if (localCamStream) {
+    localCamStream.getTracks().forEach((t) => t.stop());
+    localCamStream = null;
+  }
+  isFacecamActive = false;
+
+  // Hide self preview
+  const selfBubble = document.getElementById('selfFacecamBubble');
+  if (selfBubble) selfBubble.style.display = 'none';
+  const selfVideo = document.getElementById('selfFacecamVideo');
+  if (selfVideo) selfVideo.srcObject = null;
+
+  const hostSelfBubble = document.getElementById('hostSelfBubble');
+  if (hostSelfBubble) hostSelfBubble.style.display = 'none';
+  const hostSelfVideo = document.getElementById('hostSelfCamVideo');
+  if (hostSelfVideo) hostSelfVideo.srcObject = null;
+
+  const btnToggle = document.getElementById('btnFacecamToggle');
+  if (btnToggle) btnToggle.classList.remove('active');
+  const btnHostToggle = document.getElementById('btnHostFacecamToggle');
+  if (btnHostToggle) btnHostToggle.classList.remove('active');
+  const hostLabel = document.getElementById('hostFacecamBtnLabel');
+  if (hostLabel) hostLabel.textContent = 'Aktifkan Facecam';
+
+  // Notify peer(s)
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'facecam-status',
+      enabled: false
+    }));
+  }
+}
+
+async function flipFacecamCamera() {
+  if (!localCamStream) return;
+  currentCamFacingMode = (currentCamFacingMode === 'user') ? 'environment' : 'user';
+
+  const oldVideoTrack = localCamStream.getVideoTracks()[0];
+  if (oldVideoTrack) oldVideoTrack.stop();
+
+  try {
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: currentCamFacingMode,
+        width: { ideal: 480 },
+        height: { ideal: 480 }
+      }
+    });
+    const newVideoTrack = newStream.getVideoTracks()[0];
+
+    // Replace track in senders
+    if (currentRole === 'viewer' && viewerPeerConnection) {
+      const sender = viewerPeerConnection.getSenders().find(s => s.track && s.track.kind === 'video' && s.track !== localStream?.getVideoTracks()[0]);
+      if (sender) sender.replaceTrack(newVideoTrack);
+    } else if (currentRole === 'host') {
+      peerConnections.forEach((pc) => {
+        const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video' && s.track !== localStream?.getVideoTracks()[0]);
+        if (sender) sender.replaceTrack(newVideoTrack);
+      });
+    }
+
+    localCamStream.removeTrack(oldVideoTrack);
+    localCamStream.addTrack(newVideoTrack);
+
+    const selfVideo = document.getElementById('selfFacecamVideo');
+    if (selfVideo) {
+      selfVideo.srcObject = localCamStream;
+      selfVideo.style.transform = currentCamFacingMode === 'user' ? 'scaleX(-1)' : 'none';
+    }
+
+    showToast(currentCamFacingMode === 'user' ? 'Kamera depan aktif' : 'Kamera belakang aktif');
+  } catch (err) {
+    console.error('Flip camera failed:', err);
+    showToast('Gagal memutar kamera: ' + err.message, 'error');
+  }
+}
+
+function toggleSelfFacecamMic() {
+  if (!localCamStream) return;
+  const audioTrack = localCamStream.getAudioTracks()[0];
+  if (!audioTrack) {
+    showToast('Mikrofon kamera tidak tersedia');
+    return;
+  }
+
+  audioTrack.enabled = !audioTrack.enabled;
+  isCamMuted = !audioTrack.enabled;
+
+  const btnViewer = document.getElementById('btnSelfMic');
+  const btnHost = document.getElementById('btnHostSelfMic');
+  [btnViewer, btnHost].forEach((btn) => {
+    if (btn) {
+      if (isCamMuted) {
+        btn.classList.add('muted');
+        showToast('Mikrofon facecam dibisukan');
+      } else {
+        btn.classList.remove('muted');
+        showToast('Mikrofon facecam aktif');
+      }
+    }
+  });
+}
+
+function togglePartnerBubbleVisibility() {
+  const bubble = document.getElementById('partnerFacecamBubble');
+  if (bubble) {
+    bubble.style.display = bubble.style.display === 'none' ? 'flex' : 'none';
+  }
+}
+
+function handleFacecamStatus(data) {
+  if (data.enabled) {
+    partnerCamTrackId = data.camTrackId;
+    if (currentRole === 'viewer') {
+      const bubble = document.getElementById('partnerFacecamBubble');
+      const label = document.getElementById('partnerFacecamLabel');
+      if (label) label.textContent = data.from === 'host' ? 'Host (Pasangan)' : 'Pasangan';
+      if (bubble) bubble.style.display = 'flex';
+      showToast('Pasangan mengaktifkan kamera wajah.');
+    } else if (currentRole === 'host') {
+      const bubble = document.getElementById('hostPartnerBubble');
+      if (bubble) bubble.style.display = 'flex';
+      showToast('Penonton mengaktifkan kamera wajah.');
+    }
+  } else {
+    partnerCamTrackId = null;
+    if (currentRole === 'viewer') {
+      const bubble = document.getElementById('partnerFacecamBubble');
+      const video = document.getElementById('partnerFacecamVideo');
+      if (bubble) bubble.style.display = 'none';
+      if (video) video.srcObject = null;
+      showToast('Pasangan mematikan kamera wajah.');
+    } else if (currentRole === 'host') {
+      const bubble = document.getElementById('hostPartnerBubble');
+      const video = document.getElementById('hostPartnerCamVideo');
+      if (bubble) bubble.style.display = 'none';
+      if (video) video.srcObject = null;
+      showToast('Penonton mematikan kamera wajah.');
+    }
+  }
+}
+
+function makeDraggable(el) {
+  if (!el) return;
+  const handle = el.querySelector('[data-drag-handle]') || el;
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  function onPointerDown(e) {
+    if (e.target.closest('button')) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    isDragging = true;
+    startX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    startY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+    const rect = el.getBoundingClientRect();
+    const parent = el.parentElement;
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+
+    initialLeft = rect.left - parentRect.left;
+    initialTop = rect.top - parentRect.top;
+
+    el.style.bottom = 'auto';
+    el.style.right = 'auto';
+    el.style.left = `${initialLeft}px`;
+    el.style.top = `${initialTop}px`;
+
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
+    document.addEventListener('touchend', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+    const deltaX = clientX - startX;
+    const deltaY = clientY - startY;
+
+    const parent = el.parentElement;
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    const elWidth = el.offsetWidth;
+    const elHeight = el.offsetHeight;
+
+    let newLeft = initialLeft + deltaX;
+    let newTop = initialTop + deltaY;
+
+    const maxLeft = Math.max(0, parentRect.width - elWidth - 4);
+    const maxTop = Math.max(0, parentRect.height - elHeight - 4);
+
+    if (newLeft < 4) newLeft = 4;
+    if (newLeft > maxLeft) newLeft = maxLeft;
+    if (newTop < 4) newTop = 4;
+    if (newTop > maxTop) newTop = maxTop;
+
+    el.style.left = `${newLeft}px`;
+    el.style.top = `${newTop}px`;
+  }
+
+  function onPointerUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    document.removeEventListener('touchmove', onPointerMove);
+    document.removeEventListener('touchend', onPointerUp);
+  }
+
+  handle.addEventListener('pointerdown', onPointerDown);
+  handle.addEventListener('touchstart', onPointerDown, { passive: false });
 }

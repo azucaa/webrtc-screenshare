@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=3.1">
+  <link rel="stylesheet" href="css/style.css?v=3.2">
 </head>
 <body>
 
@@ -95,6 +95,47 @@
         <div class="player-canvas" id="viewerPlayerWrap">
           <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
+          <!-- Floating Facecam Bubbles for Couple / Watch Party -->
+          <!-- 1. Partner's Facecam (Incoming) -->
+          <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="facecam-header" data-drag-handle>
+              <span class="facecam-title">
+                <span class="facecam-status-dot"></span>
+                <span id="partnerFacecamLabel">Pasangan</span>
+              </span>
+              <button class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Tutup Tampilan Facecam" aria-label="Tutup Tampilan Facecam">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div class="facecam-body">
+              <video id="partnerFacecamVideo" class="facecam-video" autoplay playsinline></video>
+            </div>
+          </div>
+
+          <!-- 2. Self Facecam Preview -->
+          <div id="selfFacecamBubble" class="facecam-bubble self-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="facecam-header" data-drag-handle>
+              <span class="facecam-title">
+                <span class="facecam-status-dot online"></span>
+                <span>Kamera Anda</span>
+              </span>
+              <div class="facecam-tools">
+                <button class="facecam-tool-btn" id="btnFlipCam" onclick="flipFacecamCamera()" title="Putar Kamera Depan/Belakang" aria-label="Putar Kamera">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                </button>
+                <button class="facecam-tool-btn" id="btnSelfMic" onclick="toggleSelfFacecamMic()" title="Bisu / Nyalakan Mic" aria-label="Beralih Mikrofon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                </button>
+                <button class="facecam-close-btn" onclick="toggleFacecam()" title="Matikan Kamera" aria-label="Matikan Kamera">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            </div>
+            <div class="facecam-body">
+              <video id="selfFacecamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
+            </div>
+          </div>
+
           <!-- Top Status Bar Inside Player -->
           <div class="player-top-bar" id="playerTopBar" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <div class="player-top-left">
@@ -146,6 +187,14 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                   <rect x="12" y="10" width="8" height="8" rx="1"></rect>
+                </svg>
+              </button>
+
+              <!-- Facecam Toggle (Couple Camera) -->
+              <button class="hud-btn" id="btnFacecamToggle" onclick="toggleFacecam()" title="Aktifkan Facecam Pasangan" aria-label="Beralih Kamera Wajah">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M23 7l-7 5 7 5V7z"></path>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                 </svg>
               </button>
 
@@ -276,9 +325,49 @@
 
             <div class="video-stage">
               <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
+
+              <!-- Floating Facecam for Host (Partner video & self preview) -->
+              <div id="hostPartnerBubble" class="facecam-bubble host-facecam-bubble" style="display: none;">
+                <div class="facecam-header" data-drag-handle>
+                  <span class="facecam-title">
+                    <span class="facecam-status-dot online"></span>
+                    <span>Pasangan (Penonton)</span>
+                  </span>
+                </div>
+                <div class="facecam-body">
+                  <video id="hostPartnerCamVideo" class="facecam-video" autoplay playsinline></video>
+                </div>
+              </div>
+
+              <div id="hostSelfBubble" class="facecam-bubble self-bubble" style="display: none;">
+                <div class="facecam-header" data-drag-handle>
+                  <span class="facecam-title">
+                    <span class="facecam-status-dot online"></span>
+                    <span>Kamera Host</span>
+                  </span>
+                  <div class="facecam-tools">
+                    <button class="facecam-tool-btn" id="btnHostSelfMic" onclick="toggleSelfFacecamMic()" title="Bisu / Nyalakan Mic">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    </button>
+                    <button class="facecam-close-btn" onclick="toggleFacecam()" title="Matikan Kamera">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="facecam-body">
+                  <video id="hostSelfCamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
+                </div>
+              </div>
             </div>
 
             <div class="monitor-footer">
+              <button class="btn btn-secondary" id="btnHostFacecamToggle" onclick="toggleFacecam()" title="Beralih Kamera Facecam Host">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M23 7l-7 5 7 5V7z"></path>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+                <span id="hostFacecamBtnLabel">Aktifkan Facecam</span>
+              </button>
               <button class="btn btn-danger" onclick="stopHostSharing()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="3" y="3" width="18" height="18" rx="2"></rect>
@@ -358,7 +447,7 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=3.1"></script>
-  <script src="js/app.js?v=3.1"></script>
+  <script src="js/qrcode.min.js?v=3.2"></script>
+  <script src="js/app.js?v=3.2"></script>
 </body>
 </html>
