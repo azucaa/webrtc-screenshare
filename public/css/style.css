@@ -1637,3 +1637,325 @@ body.is-watching .player-video {
     font-size: 0.72rem !important;
   }
 }
+
+/* ========================================================
+   Movie Night Memories / Photobooth Component
+   ======================================================== */
+.photobooth-countdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  user-select: none;
+  pointer-events: none;
+  animation: countdownFadeIn 0.2s ease;
+}
+
+@keyframes countdownFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(88, 166, 255, 0.12);
+  border: 1px solid rgba(88, 166, 255, 0.35);
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #79c0ff;
+  margin-bottom: 24px;
+}
+
+.rollbooth-tag {
+  background: #58a6ff;
+  color: #0d1117;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.countdown-digit {
+  font-size: 8.5rem;
+  font-weight: 800;
+  font-family: var(--font-sans);
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 0 50px rgba(88, 166, 255, 0.85), 0 0 100px rgba(88, 166, 255, 0.4);
+  animation: countPop 0.85s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes countPop {
+  0% { transform: scale(0.65); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.countdown-hint {
+  font-size: 1.05rem;
+  color: #c9d1d9;
+  margin-top: 28px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Shutter Flash */
+.photobooth-shutter-flash {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000001;
+}
+
+.photobooth-shutter-flash.flash-active {
+  animation: flashKeyframes 0.38s ease-out;
+}
+
+@keyframes flashKeyframes {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+/* Photobooth / Rollbooth Preview Modal Backdrop & Card */
+.photobooth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 1000002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rollbooth-logo-badge {
+  background: linear-gradient(135deg, #58a6ff, #bc8cff);
+  color: #0b0e14;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+}
+
+.rollbooth-modal-card {
+  background: rgba(18, 22, 31, 0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  box-shadow: 0 32px 72px -15px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cardSlidePop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardSlidePop {
+  from { transform: translateY(18px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.photobooth-modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.photobooth-modal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.photobooth-modal-close {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.photobooth-modal-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.rollbooth-studio-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  padding: 18px 20px;
+  overflow-y: auto;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .rollbooth-studio-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 14px;
+  }
+}
+
+.rollbooth-preview-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 380px;
+  max-height: 64vh;
+  overflow-y: auto;
+}
+
+.rollbooth-strip-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.7));
+}
+
+.rollbooth-result-img {
+  max-height: 56vh;
+  width: auto;
+  max-width: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.rollbooth-controls-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rollbooth-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rollbooth-ctrl-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.rollbooth-segmented-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rollbooth-pill-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c9d1d9;
+  border-radius: 9999px;
+  padding: 6px 13px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rollbooth-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.rollbooth-pill-btn.active {
+  background: #58a6ff;
+  color: #0b0e14;
+  border-color: #58a6ff;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(88, 166, 255, 0.45);
+}
+
+.rollbooth-color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-swatch-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+
+.color-swatch-btn:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch-btn.active {
+  transform: scale(1.2);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.rollbooth-input {
+  font-size: 0.85rem;
+  padding: 8px 12px;
+}
+
+.rollbooth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rollbooth-sub-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.flex-1 {
+  flex: 1;
+}

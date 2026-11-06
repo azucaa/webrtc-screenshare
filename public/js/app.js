@@ -1524,6 +1524,560 @@ function initKeyboardShortcuts() {
     } else if (key === 'c' || key === 'v') {
       e.preventDefault();
       toggleFacecam();
+    } else if (key === 'p') {
+      e.preventDefault();
+      triggerPhotobooth();
     }
   });
+}
+
+/* ========================================================
+ * 9. Rollbooth Memories Studio Engine (rollbooth.com Concept)
+ * ======================================================== */
+let rollboothConfig = {
+  layout: 'strip',       // 'strip' | 'grid' | 'polaroid'
+  frameColor: 'white',   // 'white' | 'cream' | 'noir' | 'pink' | 'matcha'
+  filter: 'vintage',     // 'vintage' | 'normal' | 'bw' | 'sunset'
+  caption: 'Movie Night Memories'
+};
+
+let rollboothSnaps = []; // Array of 3 snapshots: [{ movie, cam1, cam2 }, ...]
+let isPhotoboothCountingDown = false;
+let currentPhotoboothBlob = null;
+let currentPhotoboothDataUrl = null;
+
+function triggerPhotobooth() {
+  if (isPhotoboothCountingDown) return;
+  isPhotoboothCountingDown = true;
+  rollboothSnaps = [];
+
+  const overlay = document.getElementById('photoboothCountdownOverlay');
+  const countText = document.getElementById('photoboothCountText');
+  const stepBadge = document.getElementById('photoboothStepBadge');
+  const hintText = document.getElementById('photoboothHintText');
+  const modal = document.getElementById('photoboothModal');
+
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'flex';
+
+  // Step 1: Snapshot 1 (Bersiap)
+  if (stepBadge) stepBadge.textContent = 'Foto 1 dari 3: Bersiap!';
+  if (hintText) hintText.textContent = 'Pose pertama bersama adegan film!';
+
+  runCountdownStep(3, () => {
+    rollboothSnaps[0] = grabCurrentSnap();
+
+    // Step 2: Snapshot 2 (Ganti Pose)
+    setTimeout(() => {
+      if (stepBadge) stepBadge.textContent = 'Foto 2 dari 3: Ganti Pose!';
+      if (hintText) hintText.textContent = 'Ganti ekspresi atau gaya baru!';
+
+      runCountdownStep(2, () => {
+        rollboothSnaps[1] = grabCurrentSnap();
+
+        // Step 3: Snapshot 3 (Pose Terakhir)
+        setTimeout(() => {
+          if (stepBadge) stepBadge.textContent = 'Foto 3 dari 3: Senyum!';
+          if (hintText) hintText.textContent = 'Pose terbaik terakhir!';
+
+          runCountdownStep(2, () => {
+            rollboothSnaps[2] = grabCurrentSnap();
+
+            // Finish all 3 snaps
+            if (overlay) overlay.style.display = 'none';
+            isPhotoboothCountingDown = false;
+
+            // Open Rollbooth Studio Modal
+            if (modal) modal.style.display = 'flex';
+            renderRollboothCanvas();
+            showToast('3 Foto berhasil diambil! Selamat berkreasi di Rollbooth Studio 📸✨');
+          });
+        }, 600);
+      });
+    }, 600);
+  });
+}
+
+function runCountdownStep(startCount, onFinish) {
+  const countText = document.getElementById('photoboothCountText');
+  const flash = document.getElementById('photoboothShutterFlash');
+  let current = startCount;
+  if (countText) countText.textContent = current;
+
+  const timer = setInterval(() => {
+    current--;
+    if (current > 0) {
+      if (countText) countText.textContent = current;
+    } else {
+      clearInterval(timer);
+      if (countText) countText.textContent = '📸 FLASH!';
+
+      // Trigger Flash & Sound
+      if (flash) {
+        flash.classList.remove('flash-active');
+        void flash.offsetWidth;
+        flash.classList.add('flash-active');
+        setTimeout(() => flash.classList.remove('flash-active'), 350);
+      }
+      playShutterSound();
+
+      setTimeout(onFinish, 120);
+    }
+  }, 900);
+}
+
+function grabCurrentSnap() {
+  const movieVid = (currentRole === 'host')
+    ? document.getElementById('hostPreviewVideo')
+    : document.getElementById('viewerVideo');
+  const cam1 = (currentRole === 'host')
+    ? document.getElementById('hostSelfCamVideo')
+    : document.getElementById('selfFacecamVideo');
+  const cam2 = (currentRole === 'host')
+    ? document.getElementById('hostPartnerCamVideo')
+    : document.getElementById('partnerFacecamVideo');
+
+  function copyVideo(video) {
+    if (!video || video.videoWidth === 0 || video.readyState < 2) return null;
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth;
+    c.height = video.videoHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    return c;
+  }
+
+  return {
+    movie: copyVideo(movieVid),
+    cam1: copyVideo(cam1),
+    cam2: copyVideo(cam2)
+  };
+}
+
+function playShutterSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(850, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.07);
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.07);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.07);
+
+    setTimeout(() => {
+      try {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'square';
+        osc2.frequency.setValueAtTime(360, ctx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.06);
+        gain2.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.06);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start();
+        osc2.stop(ctx.currentTime + 0.06);
+      } catch (e) {}
+    }, 70);
+  } catch (e) {}
+}
+
+/* ========================================================
+ * Rollbooth Studio Live Controls (Layout, Color, Filter, Caption)
+ * ======================================================== */
+function setRollboothLayout(layout) {
+  rollboothConfig.layout = layout;
+  ['layoutBtnStrip', 'layoutBtnGrid', 'layoutBtnPolaroid'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+  if (layout === 'strip') document.getElementById('layoutBtnStrip')?.classList.add('active');
+  if (layout === 'grid') document.getElementById('layoutBtnGrid')?.classList.add('active');
+  if (layout === 'polaroid') document.getElementById('layoutBtnPolaroid')?.classList.add('active');
+  renderRollboothCanvas();
+}
+
+function setRollboothColor(color) {
+  rollboothConfig.frameColor = color;
+  document.querySelectorAll('.color-swatch-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.color === color);
+  });
+  renderRollboothCanvas();
+}
+
+function setRollboothFilter(filter) {
+  rollboothConfig.filter = filter;
+  ['filterBtnVintage', 'filterBtnNormal', 'filterBtnBw', 'filterBtnSunset'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+  if (filter === 'vintage') document.getElementById('filterBtnVintage')?.classList.add('active');
+  if (filter === 'normal') document.getElementById('filterBtnNormal')?.classList.add('active');
+  if (filter === 'bw') document.getElementById('filterBtnBw')?.classList.add('active');
+  if (filter === 'sunset') document.getElementById('filterBtnSunset')?.classList.add('active');
+  renderRollboothCanvas();
+}
+
+function setRollboothCaption(text) {
+  rollboothConfig.caption = text || 'Movie Night Memories';
+  renderRollboothCanvas();
+}
+
+/* ========================================================
+ * Rollbooth Canvas Renderer (Retro Film Strip Aesthetic)
+ * ======================================================== */
+function renderRollboothCanvas() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  const themes = {
+    white:  { bg: '#fbfbfb', text: '#18181b', subtext: '#71717a', border: '#e4e4e7' },
+    cream:  { bg: '#f5efe6', text: '#2c231e', subtext: '#7d6f65', border: '#ded4c5' },
+    noir:   { bg: '#12151d', text: '#ffffff', subtext: '#8b949e', border: '#272e3d' },
+    pink:   { bg: '#ffe5ec', text: '#421d2a', subtext: '#8a4f65', border: '#f8bbd0' },
+    matcha: { bg: '#d8e2dc', text: '#203328', subtext: '#5c7064', border: '#b8c5bc' }
+  };
+
+  const theme = themes[rollboothConfig.frameColor] || themes.white;
+
+  const filters = {
+    normal:  'none',
+    vintage: 'sepia(0.28) contrast(1.15) brightness(1.04) saturate(1.18)',
+    bw:      'grayscale(1) contrast(1.25) brightness(0.96)',
+    sunset:  'sepia(0.38) hue-rotate(-12deg) contrast(1.12) saturate(1.3)'
+  };
+  const activeFilter = filters[rollboothConfig.filter] || 'none';
+
+  // Date and room stamp
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '. ');
+  const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const roomTag = activeRoomId ? `RUANG: ${activeRoomId}` : 'SCREENCAST';
+
+  const snap1 = rollboothSnaps[0] || {};
+  const snap2 = rollboothSnaps[1] || {};
+  const snap3 = rollboothSnaps[2] || {};
+
+  if (rollboothConfig.layout === 'strip') {
+    // ----------------------------------------------------
+    // LAYOUT 1: Iconic Vertical 3-Cut Photostrip (460x1380)
+    // ----------------------------------------------------
+    const W = 460;
+    const H = 1380;
+    canvas.width = W;
+    canvas.height = H;
+
+    // Background
+    ctx.fillStyle = theme.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Outer subtle border
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(1, 1, W - 2, H - 2);
+
+    const padX = 26;
+    const padTop = 32;
+    const photoW = W - padX * 2; // 408px
+    const photoH = 306;          // 4:3 ratio
+    const gap = 16;
+
+    // Photo 1 (Top: Movie Scene from Snap 1)
+    const y1 = padTop;
+    drawFilteredPhoto(ctx, snap1.movie, padX, y1, photoW, photoH, activeFilter, '🎬 ADEGAN FILM');
+
+    // Photo 2 (Middle: Reactions from Snap 2)
+    const y2 = y1 + photoH + gap;
+    if (snap2.cam1 && snap2.cam2) {
+      // Split side-by-side
+      const halfW = (photoW - 10) / 2;
+      drawFilteredPhoto(ctx, snap2.cam1, padX, y2, halfW, photoH, activeFilter, currentRole === 'host' ? 'Host' : 'Viewer');
+      drawFilteredPhoto(ctx, snap2.cam2, padX + halfW + 10, y2, halfW, photoH, activeFilter, currentRole === 'host' ? 'Viewer' : 'Host');
+    } else if (snap2.cam1 || snap2.cam2) {
+      drawFilteredPhoto(ctx, snap2.cam1 || snap2.cam2, padX, y2, photoW, photoH, activeFilter, 'REAKSI');
+    } else {
+      drawFilteredPhoto(ctx, snap2.movie, padX, y2, photoW, photoH, activeFilter, '🎬 FILM SCENE II');
+    }
+
+    // Photo 3 (Bottom: Final Pose from Snap 3)
+    const y3 = y2 + photoH + gap;
+    if (snap3.cam1 && snap3.cam2) {
+      const halfW = (photoW - 10) / 2;
+      drawFilteredPhoto(ctx, snap3.cam1, padX, y3, halfW, photoH, activeFilter, currentRole === 'host' ? 'Host' : 'Viewer');
+      drawFilteredPhoto(ctx, snap3.cam2, padX + halfW + 10, y3, halfW, photoH, activeFilter, currentRole === 'host' ? 'Viewer' : 'Host');
+    } else if (snap3.cam1 || snap3.cam2) {
+      drawFilteredPhoto(ctx, snap3.cam1 || snap3.cam2, padX, y3, photoW, photoH, activeFilter, 'SENYUM');
+    } else {
+      drawFilteredPhoto(ctx, snap3.movie, padX, y3, photoW, photoH, activeFilter, '🎬 FILM SCENE III');
+    }
+
+    // Strip Footer
+    const footerY = y3 + photoH + 28;
+    ctx.textAlign = 'center';
+
+    // Custom Caption
+    ctx.fillStyle = theme.text;
+    ctx.font = '700 19px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', W / 2, footerY);
+
+    // Date & Time
+    ctx.fillStyle = theme.subtext;
+    ctx.font = '500 13px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillText(`${dateStr} · ${timeStr} WIB`, W / 2, footerY + 28);
+
+    // Rollbooth Branding & Barcode
+    drawAestheticBarcode(ctx, W / 2 - 100, footerY + 44, 200, 32, theme.text);
+
+    ctx.font = '800 11px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillStyle = theme.text;
+    ctx.fillText(`ROLLBOOTH × ${roomTag}`, W / 2, footerY + 98);
+    ctx.textAlign = 'left';
+
+  } else if (rollboothConfig.layout === 'grid') {
+    // ----------------------------------------------------
+    // LAYOUT 2: Korean 2×2 Grid / Life4Cuts (860x1080)
+    // ----------------------------------------------------
+    const W = 860;
+    const H = 1080;
+    canvas.width = W;
+    canvas.height = H;
+
+    ctx.fillStyle = theme.bg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, W - 2, H - 2);
+
+    const pad = 30;
+    const gap = 16;
+    const gridW = (W - pad * 2 - gap) / 2; // 392px
+    const gridH = 392; // 1:1 square photo
+
+    // Top Row
+    const yTop = pad + 16;
+    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, '🎬 FILM 1');
+    drawFilteredPhoto(ctx, snap2.cam1 || snap1.movie, pad + gridW + gap, yTop, gridW, gridH, activeFilter, 'HOST');
+
+    // Bottom Row
+    const yBot = yTop + gridH + gap;
+    drawFilteredPhoto(ctx, snap2.cam2 || snap2.cam1 || snap2.movie, pad, yBot, gridW, gridH, activeFilter, 'VIEWER');
+    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, '🎬 FILM 2');
+
+    // Footer
+    const footerY = yBot + gridH + 34;
+    ctx.fillStyle = theme.text;
+    ctx.font = '700 24px -apple-system, sans-serif';
+    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', pad, footerY);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = theme.subtext;
+    ctx.font = '600 14px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillText(`ROLLBOOTH · ${dateStr} · ${roomTag}`, W - pad, footerY);
+    ctx.textAlign = 'left';
+
+  } else {
+    // ----------------------------------------------------
+    // LAYOUT 3: Wide Polaroid Hero (920x1200)
+    // ----------------------------------------------------
+    const W = 920;
+    const H = 1200;
+    canvas.width = W;
+    canvas.height = H;
+
+    ctx.fillStyle = theme.bg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, W - 2, H - 2);
+
+    const pad = 36;
+    const heroW = W - pad * 2;
+    const heroH = Math.round(heroW * (9 / 16)); // ~477px
+
+    // Hero Movie Scene
+    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, '🎬 ADEGAN FILM');
+
+    // Side-by-side reactions
+    const reactY = pad + heroH + 20;
+    const halfW = (heroW - 20) / 2;
+    const reactH = 440;
+
+    drawFilteredPhoto(ctx, snap2.cam1, pad, reactY, halfW, reactH, activeFilter, currentRole === 'host' ? 'Host' : 'Viewer');
+    drawFilteredPhoto(ctx, snap2.cam2 || snap3.cam2, pad + halfW + 20, reactY, halfW, reactH, activeFilter, currentRole === 'host' ? 'Viewer' : 'Host');
+
+    // Footer Polaroid
+    const footerY = reactY + reactH + 34;
+    ctx.fillStyle = theme.text;
+    ctx.font = '700 22px -apple-system, sans-serif';
+    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', pad, footerY);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = theme.subtext;
+    ctx.font = '500 14px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillText(`ROLLBOOTH × SCREENCAST · ${dateStr}`, W - pad, footerY);
+    ctx.textAlign = 'left';
+  }
+
+  // Update Result Image & Blob
+  currentPhotoboothDataUrl = canvas.toDataURL('image/png');
+  canvas.toBlob((blob) => {
+    currentPhotoboothBlob = blob;
+  }, 'image/png');
+
+  const resultImg = document.getElementById('photoboothResultImg');
+  if (resultImg) resultImg.src = currentPhotoboothDataUrl;
+}
+
+function drawFilteredPhoto(ctx, sourceCanvas, x, y, w, h, filterStr, label) {
+  ctx.save();
+
+  // Dark inner slot background
+  ctx.fillStyle = '#06080d';
+  drawRoundedRect(ctx, x, y, w, h, 6);
+  ctx.fill();
+
+  if (sourceCanvas && sourceCanvas.width > 0) {
+    ctx.beginPath();
+    drawRoundedRect(ctx, x, y, w, h, 6);
+    ctx.clip();
+
+    ctx.filter = filterStr;
+    drawCoverCanvas(ctx, sourceCanvas, x, y, w, h);
+    ctx.filter = 'none';
+  } else {
+    // Empty camera placeholder
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    drawRoundedRect(ctx, x, y, w, h, 6);
+    ctx.fill();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '28px -apple-system, sans-serif';
+    ctx.fillText('📷', x + w / 2, y + h / 2 - 8);
+    ctx.font = '500 13px -apple-system, sans-serif';
+    ctx.fillText(label || 'Foto', x + w / 2, y + h / 2 + 24);
+    ctx.textAlign = 'left';
+  }
+
+  ctx.restore();
+
+  // Thin photo outline
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  drawRoundedRect(ctx, x, y, w, h, 6);
+  ctx.stroke();
+}
+
+function drawCoverCanvas(ctx, img, x, y, w, h) {
+  const iW = img.width;
+  const iH = img.height;
+  const hRatio = w / iW;
+  const vRatio = h / iH;
+  const ratio = Math.max(hRatio, vRatio);
+  const shiftX = (w - iW * ratio) / 2;
+  const shiftY = (h - iH * ratio) / 2;
+
+  ctx.drawImage(img, 0, 0, iW, iH, x + shiftX, y + shiftY, iW * ratio, iH * ratio);
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+  }
+}
+
+function drawAestheticBarcode(ctx, x, y, w, h, barColor) {
+  ctx.fillStyle = barColor;
+  let curX = x;
+  let toggle = true;
+  while (curX < x + w) {
+    const barW = Math.random() > 0.4 ? 3 : 1.5;
+    if (toggle) {
+      ctx.fillRect(curX, y, barW, h);
+    }
+    curX += barW + (Math.random() > 0.5 ? 2.5 : 1.5);
+    toggle = !toggle;
+  }
+}
+
+function closePhotoboothModal() {
+  const modal = document.getElementById('photoboothModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function downloadPhotoboothPhoto() {
+  if (!currentPhotoboothDataUrl) return;
+  const a = document.createElement('a');
+  const filename = `Rollbooth-${rollboothConfig.layout}-${activeRoomId || 'live'}-${Date.now()}.png`;
+  a.href = currentPhotoboothDataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Foto Rollbooth berhasil diunduh!');
+}
+
+async function copyPhotoboothPhoto() {
+  if (!currentPhotoboothBlob) {
+    showToast('Gambar belum siap untuk disalin.');
+    return;
+  }
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': currentPhotoboothBlob })
+      ]);
+      showToast('Foto Strip disalin ke clipboard! Siap di-paste ke WA/Telegram.');
+    } else {
+      downloadPhotoboothPhoto();
+    }
+  } catch (err) {
+    console.warn('Clipboard write error:', err);
+    downloadPhotoboothPhoto();
+  }
+}
+
+async function sharePhotoboothPhoto() {
+  if (!currentPhotoboothBlob) return;
+  try {
+    const file = new File([currentPhotoboothBlob], `Rollbooth-${activeRoomId || 'memories'}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: 'Rollbooth Movie Memories',
+        text: 'Foto strip nobar film di ScreenCast! 🍿📸',
+        files: [file]
+      });
+      showToast('Foto berhasil dibagikan!');
+    } else if (navigator.share) {
+      await navigator.share({
+        title: 'Rollbooth Movie Memories',
+        text: 'Foto strip nobar film di ScreenCast! 🍿🎬',
+        url: window.location.href
+      });
+    } else {
+      copyPhotoboothPhoto();
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      copyPhotoboothPhoto();
+    }
+  }
 }

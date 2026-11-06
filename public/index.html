@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=4.2">
+  <link rel="stylesheet" href="css/style.css?v=4.4">
 </head>
 <body>
   <!-- 21st.dev Mesh Drift Shader Background -->
@@ -262,7 +262,15 @@
                 </svg>
               </button>
 
-              <!-- 5. Layar Penuh (Fullscreen) -->
+              <!-- 5. Photobooth Memories -->
+              <button class="hud-btn" id="btnPhotoboothToggle" onclick="triggerPhotobooth()" data-tooltip="Photobooth (P)" aria-label="Abadikan Momen Photobooth">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </button>
+
+              <!-- 6. Layar Penuh (Fullscreen) -->
               <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" data-tooltip="Layar Penuh (F)" aria-label="Layar Penuh">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -443,6 +451,13 @@
                   </svg>
                   <span id="hostCameraBtnLabel">Kamera: Mati</span>
                 </button>
+                <button class="btn btn-secondary btn-sm" onclick="triggerPhotobooth()" title="Abadikan Momen Photobooth (P)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Photobooth</span>
+                </button>
               </div>
               <button class="btn btn-danger btn-sm" onclick="stopHostSharing()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -520,11 +535,151 @@
     </section>
   </main>
 
+  <!-- Rollbooth Countdown & Shutter Flash Overlay -->
+  <div id="photoboothCountdownOverlay" class="photobooth-countdown-overlay" style="display: none;">
+    <div class="countdown-badge">
+      <span class="rollbooth-tag">ROLLBOOTH</span>
+      <span id="photoboothStepBadge">Foto 1 dari 3</span>
+    </div>
+    <div class="countdown-digit" id="photoboothCountText">3</div>
+    <div class="countdown-hint" id="photoboothHintText">Bersiap dengan pose terbaik Anda!</div>
+  </div>
+  <div id="photoboothShutterFlash" class="photobooth-shutter-flash"></div>
+
+  <!-- Rollbooth Studio Preview Modal -->
+  <div id="photoboothModal" class="photobooth-modal-backdrop" style="display: none;" onclick="if(event.target===this) closePhotoboothModal()">
+    <div class="rollbooth-modal-card">
+      <div class="photobooth-modal-header">
+        <div class="photobooth-modal-title">
+          <span class="rollbooth-logo-badge">ROLLBOOTH</span>
+          <span>Movie Memories Studio</span>
+        </div>
+        <button class="photobooth-modal-close" onclick="closePhotoboothModal()" aria-label="Tutup">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="rollbooth-studio-layout">
+        <!-- Left: Live Strip Preview with Paper Drop Shadow -->
+        <div class="rollbooth-preview-column">
+          <div class="rollbooth-strip-container" id="photoboothCardWrap">
+            <img id="photoboothResultImg" class="rollbooth-result-img" alt="Rollbooth Movie Strip" />
+          </div>
+        </div>
+
+        <!-- Right: Studio Customizer Controls -->
+        <div class="rollbooth-controls-column">
+          <!-- 1. Layout Selector -->
+          <div class="rollbooth-ctrl-group">
+            <label class="rollbooth-ctrl-label">Tata Letak (Layout)</label>
+            <div class="rollbooth-segmented-pills">
+              <button type="button" class="rollbooth-pill-btn active" id="layoutBtnStrip" onclick="setRollboothLayout('strip')">
+                <span>Strip Vertikal</span>
+              </button>
+              <button type="button" class="rollbooth-pill-btn" id="layoutBtnGrid" onclick="setRollboothLayout('grid')">
+                <span>Grid 2×2</span>
+              </button>
+              <button type="button" class="rollbooth-pill-btn" id="layoutBtnPolaroid" onclick="setRollboothLayout('polaroid')">
+                <span>Polaroid</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Frame Color Picker -->
+          <div class="rollbooth-ctrl-group">
+            <label class="rollbooth-ctrl-label">Warna Bingkai (Frame Color)</label>
+            <div class="rollbooth-color-swatches">
+              <button type="button" class="color-swatch-btn active" data-color="white" style="background: #ffffff;" onclick="setRollboothColor('white')" title="Classic White"></button>
+              <button type="button" class="color-swatch-btn" data-color="cream" style="background: #f5efe6;" onclick="setRollboothColor('cream')" title="Vintage Cream"></button>
+              <button type="button" class="color-swatch-btn" data-color="noir" style="background: #12151d;" onclick="setRollboothColor('noir')" title="Deep Noir"></button>
+              <button type="button" class="color-swatch-btn" data-color="pink" style="background: #ffe5ec;" onclick="setRollboothColor('pink')" title="Pastel Blossom"></button>
+              <button type="button" class="color-swatch-btn" data-color="matcha" style="background: #d8e2dc;" onclick="setRollboothColor('matcha')" title="Matcha Sage"></button>
+            </div>
+          </div>
+
+          <!-- 3. Filter Options -->
+          <div class="rollbooth-ctrl-group">
+            <label class="rollbooth-ctrl-label">Filter Vintage</label>
+            <div class="rollbooth-segmented-pills">
+              <button type="button" class="rollbooth-pill-btn active" id="filterBtnVintage" onclick="setRollboothFilter('vintage')">
+                <span>Retro 90s</span>
+              </button>
+              <button type="button" class="rollbooth-pill-btn" id="filterBtnNormal" onclick="setRollboothFilter('normal')">
+                <span>Normal</span>
+              </button>
+              <button type="button" class="rollbooth-pill-btn" id="filterBtnBw" onclick="setRollboothFilter('bw')">
+                <span>B&W Noir</span>
+              </button>
+              <button type="button" class="rollbooth-pill-btn" id="filterBtnSunset" onclick="setRollboothFilter('sunset')">
+                <span>Sunset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Custom Caption Input -->
+          <div class="rollbooth-ctrl-group">
+            <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki (Caption)</label>
+            <input
+              type="text"
+              id="rollboothCaptionInput"
+              class="form-input rollbooth-input"
+              placeholder="Tulis judul film / pesan manis..."
+              maxlength="32"
+              value="Movie Night Memories"
+              oninput="setRollboothCaption(this.value)"
+            >
+          </div>
+
+          <!-- 5. Action Buttons -->
+          <div class="rollbooth-actions">
+            <button type="button" class="btn btn-primary w-full" onclick="downloadPhotoboothPhoto()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Unduh Foto HD (PNG)</span>
+            </button>
+
+            <div class="rollbooth-sub-actions">
+              <button type="button" class="btn btn-secondary flex-1" onclick="copyPhotoboothPhoto()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Salin</span>
+              </button>
+
+              <button type="button" class="btn btn-secondary flex-1" id="btnShareMemories" onclick="sharePhotoboothPhoto()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                <span>Bagikan</span>
+              </button>
+
+              <button type="button" class="btn btn-secondary flex-1" onclick="triggerPhotobooth()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Ulang</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=4.2"></script>
-  <script src="js/app.js?v=4.2"></script>
-  <script src="js/mesh-drift.js?v=4.2"></script>
+  <script src="js/qrcode.min.js?v=4.4"></script>
+  <script src="js/app.js?v=4.4"></script>
+  <script src="js/mesh-drift.js?v=4.4"></script>
 </body>
 </html>
