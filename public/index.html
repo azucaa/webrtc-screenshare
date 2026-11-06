@@ -2,9 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
 </head>
 <body>
 
@@ -90,7 +93,7 @@
       <!-- Active Fullscreen Player Workspace -->
       <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
         <div class="player-canvas" id="viewerPlayerWrap">
-          <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="toggleHudVisibility()"></video>
+          <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
           <!-- Top Status Bar Inside Player -->
           <div class="player-top-bar" id="playerTopBar">
@@ -355,7 +358,7 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/qrcode.min.js?v=3.0"></script>
+  <script src="js/app.js?v=3.0"></script>
 </body>
 </html>

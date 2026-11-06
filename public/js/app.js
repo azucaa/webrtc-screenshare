@@ -541,6 +541,27 @@ async function toggleViewerPiP() {
   }
 }
 
+let lastPlayerTapTime = 0;
+let singleTapTimeout = null;
+
+function handlePlayerTap(e) {
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastPlayerTapTime;
+  
+  if (tapLength < 350 && tapLength > 0) {
+    // Double tap: toggle zoom fit immediately
+    clearTimeout(singleTapTimeout);
+    toggleViewerFit();
+    lastPlayerTapTime = 0;
+  } else {
+    // Single tap: toggle HUD controls
+    lastPlayerTapTime = currentTime;
+    singleTapTimeout = setTimeout(() => {
+      toggleHudVisibility();
+    }, 250);
+  }
+}
+
 function toggleHudVisibility() {
   const top = document.getElementById('playerTopBar');
   const bottom = document.getElementById('playerBottomHud');
