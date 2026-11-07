@@ -1058,11 +1058,11 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'dr-tab-btn active' : 'dr-tab-btn';
+    hostBtn.className = isHost ? 'inspo-tab active' : 'inspo-tab';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'dr-tab-btn active' : 'dr-tab-btn';
+    viewerBtn.className = !isHost ? 'inspo-tab active' : 'inspo-tab';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 

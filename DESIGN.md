@@ -1,36 +1,49 @@
-# ScreenCast x Rollbooth Design System
+# DESIGN.md : ScreenCast x Rollbooth (Inspo-MCP Split Studio & Editorial Film Archive)
 
-## Identity & Character
-- **Product:** ScreenCast x Rollbooth (Peer-to-peer 60fps watch-party cinema paired with a dual-column 35mm photobooth darkroom).
-- **Visual Language:** Analog 35mm Darkroom & Projection Print House. Inspired by physical celluloid film strips, silver-halide contact sheets, and classic repertory cinema schedules.
-- **Identity Motif:** Perforated 35mm film sprocket rails and frame-counter timecodes (`FRM 01A .. 04A`) that frame live video captures and photobooth contact sheets.
-- **Dials:** `Dial: ENERGY 2 / RHYTHM 3 / MOTION 2`
+## 1. Visual Direction & Domain Exemplars (via `inspo-mcp`)
+- **Macrostructure Pick (`inspo-mcp recommend`):** `split-studio` (Split Studio with hairline-ruled editorial sections).
+- **Primary Exemplars & Reference Archetypes:**
+  1. **FURO Web Studio (`furoweb-eu` via `inspo-mcp`):** Deep warm-black expanse (`#0C0B0A`), high-contrast `Instrument Serif` display typography with italic coral-vermilion accent clauses (`#FC9B7D` / `#B42E04`), and quiet architectural stillness.
+  2. **Inspo Reference Archetypes (`inspo-mcp get_reference_jsx`):**
+     - `nav/inline` (`NavInline`): Hairline-ruled top bar, serif wordmark with accent period on the left, mono metadata links and compact utility cluster on the right.
+     - `hero/split-screen` (`HeroSplitScreen`): Full-bleed 50/50 split grid divided by a `1px` structural rule; editorial typography and room console on the left half, atmospheric CSS/SVG 35mm film archive specimen on the right half.
+     - `features/workbench` (`FeaturesWorkbench`): 12-column split (5 columns explanatory copy and controls on the left, 7 columns interactive 35mm contact sheet workbench on the right).
+     - `features/numbered-triplet` (`FeaturesNumberedTriplet`): 3 equal columns prefaced by a `2px solid var(--color-fg)` top rule and mono ordinal (`TAHAP 01`, `TAHAP 02`, `TAHAP 03`).
+     - `faq/accordion` (`FaqAccordion`): 12-column intro header followed by hairline-ruled FAQ rows with `Instrument Serif` questions and a rotating `+` mono affordance.
+     - `footer/colophon` (`FooterColophon`): 3-column magazine end-credit (`Tipografi`, `Tumpukan Teknis`, `Kolofon & Pintasan`).
+- **Aesthetic Dial:** `ENERGY 2 / RHYTHM 3 / MOTION 2` (Measured editorial pacing, sharp hairline rules, tactile 35mm contact sheet specimens).
 
-## Color Palette (Capped at 2 Core Neutrals + 1 Deliberate Accent per Theme)
-### Projection Darkroom (Dark Theme - Default for Cinema Watching)
-- **Canvas Primary (`--bg-canvas`):** `#111110` (Carbon celluloid base; minimizes screen glare while watching films in a dark room)
-- **Surface / Contact Sheet (`--bg-surface`):** `#1A1917` (Elevated darkroom tray surface)
-- **Ink Primary (`--ink-primary`):** `#F3EFE6` (Silver-gelatin warm paper white; 16.46:1 contrast on `#111110`)
-- **Ink Secondary (`--ink-secondary`):** `#B8B2A6` (Muted warm silver; 8.33:1 contrast on `#1A1917`)
-- **Interactive Border (`--border-strong`):** `#757066` (3.57:1 non-text contrast against `#1A1917`)
-- **Primary Accent (`--accent-vermilion`):** `#B83B1A` button surface with `#FAF7F0` text (5.34:1 contrast) and `#F07148` darkroom safelight highlight (6.44:1 contrast on `#111110`).
+## 2. Color Palette & Atmospheric Polarity (WCAG AA Verified via `contrast-check.py`)
+- **Dual / Adaptive Palette (`data-theme="dark"` default + working `data-theme="light"` Inspo-Paper mode):**
+  - **Dark Mode (`data-theme="dark"`):**
+    - `--color-paper` (`--color-bg`): `#0C0B0A` (Carbon Darkroom Ground)
+    - `--color-surface`: `#141311` (Projection Platen Surface)
+    - `--color-elevated`: `#1C1A17` (Control Well Surface)
+    - `--color-ink` (`--color-fg`): `#EDE8DF` (`16.12:1` on `#0C0B0A`, PASS AAA)
+    - `--color-muted` (`--color-fg-muted`): `#A8A196` (`7.25:1` on `#141311`, PASS AAA)
+    - `--color-rule`: `#6E685F` (`3.37:1` on `#141311`, PASS 3:1 UI component boundary)
+    - `--color-accent`: `#B42E04` (`inspo-mcp` warm vermilion anchor; `#FAF6F0` button text = `5.85:1`, PASS AA)
+    - `--color-accent-text`: `#FC9B7D` (`inspo-mcp` coral-vermilion highlight; `9.48:1` on `#0C0B0A`, PASS AAA)
+  - **Light Mode (`data-theme="light"`, Inspo-Paper):**
+    - `--color-paper` (`--color-bg`): `#F5F1E8` (Warm Archival Newsprint)
+    - `--color-surface`: `#EBE5D8` (Contact Sheet Platen)
+    - `--color-elevated`: `#FFFFFF` (Bright Paper Well)
+    - `--color-ink` (`--color-fg`): `#141311` (`16.47:1` on `#F5F1E8`, PASS AAA)
+    - `--color-muted` (`--color-fg-muted`): `#524D45` (`6.68:1` on `#EBE5D8`, PASS AA)
+    - `--color-rule`: `#787166` (`4.28:1` on `#F5F1E8`, PASS 3:1 UI boundary)
+    - `--color-accent`: `#B42E04` (`#FAF6F0` button text = `5.85:1`, PASS AA)
+    - `--color-accent-text`: `#9E2702` (`6.79:1` on `#F5F1E8`, PASS AA)
 
-### Daylight Contact Sheet (Light Theme - Working Toggle)
-- **Canvas Primary (`--bg-canvas`):** `#F4F0E6` (Archival baryta photo paper)
-- **Surface (`--bg-surface`):** `#EAE4D7` (Warm mounting board)
-- **Ink Primary (`--ink-primary`):** `#181614` (Carbon printer ink; 15.86:1 contrast on `#F4F0E6`)
-- **Ink Secondary (`--ink-secondary`):** `#4F4A42` (Graphite note ink; 6.93:1 contrast on `#EAE4D7`)
-- **Interactive Border (`--border-strong`):** `#7D766A` (3.95:1 non-text contrast against `#F4F0E6`)
-- **Primary Accent (`--accent-vermilion`):** `#B83B1A` with `#FAF7F0` text (5.34:1 contrast).
+## 3. Typography & Scannable Hierarchy
+- **Display Serif (`--font-display`):** `'Instrument Serif', Georgia, serif` (recommended by `inspo-mcp` exemplar analysis) for hero headlines, section headers, triplet titles, and FAQ questions.
+- **UI & Body Sans (`--font-sans`):** `'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif` for room controls, form inputs, and body descriptions.
+- **Technical Marginalia (`--font-mono`):** `'IBM Plex Mono', monospace` for `.text-meta` labels (`0.72rem`, `letter-spacing: 0.1em`, `text-transform: uppercase`), 6-digit OTP inputs, timecodes, and colophon metadata.
 
-## Typography (Chosen for Brand Character)
-- **Display / Headings (`Instrument Serif` / `Fraunces`):** High-contrast editorial serif evoking classic criterion film booklets and cinema marquees.
-- **UI & Body (`Plus Jakarta Sans`):** Clean humanist sans-serif with wide apertures for legible controls at small sizes during video playback.
-- **Technical Metadata (`IBM Plex Mono`):** Used strictly for functional 6-digit room codes, WebRTC telemetry (resolution, FPS, bitrate, ping), and film frame timestamps (`01:12:40`), never for large headings.
-
-## One-Line Reasons for Major Visual Decisions (R-31)
-- **Why this palette?** Warm carbon `#111110` and safelight vermilion `#B83B1A` reflect a physical photo darkroom and prevent eye strain during dark-room movie streaming, while `#F4F0E6` light mode mimics printed baryta photo paper.
-- **Why this layout (RHYTHM 3)?** Sections vary intentionally by task: an asymmetric workbench hero with immediate room entry on the left and a film reel selector on the right, followed by an interactive darkroom contact-sheet table, a two-column technical ledger, and a single-column FAQ accordion.
-- **Why this typography?** Serif headlines reference classic cinema programs, humanist sans handles dense media controls, and monospace is restricted to numeric timecodes and room digits.
-- **Why this radius hierarchy?** Sharp `4px` corners on film frames mimic cut celluloid, `6px` on inputs/buttons signals interactive controls, and `10px` on the studio console frames the container.
-- **Why the movie scene SVG illustrations?** Each SVG directly depicts a real scene from *La La Land*, *Interstellar*, *Spirited Away*, and *Blade Runner 2049* to demonstrate how the right column of the Rollbooth strip captures live film frames alongside webcam poses.
+## 4. Layout, Spatial Architecture & Focal Point Design
+- **Spacing System (`inspo-mcp spacingGuidance`):**
+  - Vertical section rhythm: `padding-block: clamp(64px, 8vw, 112px)` applied consistently across all below-the-fold sections.
+  - Horizontal container padding: `padding-inline: clamp(20px, 4vw, 56px)` declared separately from vertical rhythm so shorthand padding never zeroes section spacing.
+- **One-Line Visual Decisions (R-31):**
+  - **Hero Split-Screen Grid:** Uses a full-bleed 50/50 split with a `1px solid var(--color-rule)` center seam so the left half houses the immediate WebRTC room console and the right half showcases the interactive 35mm movie reel archive above the fold.
+  - **Zero Rounded Card Blobs:** Replaces generic rounded SaaS cards with crisp hairline-ruled architectural cells (`border-radius: 0` on structural sections, `4px` on interactive buttons and inputs) to honor the `inspo-mcp` editorial specification.
+  - **Workbench 5/7 Split:** Dedicates 5 columns to numbered darkroom print parameters and 7 columns to the live 35mm contact sheet specimen so controls and output remain visible side-by-side without scrolling.
