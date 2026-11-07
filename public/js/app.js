@@ -267,6 +267,7 @@ async function startHostSharing() {
 
 function handleRoomCreated(roomId) {
   activeRoomId = roomId;
+  document.body.classList.add('is-watching');
   document.getElementById('hostSetupCard').style.display = 'none';
   document.getElementById('hostActiveDash').style.display = 'grid';
   document.getElementById('displayRoomCode').textContent = roomId;
@@ -410,6 +411,7 @@ function handleViewerLeft(viewerId, totalViewers) {
 }
 
 function stopHostSharing() {
+  document.body.classList.remove('is-watching');
   stopAllVoiceActivityDetection();
   stopFacecam();
   if (localMicStream) {
@@ -954,18 +956,86 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'segment-btn active' : 'segment-btn';
+    hostBtn.className = isHost ? 'hero-hub-tab active' : 'hero-hub-tab';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'segment-btn active' : 'segment-btn';
+    viewerBtn.className = !isHost ? 'hero-hub-tab active' : 'hero-hub-tab';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 
-  const hostSec = document.getElementById('hostSection');
-  const viewerSec = document.getElementById('viewerSection');
-  if (hostSec) hostSec.style.display = isHost ? 'block' : 'none';
-  if (viewerSec) viewerSec.style.display = !isHost ? 'block' : 'none';
+  const hostCard = document.getElementById('hostSetupCard');
+  const viewerCard = document.getElementById('viewerJoinCard');
+  if (hostCard) hostCard.style.display = isHost ? 'block' : 'none';
+  if (viewerCard) {
+    viewerCard.style.display = !isHost ? 'block' : 'none';
+    if (!isHost) focusOtpInput();
+  }
+}
+
+/* ========================================================
+ * 10. Landing Page Interactions (Scroll, Playground, FAQ)
+ * ======================================================== */
+function scrollToSection(id, e) {
+  if (e) e.preventDefault();
+  const el = document.getElementById(id);
+  if (el) {
+    const yOffset = -70; // offset for sticky header
+    const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+    if (id === 'heroSection') {
+      setTimeout(() => focusOtpInput(), 400);
+    }
+  }
+}
+
+function setSampleLayout(layout) {
+  const strip = document.getElementById('sampleStripWrap');
+  if (!strip) return;
+  strip.classList.remove('layout-strip', 'layout-grid', 'layout-polaroid');
+  strip.classList.add(`layout-${layout}`);
+
+  ['sampleLayoutStrip', 'sampleLayoutGrid', 'sampleLayoutPolaroid'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+  if (layout === 'strip') document.getElementById('sampleLayoutStrip')?.classList.add('active');
+  if (layout === 'grid') document.getElementById('sampleLayoutGrid')?.classList.add('active');
+  if (layout === 'polaroid') document.getElementById('sampleLayoutPolaroid')?.classList.add('active');
+}
+
+function setSampleColor(color) {
+  const strip = document.getElementById('sampleStripWrap');
+  if (!strip) return;
+  strip.classList.remove('theme-white', 'theme-cream', 'theme-noir', 'theme-pink', 'theme-matcha');
+  strip.classList.add(`theme-${color}`);
+
+  document.querySelectorAll('.playground-swatches .sample-swatch').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById(`sampleColor${color.charAt(0).toUpperCase() + color.slice(1)}`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+function setSampleFilter(filter) {
+  const strip = document.getElementById('sampleStripWrap');
+  if (!strip) return;
+  strip.classList.remove('filter-vintage', 'filter-bw', 'filter-sunset', 'filter-normal');
+  strip.classList.add(`filter-${filter}`);
+
+  ['sampleFilterVintage', 'sampleFilterBw', 'sampleFilterSunset', 'sampleFilterNormal'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+  const btnId = `sampleFilter${filter.charAt(0).toUpperCase() + filter.slice(1)}`;
+  document.getElementById(btnId)?.classList.add('active');
+}
+
+function toggleFaq(itemEl) {
+  if (!itemEl) return;
+  const isOpen = itemEl.classList.contains('is-open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('is-open'));
+  if (!isOpen) {
+    itemEl.classList.add('is-open');
+  }
 }
 
 function showToast(text, type = 'info') {
