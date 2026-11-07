@@ -956,11 +956,11 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'hero-hub-tab active' : 'hero-hub-tab';
+    hostBtn.className = isHost ? 'cooldock-pill active' : 'cooldock-pill';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'hero-hub-tab active' : 'hero-hub-tab';
+    viewerBtn.className = !isHost ? 'cooldock-pill active' : 'cooldock-pill';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 
@@ -976,15 +976,20 @@ function switchTab(mode) {
 /* ========================================================
  * 10. Landing Page Interactions (Scroll, Playground, FAQ)
  * ======================================================== */
+function openHeroAction(mode) {
+  switchTab(mode);
+  scrollToSection('cooldockHub');
+}
+
 function scrollToSection(id, e) {
   if (e) e.preventDefault();
   const el = document.getElementById(id);
   if (el) {
-    const yOffset = -70; // offset for sticky header
+    const yOffset = -56;
     const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
     window.scrollTo({ top: y, behavior: 'smooth' });
-    if (id === 'heroSection') {
-      setTimeout(() => focusOtpInput(), 400);
+    if (id === 'heroSection' || id === 'cooldockHub') {
+      setTimeout(() => focusOtpInput(), 420);
     }
   }
 }

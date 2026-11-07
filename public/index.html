@@ -3,49 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0647c9">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ScreenCast × Rollbooth · Nobar Film & Retro Photobooth</title>
-  <link rel="stylesheet" href="css/style.css?v=5.0">
+  <!-- Google Fonts: Inter + Instrument Serif for the signature Supaste editorial look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=6.0">
 </head>
 <body>
-  <!-- 21st.dev Mesh Drift Shader Background -->
+  <!-- 21st.dev Mesh Drift Shader Background (Visible during dark studio/room states) -->
   <canvas id="meshDriftCanvas" class="mesh-drift-canvas" aria-hidden="true"></canvas>
 
-  <!-- App Header & Navigation -->
-  <header class="app-header" id="appHeader">
-    <div class="header-inner">
-      <a href="/" class="brand">
-        <span class="brand-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+  <!-- ========================================================
+       SUPASTE-STYLE FLOATING TOP CAPSULE NAVIGATION
+       ======================================================== -->
+  <header class="app-header supaste-header-wrap" id="appHeader">
+    <div class="supaste-nav-capsule">
+      <a href="/" class="supaste-brand">
+        <span class="supaste-app-icon" aria-hidden="true">
+          <span class="icon-gloss"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2.5"></rect>
             <line x1="8" y1="21" x2="16" y2="21"></line>
             <line x1="12" y1="17" x2="12" y2="21"></line>
           </svg>
         </span>
-        <span class="brand-name">ScreenCast</span>
-        <span class="brand-badge-x">×</span>
-        <span class="brand-pill">Rollbooth</span>
+        <span class="supaste-brand-text">ScreenCast</span>
       </a>
 
-      <!-- Desktop Nav Links -->
-      <nav class="header-nav" aria-label="Navigasi Utama">
-        <a href="#heroSection" class="nav-link" onclick="scrollToSection('heroSection', event)">Mulai</a>
-        <a href="#photoboothSection" class="nav-link" onclick="scrollToSection('photoboothSection', event)">Rollbooth Studio</a>
-        <a href="#featuresSection" class="nav-link" onclick="scrollToSection('featuresSection', event)">Fitur Nobar</a>
-        <a href="#howSection" class="nav-link" onclick="scrollToSection('howSection', event)">Cara Kerja</a>
-        <a href="#compareSection" class="nav-link" onclick="scrollToSection('compareSection', event)">Perbandingan</a>
-        <a href="#faqSection" class="nav-link" onclick="scrollToSection('faqSection', event)">FAQ</a>
+      <nav class="supaste-nav-links" aria-label="Navigasi Utama">
+        <a href="#featuresSection" class="supaste-nav-link" onclick="scrollToSection('featuresSection', event)">Features</a>
+        <a href="#faqSection" class="supaste-nav-link" onclick="scrollToSection('faqSection', event)">FAQ</a>
+        <a href="#photoboothSection" class="supaste-nav-link" onclick="scrollToSection('photoboothSection', event)">Rollbooth</a>
+        <a href="#cooldockHub" class="supaste-nav-link" onclick="scrollToSection('cooldockHub', event)">Cooldock</a>
+        <a href="#howSection" class="supaste-nav-link" onclick="scrollToSection('howSection', event)">Screen Movie</a>
+        <a href="#pricingSection" class="supaste-nav-link" onclick="scrollToSection('pricingSection', event)">Pricing</a>
       </nav>
 
-      <div class="header-right">
-        <div class="server-status" role="status" aria-live="polite">
-          <span class="status-indicator" id="serverStatusDot"></span>
-          <span class="status-label" id="serverStatusText">Menghubungkan...</span>
-        </div>
-        <button type="button" class="btn btn-secondary btn-sm header-cta-btn" onclick="scrollToSection('heroSection')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="supaste-nav-right">
+        <span class="nav-status-dot" id="serverStatusDot" title="Status Server"></span>
+        <span class="sr-only" id="serverStatusText">Menghubungkan...</span>
+        <button type="button" class="supaste-nav-cta" onclick="scrollToSection('cooldockHub')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
           <span>Mulai Nobar</span>
@@ -56,373 +58,409 @@
 
   <main class="app-main">
     <!-- ========================================================
-         LANDING PAGE VIEW (Hidden during active streaming / watching)
+         SUPASTE-INSPIRED LANDING PAGE VIEW
          ======================================================== -->
-    <div id="landingView" class="landing-view">
-      
-      <!-- 1. HERO SECTION -->
-      <section class="landing-hero" id="heroSection">
-        <div class="hero-container">
-          <!-- Left Column: Copy & Interactive Quick Launch Hub -->
-          <div class="hero-content">
-            <div class="hero-announcement-badge">
-              <span class="badge-sparkle">✨</span>
-              <span class="badge-text">New · Rollbooth 4-Cut Memories is Live</span>
-              <span class="badge-arrow">→</span>
-            </div>
+    <div id="landingView" class="landing-view supaste-landing">
 
-            <h1 class="hero-title">
-              Nobar Film Lebih Dekat,<br>
-              <span class="gradient-text">Abadikan Momen Lebih Nyata.</span>
-            </h1>
-
-            <p class="hero-subtitle">
-              Streaming layar film & serial berkecepatan tinggi (&lt;100ms) tanpa delay audio. Abadikan momen tawa dan reaksi bersama pasangan atau sahabat ke dalam strip foto retro ala Korea (Rollbooth / Life4Cuts) secara instan tanpa perlu install aplikasi.
-            </p>
-
-            <!-- Hero Unified Quick Launch Hub (Glass Container) -->
-            <div class="hero-hub-card">
-              <!-- Segmented Tabs Switcher -->
-              <div class="hero-hub-nav" role="tablist">
-                <button type="button" class="hero-hub-tab active" id="tabViewerBtn" role="tab" aria-selected="true" onclick="switchTab('viewer')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="5" y="2" width="14" height="20" rx="2"></rect>
-                    <line x1="12" y1="18" x2="12" y2="18.01"></line>
-                  </svg>
-                  <span>Tonton Layar (Viewer)</span>
-                </button>
-                <button type="button" class="hero-hub-tab" id="tabHostBtn" role="tab" aria-selected="false" onclick="switchTab('host')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                  </svg>
-                  <span>Bagikan Layar (Host)</span>
-                </button>
-              </div>
-
-              <div class="hero-hub-body">
-                <!-- A. Viewer Join Card (Default active) -->
-                <div class="hub-tab-pane" id="viewerJoinCard">
-                  <p class="hub-pane-desc">Masukkan 6-karakter kode siaran yang dibagikan host untuk langsung nobar:</p>
-                  
-                  <div class="otp-wrapper">
-                    <label class="sr-only" for="inputRoomCode">Kode Ruang Siaran</label>
-                    <div class="otp-interactive-area" onclick="focusOtpInput()">
-                      <input
-                        type="text"
-                        id="inputRoomCode"
-                        class="otp-real-input"
-                        maxlength="6"
-                        autocomplete="one-time-code"
-                        autocapitalize="characters"
-                        spellcheck="false"
-                        autofocus
-                        oninput="updateOtpSlots()"
-                        onfocus="updateOtpSlots()"
-                        onblur="updateOtpSlots()"
-                        onkeydown="if(event.key==='Enter') joinRoomByInput()"
-                      >
-                      <div class="otp-container" aria-hidden="true">
-                        <div class="otp-group">
-                          <div class="otp-slot is-active is-empty" data-index="0">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                          <div class="otp-slot is-empty" data-index="1">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                          <div class="otp-slot is-empty" data-index="2">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                        </div>
-                        <div class="otp-separator">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
-                        </div>
-                        <div class="otp-group">
-                          <div class="otp-slot is-empty" data-index="3">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                          <div class="otp-slot is-empty" data-index="4">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                          <div class="otp-slot is-empty" data-index="5">
-                            <span class="otp-val"></span>
-                            <span class="otp-caret"></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="otp-helper-row">
-                      <span class="otp-helper-text">6 karakter kode siaran</span>
-                      <button type="button" class="otp-paste-btn" onclick="pasteRoomCode()" title="Tempel dari Clipboard">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                        </svg>
-                        <span>Tempel Kode</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button type="button" class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    <span>Mulai Menonton</span>
-                  </button>
-
-                  <!-- Recent Rooms Quick Rejoin -->
-                  <div id="viewerRecentRooms" class="recent-rooms-box" style="display: none;">
-                    <span class="recent-rooms-label">Ruang Sebelumnya:</span>
-                    <div id="recentRoomsList" class="recent-rooms-list"></div>
-                  </div>
-                </div>
-
-                <!-- B. Host Setup Card (Switched via switchTab) -->
-                <div class="hub-tab-pane" id="hostSetupCard" style="display: none;">
-                  <p class="hub-pane-desc">Bagikan layar film, tab browser, atau aplikasi PC Anda dengan audio stereo jernih:</p>
-
-                  <div class="config-grid">
-                    <div class="field-group">
-                      <label class="field-label" for="optMode">Prioritas Aliran</label>
-                      <div class="select-wrapper">
-                        <select id="optMode" class="form-select">
-                          <option value="motion" selected>Prioritas Gerak (Video / Film)</option>
-                          <option value="detail">Prioritas Ketajaman (Dokumen / Teks)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="field-group">
-                      <label class="field-label" for="optResolution">Batas Resolusi</label>
-                      <div class="select-wrapper">
-                        <select id="optResolution" class="form-select">
-                          <option value="1080p" selected>1080p Full HD (Stabil)</option>
-                          <option value="720p">720p HD (Hemat Kuota)</option>
-                          <option value="native">Resolusi Asli Layar</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="field-group">
-                      <label class="field-label" for="optFps">Target Framerate</label>
-                      <div class="select-wrapper">
-                        <select id="optFps" class="form-select">
-                          <option value="60" selected>60 FPS (Super Mulus)</option>
-                          <option value="30">30 FPS (Standar)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="toggles-row">
-                    <label class="checkbox-control">
-                      <input type="checkbox" id="optAudio" checked>
-                      <span class="checkbox-box" aria-hidden="true"></span>
-                      <span class="checkbox-text">Sertakan audio sistem film (Stereo)</span>
-                    </label>
-                    <label class="checkbox-control">
-                      <input type="checkbox" id="optHardwareAccel" checked>
-                      <span class="checkbox-box" aria-hidden="true"></span>
-                      <span class="checkbox-text">Akselerasi GPU (H.264)</span>
-                    </label>
-                  </div>
-
-                  <button type="button" class="btn btn-primary btn-lg w-full" id="btnStartShare" onclick="startHostSharing()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    <span>Mulai Siaran Layar (Host)</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Value Chips Under Hub -->
-            <div class="hero-trust-row">
-              <div class="trust-chip">
-                <span class="chip-icon">⚡</span>
-                <span>WebRTC &lt;100ms</span>
-              </div>
-              <div class="trust-chip">
-                <span class="chip-icon">📸</span>
-                <span>Life4Cuts Korea</span>
-              </div>
-              <div class="trust-chip">
-                <span class="chip-icon">🔊</span>
-                <span>Audio Stereo Jernih</span>
-              </div>
-              <div class="trust-chip">
-                <span class="chip-icon">🔒</span>
-                <span>100% P2P Privat</span>
-              </div>
-            </div>
+      <!-- 1. FULL-BLEED COBALT SKY HERO SECTION -->
+      <section class="supaste-hero" id="heroSection">
+        <div class="supaste-hero-inner">
+          <!-- Eyebrow Tag -->
+          <div class="supaste-eyebrow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4" fill="#0667e8"></circle>
+            </svg>
+            <span>Nobar Film &amp; Retro Photobooth</span>
           </div>
 
-          <!-- Right Column: Interactive Mockup Showcase (Cinema + 3D Rollbooth Strip) -->
-          <div class="hero-visual">
-            <div class="mock-cinema-stage">
-              <!-- Colored Ambilight Aura Backdrop -->
-              <div class="ambilight-aura" aria-hidden="true"></div>
+          <!-- Signature Two-Tone Headline: Inter Bold + Instrument Serif Italic -->
+          <h1 class="supaste-hero-title">
+            <span class="title-sans">Nobar bersama.</span>
+            <span class="title-serif">Abadikan selamanya.</span>
+          </h1>
 
-              <!-- Virtual Cinema Player Frame -->
-              <div class="mock-player-frame">
-                <!-- Player Header -->
-                <div class="mock-player-topbar">
-                  <div class="mock-window-dots">
-                    <span class="dot red"></span>
-                    <span class="dot yellow"></span>
-                    <span class="dot green"></span>
-                  </div>
-                  <div class="mock-room-badge">
-                    <span class="live-dot"></span>
-                    <span>NOBAR #ROMANCE · 2 Penonton</span>
-                  </div>
-                  <div class="mock-quality-pill">1080p 60fps</div>
+          <!-- Centered Editorial Subtitle -->
+          <p class="supaste-hero-sub">
+            ScreenCast mengalirkan layar film dan audio stereo Anda dalam kualitas tinggi tanpa jeda (&lt;100ms), otomatis dilengkapi studio photobooth ala Korea agar Anda bisa menonton, tertawa, dan menyimpan strip foto kenangan dalam hitungan detik.
+          </p>
+
+          <!-- Primary Black Pill CTA + Secondary Mode Trigger -->
+          <div class="supaste-hero-actions">
+            <button type="button" class="supaste-btn-black" onclick="openHeroAction('host')">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Bagikan Layar Sekarang</span>
+            </button>
+            <button type="button" class="supaste-btn-glass" onclick="openHeroAction('viewer')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Masukkan Kode Ruang</span>
+            </button>
+          </div>
+
+          <!-- 3 Muted Metadata Captions Below CTA -->
+          <div class="supaste-hero-meta">
+            <span>100% Gratis &amp; Tanpa Install</span>
+            <span>Privasi P2P Tanpa Simpan Server</span>
+            <span>PC, Mac, Android &amp; iOS</span>
+          </div>
+        </div>
+
+        <!-- SIGNATURE FLOATING MACOS SCREEN + COOLDOCK BLACK INTERFACE -->
+        <div class="supaste-screen-showcase" id="cooldockHub">
+          <div class="macos-bezel-frame">
+            <!-- macOS Top Menu Bar -->
+            <div class="macos-menubar">
+              <div class="menubar-left">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <rect x="2" y="3" width="20" height="14" rx="2.5"></rect>
+                </svg>
+                <span class="menubar-appname">ScreenCast</span>
+              </div>
+              <div class="menubar-right">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                <span class="menubar-clock">09:41</span>
+              </div>
+            </div>
+
+            <!-- PITCH-BLACK COOLDOCK / SUPASTE INTERFACE DRAWER -->
+            <div class="cooldock-drawer">
+              <!-- Top Search / Command Header inside Cooldock -->
+              <div class="cooldock-topbar">
+                <div class="cooldock-search" onclick="focusOtpInput()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <span>Ketik 6-digit kode ruang atau pilih mode siaran di bawah...</span>
                 </div>
-
-                <!-- Player Screen Content -->
-                <div class="mock-screen-stage">
-                  <!-- Simulated Cinematic Movie Scene -->
-                  <div class="mock-movie-scene">
-                    <div class="mock-scenery">
-                      <div class="scenery-glow"></div>
-                      <div class="scenery-stars"></div>
-                      <div class="scenery-horizon"></div>
-                      <div class="scenery-silhouette"></div>
-                    </div>
-                  </div>
-
-                  <!-- Floating Partner Facecam Bubble (Left) -->
-                  <div class="mock-cam-bubble cam-host">
-                    <div class="mock-avatar avatar-1">
-                      <div class="mock-cam-img host-art"></div>
-                    </div>
-                    <span class="mock-cam-label">Host</span>
-                    <span class="mock-speaker-wave" title="Aktif berbicara">
-                      <span></span><span></span><span></span>
-                    </span>
-                  </div>
-
-                  <!-- Floating Self Facecam Bubble (Right) -->
-                  <div class="mock-cam-bubble cam-peer">
-                    <div class="mock-avatar avatar-2">
-                      <div class="mock-cam-img peer-art"></div>
-                    </div>
-                    <span class="mock-cam-label">Viewer</span>
-                    <span class="mock-speaker-wave" title="Aktif berbicara">
-                      <span></span><span></span><span></span>
-                    </span>
-                  </div>
-
-                  <!-- Floating Liquid Glass Dock Simulation -->
-                  <div class="mock-hud-dock">
-                    <span class="mock-dock-btn" title="Suara Film">🔊</span>
-                    <span class="mock-dock-btn" title="Mikrofon">🎙️</span>
-                    <span class="mock-dock-btn" title="Kamera">📹</span>
-                    <span class="mock-dock-btn mock-dock-active" title="Photobooth Memories">📸</span>
-                    <span class="mock-dock-btn" title="Layar Penuh">⛶</span>
-                  </div>
+                <div class="cooldock-top-actions">
+                  <button type="button" class="cooldock-icon-btn" onclick="scrollToSection('photoboothSection')" title="Rollbooth Studio">★</button>
+                  <button type="button" class="cooldock-icon-btn" onclick="switchTab('viewer')" title="Mode Penonton">⊞</button>
+                  <button type="button" class="cooldock-icon-btn" onclick="switchTab('host')" title="Mode Host">↗</button>
                 </div>
               </div>
 
-              <!-- Realistic Korean 3-Cut Rollbooth Photo Strip Emerging -->
-              <div class="mock-strip-card" aria-label="Contoh Rollbooth Photo Strip">
-                <div class="mock-strip-ribbon">📸 3-Cut Rollbooth Strip</div>
-                <div class="mock-strip-body">
-                  <!-- Photo 1: Movie scene -->
-                  <div class="strip-photo-slot slot-movie">
-                    <div class="strip-photo-fill photo-anime"></div>
-                    <span class="slot-badge">🎬 ADEGAN FILM</span>
-                  </div>
-                  <!-- Photo 2: Reactions duo -->
-                  <div class="strip-photo-slot slot-duo">
-                    <div class="duo-grid">
-                      <div class="duo-half photo-host">
-                        <span class="duo-tag">Host</span>
+              <!-- Category Filter Pills (Interactive Mode Tabs) -->
+              <div class="cooldock-pills" role="tablist">
+                <button type="button" class="cooldock-pill active" id="tabViewerBtn" role="tab" aria-selected="true" onclick="switchTab('viewer')">
+                  <span class="pill-title">Tonton Layar</span>
+                  <span class="pill-count">6-Digit</span>
+                </button>
+                <button type="button" class="cooldock-pill" id="tabHostBtn" role="tab" aria-selected="false" onclick="switchTab('host')">
+                  <span class="pill-title">Bagikan Layar</span>
+                  <span class="pill-count">60 FPS</span>
+                </button>
+                <button type="button" class="cooldock-pill" onclick="scrollToSection('photoboothSection')">
+                  <span class="pill-title">Rollbooth</span>
+                  <span class="pill-count">4-Cut</span>
+                </button>
+                <button type="button" class="cooldock-pill" onclick="scrollToSection('featuresSection')">
+                  <span class="pill-title">Audio Stereo</span>
+                  <span class="pill-count">P2P</span>
+                </button>
+                <button type="button" class="cooldock-pill" onclick="scrollToSection('faqSection')">
+                  <span class="pill-title">Inspirations</span>
+                  <span class="pill-count">24</span>
+                </button>
+                <button type="button" class="cooldock-pill-plus" onclick="openHeroAction('host')" title="Buat Ruang Baru">+</button>
+              </div>
+
+              <!-- Interactive Content Inside Cooldock: Left Action Form + Right Visual History Cards -->
+              <div class="cooldock-content-grid">
+                <!-- Left: Functional Join Room / Host Setup Panel -->
+                <div class="cooldock-action-panel">
+                  <!-- A. Viewer Join Card -->
+                  <div class="cooldock-pane" id="viewerJoinCard">
+                    <div class="pane-head-row">
+                      <span class="pane-badge-live">● SIAP MENONTON</span>
+                      <span class="pane-sub-hint">Tekan Enter untuk masuk</span>
+                    </div>
+
+                    <div class="otp-wrapper">
+                      <label class="sr-only" for="inputRoomCode">Kode Ruang Siaran</label>
+                      <div class="otp-interactive-area" onclick="focusOtpInput()">
+                        <input
+                          type="text"
+                          id="inputRoomCode"
+                          class="otp-real-input"
+                          maxlength="6"
+                          autocomplete="one-time-code"
+                          autocapitalize="characters"
+                          spellcheck="false"
+                          autofocus
+                          oninput="updateOtpSlots()"
+                          onfocus="updateOtpSlots()"
+                          onblur="updateOtpSlots()"
+                          onkeydown="if(event.key==='Enter') joinRoomByInput()"
+                        >
+                        <div class="otp-container" aria-hidden="true">
+                          <div class="otp-group">
+                            <div class="otp-slot is-active is-empty" data-index="0">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                            <div class="otp-slot is-empty" data-index="1">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                            <div class="otp-slot is-empty" data-index="2">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                          </div>
+                          <div class="otp-separator">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                          </div>
+                          <div class="otp-group">
+                            <div class="otp-slot is-empty" data-index="3">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                            <div class="otp-slot is-empty" data-index="4">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                            <div class="otp-slot is-empty" data-index="5">
+                              <span class="otp-val"></span>
+                              <span class="otp-caret"></span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div class="duo-half photo-peer">
-                        <span class="duo-tag">Viewer</span>
+
+                      <div class="otp-helper-row">
+                        <span class="otp-helper-text">Kode 6-karakter dari Host</span>
+                        <button type="button" class="otp-paste-btn" onclick="pasteRoomCode()" title="Tempel dari Clipboard">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                          </svg>
+                          <span>Tempel Kode</span>
+                        </button>
                       </div>
                     </div>
-                    <span class="slot-badge">REAKSI BERDUA</span>
+
+                    <button type="button" class="cooldock-submit-btn" onclick="joinRoomByInput()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                      <span>Mulai Menonton Sekarang</span>
+                    </button>
+
+                    <!-- Recent Rooms Quick Rejoin -->
+                    <div id="viewerRecentRooms" class="recent-rooms-box" style="display: none;">
+                      <span class="recent-rooms-label">Ruang Terakhir:</span>
+                      <div id="recentRoomsList" class="recent-rooms-list"></div>
+                    </div>
                   </div>
-                  <!-- Photo 3: Smiling pose -->
-                  <div class="strip-photo-slot slot-duo">
-                    <div class="duo-grid">
-                      <div class="duo-half photo-host-smile">
-                        <span class="duo-tag">Host</span>
+
+                  <!-- B. Host Setup Card -->
+                  <div class="cooldock-pane" id="hostSetupCard" style="display: none;">
+                    <div class="pane-head-row">
+                      <span class="pane-badge-live host-badge">● MODE PENYIAR (HOST)</span>
+                      <span class="pane-sub-hint">WebRTC P2P Stereo</span>
+                    </div>
+
+                    <div class="cooldock-host-grid">
+                      <div class="field-group">
+                        <label class="field-label" for="optMode">Prioritas</label>
+                        <select id="optMode" class="form-select">
+                          <option value="motion" selected>Gerak Halus (Film/Anime)</option>
+                          <option value="detail">Ketajaman Teks (Presentasi)</option>
+                        </select>
                       </div>
-                      <div class="duo-half photo-peer-smile">
-                        <span class="duo-tag">Viewer</span>
+                      <div class="field-group">
+                        <label class="field-label" for="optResolution">Resolusi</label>
+                        <select id="optResolution" class="form-select">
+                          <option value="1080p" selected>1080p Full HD</option>
+                          <option value="720p">720p HD Hemat</option>
+                          <option value="native">Resolusi Asli</option>
+                        </select>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label" for="optFps">Framerate</label>
+                        <select id="optFps" class="form-select">
+                          <option value="60" selected>60 FPS Mulus</option>
+                          <option value="30">30 FPS Standar</option>
+                        </select>
                       </div>
                     </div>
-                    <span class="slot-badge">SENYUM</span>
+
+                    <div class="cooldock-checks">
+                      <label class="checkbox-control">
+                        <input type="checkbox" id="optAudio" checked>
+                        <span class="checkbox-box" aria-hidden="true"></span>
+                        <span class="checkbox-text">Audio sistem stereo</span>
+                      </label>
+                      <label class="checkbox-control">
+                        <input type="checkbox" id="optHardwareAccel" checked>
+                        <span class="checkbox-box" aria-hidden="true"></span>
+                        <span class="checkbox-text">Akselerasi GPU H.264</span>
+                      </label>
+                    </div>
+
+                    <button type="button" class="cooldock-submit-btn" id="btnStartShare" onclick="startHostSharing()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                      <span>Pilih Layar &amp; Mulai Siaran</span>
+                    </button>
                   </div>
-                  <!-- Strip Footer -->
-                  <div class="strip-footer-meta">
-                    <div class="strip-caption-text">Movie Night Memories 🍿✨</div>
-                    <div class="strip-date-text">2026. 11. 07 · 21:40 WIB</div>
-                    <div class="strip-barcode-art"></div>
-                    <div class="strip-brand-text">ROLLBOOTH × SCREENCAST</div>
+                </div>
+
+                <!-- Right: Supaste-style Visual Preview Cards Row -->
+                <div class="cooldock-cards-strip">
+                  <!-- Card 1: Cinema Stream Preview -->
+                  <div class="supaste-clip-card clip-cinema" onclick="switchTab('host')">
+                    <div class="clip-preview-art cinema-art">
+                      <span class="clip-floating-tag">1080p · 60 FPS</span>
+                      <div class="clip-art-headline">Nobar Film Tanpa Jeda.</div>
+                      <div class="clip-mini-dock">🔊 🎙️ 📹 📸 ⛶</div>
+                    </div>
+                    <div class="clip-card-meta">
+                      <span class="clip-app-badge blue">🎬</span>
+                      <span class="clip-time">Live WebRTC</span>
+                      <span class="clip-size">&lt;85ms</span>
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Dual Facecam Reaction -->
+                  <div class="supaste-clip-card clip-reaction" onclick="scrollToSection('photoboothSection')">
+                    <div class="clip-preview-art reaction-art">
+                      <div class="reaction-split">
+                        <div class="react-person p-host">
+                          <span class="p-wave"><i></i><i></i><i></i></span>
+                          <span class="p-tag">Host</span>
+                        </div>
+                        <div class="react-person p-viewer">
+                          <span class="p-wave"><i></i><i></i><i></i></span>
+                          <span class="p-tag">Viewer</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="clip-card-meta">
+                      <span class="clip-app-badge pink">📸</span>
+                      <span class="clip-time">2m lalu</span>
+                      <span class="clip-size">Dual Cam</span>
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Rollbooth 3-Cut Strip Card -->
+                  <div class="supaste-clip-card clip-rollbooth" onclick="scrollToSection('photoboothSection')">
+                    <div class="clip-preview-art strip-art">
+                      <div class="mini-4cut-sheet">
+                        <div class="mini-cut c1"></div>
+                        <div class="mini-cut c2"></div>
+                        <div class="mini-cut c3"></div>
+                        <div class="mini-cut-foot">ROLLBOOTH 4-CUT</div>
+                      </div>
+                      <div class="strip-art-copy">
+                        <strong>Rollbooth Studio</strong>
+                        <span>Korean 4-Cut &amp; Polaroid</span>
+                      </div>
+                    </div>
+                    <div class="clip-card-meta">
+                      <span class="clip-app-badge amber">🎞️</span>
+                      <span class="clip-time">Baru saja</span>
+                      <span class="clip-size">300 DPI</span>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Color Swatch Card (Just like Supaste #0080FF card!) -->
+                  <div class="supaste-clip-card clip-color" onclick="scrollToSection('photoboothSection')">
+                    <div class="clip-preview-art color-art">
+                      <span class="color-hex-code">#087CF8</span>
+                    </div>
+                    <div class="clip-card-meta">
+                      <span class="clip-app-badge cyan">🎨</span>
+                      <span class="clip-time">5 Frame Themes</span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Scenic Pastoral Hills Wallpaper Inside & Around Bezel -->
+            <div class="macos-meadow-scene" aria-hidden="true">
+              <div class="meadow-sun-glow"></div>
+              <div class="meadow-hill hill-far"></div>
+              <div class="meadow-hill hill-mid"></div>
+              <div class="meadow-hill hill-near"></div>
+              <div class="meadow-flowers"></div>
             </div>
           </div>
         </div>
+
+        <!-- Smooth Meadow-to-White Fade Transition -->
+        <div class="hero-bottom-fade" aria-hidden="true"></div>
       </section>
 
-      <!-- 2. PHOTOBOOTH STUDIO SHOWCASE SECTION -->
-      <section class="landing-section" id="photoboothSection">
-        <div class="section-container">
-          <div class="section-header text-center">
-            <div class="section-badge">✨ Rollbooth Memories Studio</div>
-            <h2 class="section-title">Bukan Sekadar Nobar Biasa.<br><span class="gradient-text">Bawa Pulang Cinderamata Foto Strip.</span></h2>
-            <p class="section-subtitle">
-              Satu klik saat adegan berkesan, Rollbooth otomatis mengambil 3 pose berurutan dengan animasi flash & suara shutter, lalu meramunya ke dalam strip foto estetik ala Korea (Life4Cuts) beresolusi cetak HD 300 DPI.
+      <!-- ========================================================
+           2. WHITE EDITORIAL CANVAS (SUPASTE SINGLE-COLUMN RHYTHM)
+           ======================================================== -->
+      <div class="supaste-white-canvas">
+
+        <!-- A. Circular Feature Icons + Editorial Intro -->
+        <section class="supaste-intro-block" id="featuresSection">
+          <div class="circular-icons-row" aria-hidden="true">
+            <div class="circle-feature-icon" title="Ultra-Low Latency WebRTC">⚡</div>
+            <div class="circle-feature-icon" title="Rollbooth 4-Cut Strip">📸</div>
+            <div class="circle-feature-icon" title="Stereo System Audio">🔊</div>
+            <div class="circle-feature-icon" title="Dual Floating Facecam">🎥</div>
+            <div class="circle-feature-icon" title="4 Filter Analog Retro">🎞️</div>
+            <div class="circle-feature-icon" title="100% P2P Privacy">🔒</div>
+          </div>
+
+          <h2 class="supaste-section-h2">
+            Bioskop virtual Anda,<br>kapan pun Anda rindu
+          </h2>
+
+          <p class="supaste-section-lead">
+            Jangan biarkan jarak menghalangi malam kencan atau nobar akhir pekan. Mulai siaran dalam satu klik, ngobrol lewat kamera melayang, dan cetak foto strip kenangan kapan saja.
+          </p>
+
+          <div class="supaste-feature-tags">
+            <span class="s-tag"><i>✓</i> Tanpa Instalasi</span>
+            <span class="s-tag"><i>✓</i> WebRTC &lt;85ms</span>
+            <span class="s-tag"><i>✓</i> Audio Sistem Stereo</span>
+            <span class="s-tag"><i>✓</i> Rollbooth 3-Cut &amp; 2×2</span>
+            <span class="s-tag"><i>✓</i> 5 Warna Bingkai</span>
+            <span class="s-tag"><i>✓</i> 4 Filter Analog</span>
+            <span class="s-tag"><i>✓</i> Ekspor PNG 300 DPI</span>
+            <span class="s-tag"><i>✓</i> Pintasan Alt+P</span>
+          </div>
+        </section>
+
+        <!-- B. Editorial Showcase Card 1: Interactive Rollbooth Studio Playground -->
+        <section class="supaste-showcase-card" id="photoboothSection">
+          <div class="showcase-card-header">
+            <h3 class="showcase-card-title">Satu Tempat Indah untuk Semua Kenangan Nobar</h3>
+            <p class="showcase-card-desc">
+              Bukan sekadar tangkapan layar biasa. Rollbooth menggabungkan adegan film yang sedang diputar dengan ekspresi wajah Anda dan pasangan ke dalam lembar foto strip ala Korea. Coba sesuaikan langsung di bawah ini:
             </p>
           </div>
 
-          <!-- Interactive Studio Playground -->
-          <div class="studio-playground-grid">
-            <!-- Left: Interactive Customizer Controls -->
-            <div class="studio-controls-card">
-              <div class="studio-card-head">
-                <span class="studio-sparkle">🎨</span>
-                <div>
-                  <h3 class="studio-ctrl-title">Interactive Studio Playground</h3>
-                  <p class="studio-ctrl-desc">Coba klik pilihan tata letak, warna kertas, dan filter di bawah untuk melihat perubahannya langsung:</p>
-                </div>
+          <!-- Scenic Window Backdrop Containing Interactive Rollbooth Playground -->
+          <div class="showcase-window-stage">
+            <!-- Top Dark Bar of Studio -->
+            <div class="studio-floating-dock">
+              <!-- Layout Pills -->
+              <div class="studio-dock-group">
+                <span class="dock-group-label">Layout:</span>
+                <button type="button" class="playground-pill active" id="sampleLayoutStrip" onclick="setSampleLayout('strip')">Strip 1:3</button>
+                <button type="button" class="playground-pill" id="sampleLayoutGrid" onclick="setSampleLayout('grid')">Grid 2×2</button>
+                <button type="button" class="playground-pill" id="sampleLayoutPolaroid" onclick="setSampleLayout('polaroid')">Polaroid</button>
               </div>
 
-              <!-- Control 1: Layout Selection -->
-              <div class="playground-group">
-                <span class="playground-label">Tata Letak (Layout)</span>
-                <div class="playground-pills">
-                  <button type="button" class="playground-pill active" id="sampleLayoutStrip" onclick="setSampleLayout('strip')">
-                    <span>Strip Vertikal (1:3)</span>
-                  </button>
-                  <button type="button" class="playground-pill" id="sampleLayoutGrid" onclick="setSampleLayout('grid')">
-                    <span>Grid 2×2 (Life4Cuts)</span>
-                  </button>
-                  <button type="button" class="playground-pill" id="sampleLayoutPolaroid" onclick="setSampleLayout('polaroid')">
-                    <span>Wide Polaroid</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Control 2: Frame Colors -->
-              <div class="playground-group">
-                <span class="playground-label">Warna Bingkai Kertas (Paper Frame)</span>
+              <!-- Frame Color Swatches -->
+              <div class="studio-dock-group">
+                <span class="dock-group-label">Frame:</span>
                 <div class="playground-swatches">
                   <button type="button" class="sample-swatch active" id="sampleColorWhite" style="background: #ffffff;" onclick="setSampleColor('white')" title="Classic White"></button>
                   <button type="button" class="sample-swatch" id="sampleColorCream" style="background: #f5efe6;" onclick="setSampleColor('cream')" title="Vintage Cream"></button>
@@ -432,46 +470,19 @@
                 </div>
               </div>
 
-              <!-- Control 3: Retro Filters -->
-              <div class="playground-group">
-                <span class="playground-label">Filter Vintage Analog</span>
-                <div class="playground-pills">
-                  <button type="button" class="playground-pill active" id="sampleFilterVintage" onclick="setSampleFilter('vintage')">
-                    <span>Retro 90s</span>
-                  </button>
-                  <button type="button" class="playground-pill" id="sampleFilterBw" onclick="setSampleFilter('bw')">
-                    <span>B&W Noir</span>
-                  </button>
-                  <button type="button" class="playground-pill" id="sampleFilterSunset" onclick="setSampleFilter('sunset')">
-                    <span>Sunset Glow</span>
-                  </button>
-                  <button type="button" class="playground-pill" id="sampleFilterNormal" onclick="setSampleFilter('normal')">
-                    <span>Normal Asli</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Features checklist -->
-              <div class="playground-perks-list">
-                <div class="perk-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Ekspor Resolusi Tinggi 300 DPI (1080×3240px PNG)</span>
-                </div>
-                <div class="perk-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Otomatis Stempel Waktu Bioskop & Barcode Unik</span>
-                </div>
-                <div class="perk-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>1-Klik Salin ke Clipboard & Bagikan ke Instagram Stories</span>
-                </div>
+              <!-- Filter Pills -->
+              <div class="studio-dock-group">
+                <span class="dock-group-label">Filter:</span>
+                <button type="button" class="playground-pill active" id="sampleFilterVintage" onclick="setSampleFilter('vintage')">Retro 90s</button>
+                <button type="button" class="playground-pill" id="sampleFilterBw" onclick="setSampleFilter('bw')">B&amp;W Noir</button>
+                <button type="button" class="playground-pill" id="sampleFilterSunset" onclick="setSampleFilter('sunset')">Sunset</button>
+                <button type="button" class="playground-pill" id="sampleFilterNormal" onclick="setSampleFilter('normal')">Normal</button>
               </div>
             </div>
 
-            <!-- Right: Real-time Reactive Sample Strip -->
-            <div class="studio-preview-card">
+            <!-- Live Interactive Strip Floating Over Meadow Window -->
+            <div class="studio-meadow-preview">
               <div id="sampleStripWrap" class="interactive-sample-strip theme-white filter-vintage layout-strip">
-                <!-- 3 Poses in Vertical Strip -->
                 <div class="sample-frame-item sample-movie-frame">
                   <div class="sample-photo-inner scene-img"></div>
                   <span class="sample-tag">🎬 ADEGAN FILM</span>
@@ -493,7 +504,6 @@
                   <span class="sample-tag">SENYUM</span>
                 </div>
 
-                <!-- Footer of strip -->
                 <div class="sample-strip-bottom">
                   <div class="sample-caption-text">Movie Night Memories 🍿✨</div>
                   <div class="sample-date-text">2026. 11. 07 · 21:40 WIB</div>
@@ -503,290 +513,366 @@
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 3. FITUR UTAMA NOBAR (BENTO GRID) -->
-      <section class="landing-section" id="featuresSection">
-        <div class="section-container">
-          <div class="section-header text-center">
-            <div class="section-badge">⚡ Arsitektur P2P Modern</div>
-            <h2 class="section-title">Teknologi Nobar Tanpa Lag,<br><span class="gradient-text">Fokus Penuh pada Keintiman.</span></h2>
-            <p class="section-subtitle">
-              Dibangun dari nol dengan WebRTC murni untuk menghadirkan latensi tercepat tanpa beban server perantara.
+        <!-- C. Editorial Testimonial Quote 1 (Exact Supaste Review Style) -->
+        <div class="supaste-testimonial">
+          <div class="stars-row" aria-label="5 dari 5 bintang">★★★★★</div>
+          <blockquote class="testimonial-quote">
+            “Biasanya kalau nobar LDR lewat Discord cuma selesai gitu aja. Sekarang tiap kali ada adegan lucu atau romantis, tinggal pencet <kbd>P</kbd> langsung dapet foto strip Life4Cuts berdua buat di-upload ke Story!”
+          </blockquote>
+          <div class="testimonial-author">
+            <span class="author-avatar av-1">N</span>
+            <div class="author-meta">
+              <strong>Nadya &amp; Dimas</strong>
+              <span>Pasangan LDR Jakarta – Tokyo</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- D. Editorial Showcase Card 2: Ultra-Low Latency & Audio Stereo -->
+        <section class="supaste-showcase-card" id="howSection">
+          <div class="showcase-card-header">
+            <h3 class="showcase-card-title">Lebih Cepat, Lebih Mulus, dan Terhubung Langsung Antar Perangkat</h3>
+            <p class="showcase-card-desc">
+              Dibangun dengan protokol WebRTC P2P murni dan optimasi bitrate H.264 60 FPS. Suara film mengalir jernih langsung dari sistem audio komputer tanpa pantulan gema mikrofon.
             </p>
           </div>
 
-          <div class="bento-grid">
-            <!-- Bento Card 1: Latency -->
-            <div class="bento-card bento-wide">
-              <div class="bento-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <div class="showcase-window-stage stage-cinema-demo">
+            <div class="demo-cinema-window">
+              <div class="demo-window-bar">
+                <div class="demo-dots"><span></span><span></span><span></span></div>
+                <div class="demo-stream-pill">● LANGSUNG · 1080p 60 FPS · Latensi 64ms</div>
+                <div class="demo-shortcut-pill">Alt + P Photobooth</div>
               </div>
-              <h3 class="bento-title">Latensi Ultra-Rendah &lt;100ms (P2P Murni)</h3>
-              <p class="bento-desc">
-                Koneksi langsung antar browser (Peer-to-Peer) tanpa server streaming penengah. Setiap detik film dan reaksi suara tersinkronisasi presisi tanpa jeda, tanpa buffer, dan mendukung 60 FPS full motion.
-              </p>
-              <div class="bento-visual-bar">
-                <div class="latency-compare">
-                  <div class="compare-row highlight">
-                    <span class="comp-label">ScreenCast (WebRTC)</span>
-                    <div class="comp-bar bar-fast"><span class="comp-val">&lt; 85ms</span></div>
+              <div class="demo-cinema-body">
+                <!-- Latency Comparison Overlay Card (Like Supaste Context Menu) -->
+                <div class="supaste-context-card">
+                  <div class="ctx-header">Perbandingan Latensi Streaming</div>
+                  <div class="ctx-item active">
+                    <span class="ctx-name">⚡ ScreenCast P2P</span>
+                    <span class="ctx-badge">65 ms</span>
                   </div>
-                  <div class="compare-row">
-                    <span class="comp-label">Discord Stream</span>
-                    <div class="comp-bar bar-discord"><span class="comp-val">800ms - 1.5s</span></div>
+                  <div class="ctx-item">
+                    <span class="ctx-name">🎮 Discord Go Live</span>
+                    <span class="ctx-sub">1.200 ms</span>
                   </div>
-                  <div class="compare-row">
-                    <span class="comp-label">Google Meet / Zoom</span>
-                    <div class="comp-bar bar-slow"><span class="comp-val">2.0s - 3.5s</span></div>
+                  <div class="ctx-item">
+                    <span class="ctx-name">📹 Google Meet</span>
+                    <span class="ctx-sub">2.800 ms</span>
+                  </div>
+                  <div class="ctx-divider"></div>
+                  <div class="ctx-item">
+                    <span class="ctx-name">🔊 Audio Sistem Stereo</span>
+                    <span class="ctx-check">Aktif</span>
+                  </div>
+                  <div class="ctx-item">
+                    <span class="ctx-name">📸 Rollbooth 300 DPI</span>
+                    <span class="ctx-check">Siap</span>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Bento Card 2: System Audio -->
-            <div class="bento-card">
-              <div class="bento-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-              </div>
-              <h3 class="bento-title">Audio Sistem Stereo Jernih</h3>
-              <p class="bento-desc">
-                Suara film dialirkan stereo langsung dari output sound card komputer host, bukan direkam lewat mikrofon. Efek surround dan dialog terdengar bening tanpa feedback gema.
-              </p>
-            </div>
-
-            <!-- Bento Card 3: Floating Facecam & Voice Activity Detection -->
-            <div class="bento-card">
-              <div class="bento-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              </div>
-              <h3 class="bento-title">Floating Facecam & Deteksi Suara</h3>
-              <p class="bento-desc">
-                Bubble webcam melayang bebas (draggable) dengan visualizer 3 bar yang otomatis menyala saat teman Anda tertawa atau berbicara, memberikan nuansa kencan bioskop virtual.
-              </p>
-            </div>
-
-            <!-- Bento Card 4: 100% Privacy -->
-            <div class="bento-card bento-wide">
-              <div class="bento-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              </div>
-              <h3 class="bento-title">100% Client-Side Privacy (Zero Data Storage)</h3>
-              <p class="bento-desc">
-                Privasi Anda adalah prioritas mutlak. Pemrosesan foto photobooth (capture, filtering, layouting, export) terjadi 100% di browser lokal Anda (Canvas 2D). Server signaling tidak pernah menyimpan atau merekam foto webcam dan tangkapan layar pengguna.
-              </p>
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- 4. CARA KERJA (3 LANGKAH MUDAH) -->
-      <section class="landing-section" id="howSection">
-        <div class="section-container">
-          <div class="section-header text-center">
-            <div class="section-badge">🚀 Tanpa Ribet</div>
-            <h2 class="section-title">Mulai Nobar dalam 3 Langkah Mudah</h2>
-            <p class="section-subtitle">Tidak perlu download installer, ekstensi peramban, atau pendaftaran akun.</p>
-          </div>
-
-          <div class="steps-grid">
-            <div class="step-card">
-              <div class="step-badge-num">01</div>
-              <h3 class="step-title">Host Membuat Ruang</h3>
-              <p class="step-desc">
-                Buka di laptop/PC, klik tab "Bagikan Layar", pilih jendela film atau tab browser dengan audio sistem tercentang, lalu salin kode 6-digit yang muncul.
-              </p>
-            </div>
-
-            <div class="step-card">
-              <div class="step-badge-num">02</div>
-              <h3 class="step-title">Pasangan Masuk Ruang</h3>
-              <p class="step-desc">
-                Buka link langsung di laptop maupun smartphone, atau masukkan kode 6-digit di kolom Tonton Layar. Siaran langsung terhubung dalam hitungan milidetik.
-              </p>
-            </div>
-
-            <div class="step-card">
-              <div class="step-badge-num">03</div>
-              <h3 class="step-title">Jepret Strip Foto Bersama</h3>
-              <p class="step-desc">
-                Saat adegan film seru, tekan tombol kamera di dock (atau shortcut Alt+P). Ganti gaya dalam hitungan 3 pose, beri caption manis, dan simpan foto stripnya!
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5. PERBANDINGAN FITUR -->
-      <section class="landing-section" id="compareSection">
-        <div class="section-container">
-          <div class="section-header text-center">
-            <div class="section-badge">⚖️ Kenapa Memilih Kami?</div>
-            <h2 class="section-title">Bandingkan dengan Platform Lain</h2>
-            <p class="section-subtitle">Didesain khusus untuk kenikmatan menonton film berdua, bukan untuk meeting kantor.</p>
-          </div>
-
-          <div class="compare-table-card">
-            <table class="compare-table">
-              <thead>
-                <tr>
-                  <th>Fitur Utama</th>
-                  <th class="brand-col">ScreenCast × Rollbooth</th>
-                  <th>Discord</th>
-                  <th>Google Meet</th>
-                  <th>Teleparty</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Latensi Streaming</td>
-                  <td class="brand-col"><span class="badge-good">&lt; 100ms (P2P Realtime)</span></td>
-                  <td>1.0 - 2.0s delay</td>
-                  <td>2.0 - 4.0s delay</td>
-                  <td>Desync berkala</td>
-                </tr>
-                <tr>
-                  <td>Studio Photobooth Retro Bawaan</td>
-                  <td class="brand-col"><span class="badge-good">✓ Ada (3-Cut Strip HD)</span></td>
-                  <td>✗ Tidak ada</td>
-                  <td>✗ Tidak ada</td>
-                  <td>✗ Tidak ada</td>
-                </tr>
-                <tr>
-                  <td>Kemudahan Akses (Zero-Install)</td>
-                  <td class="brand-col"><span class="badge-good">✓ Cukup Link / Kode 6-Digit</span></td>
-                  <td>✗ Wajib Login & App</td>
-                  <td>Wajib Akun Google</td>
-                  <td>✗ Wajib Ekstensi Chrome</td>
-                </tr>
-                <tr>
-                  <td>Audio Film Stereo Asli</td>
-                  <td class="brand-col"><span class="badge-good">✓ Stereo Sound Card</span></td>
-                  <td>Kompresi Mono</td>
-                  <td>Terkadang Bocor</td>
-                  <td>Tergantung Akun</td>
-                </tr>
-                <tr>
-                  <td>Privasi & Tanpa Simpan Data</td>
-                  <td class="brand-col"><span class="badge-good">✓ 100% Client-Side</span></td>
-                  <td>Server Hosted</td>
-                  <td>Server Hosted</td>
-                  <td>Server Sync</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- 6. FAQ (TANYA JAWAB UMUM) -->
-      <section class="landing-section" id="faqSection">
-        <div class="section-container">
-          <div class="section-header text-center">
-            <div class="section-badge">💡 FAQ</div>
-            <h2 class="section-title">Pertanyaan yang Sering Diajukan</h2>
-            <p class="section-subtitle">Semua yang perlu Anda ketahui sebelum memulai sesi nobar.</p>
-          </div>
-
-          <div class="faq-accordion-list">
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Apakah saya harus memasang aplikasi atau ekstensi tambahan?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                <p>Sama sekali tidak! ScreenCast dibangun 100% menggunakan teknologi web browser modern (WebRTC, HTML5 Canvas, WebGL, Web Audio). Anda dan teman Anda cukup membuka browser (Google Chrome, Microsoft Edge, Safari, Firefox) baik di komputer maupun smartphone.</p>
-              </div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Apakah pasangan saya bisa menonton dan menyalakan kamera lewat HP?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                <p>Bisa! Penonton (Viewer) dapat bergabung dengan sangat lancar melalui browser di ponsel Android atau iPhone. Kamera depan dan mikrofon ponsel juga dapat diaktifkan untuk berinteraksi dan berfoto di photobooth.</p>
-              </div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Bagaimana cara memastikan suara film terdengar jernih oleh penonton?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                <p>Saat host mengklik "Mulai Siaran Layar", jendela izin browser akan muncul. Pastikan untuk mencentang opsi <strong>"Bagikan audio sistem"</strong> atau pilih tab browser tempat Anda memutar film dengan opsi <strong>"Bagikan audio tab"</strong> tercentang.</p>
-              </div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Apakah foto strip Rollbooth disimpan di server Anda?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                <p>Tidak pernah. Seluruh proses pembuatan strip foto, filter analog, pemotongan sudut, hingga ekspor gambar berjalan sepenuhnya di memori browser Anda (Client-side HTML5 Canvas). Tidak ada foto yang diunggah ke server kami, privasi momen intim Anda terjamin 100% aman.</p>
-              </div>
-            </div>
-
-            <div class="faq-item" onclick="toggleFaq(this)">
-              <div class="faq-question">
-                <span>Berapa resolusi foto strip yang diunduh?</span>
-                <span class="faq-chevron">▼</span>
-              </div>
-              <div class="faq-answer">
-                <p>Rollbooth mengekspor strip foto dalam format PNG berkualitas tinggi setara cetak 300 DPI (hingga resolusi 1080×3240 piksel), sangat tajam dan pas untuk dicetak fisik maupun diunggah ke Instagram Stories tanpa pecah.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 7. BOTTOM CALL TO ACTION -->
-      <section class="landing-cta" id="ctaSection">
-        <div class="cta-banner-card">
-          <div class="cta-content">
-            <h2 class="cta-title">Siap Nobar Film Malam Ini?</h2>
-            <p class="cta-desc">
-              Ajak pasangan atau sahabatmu menonton film favorit bersama dan bawa pulang foto strip kenangannya secara gratis.
+        <!-- E. Editorial Showcase Card 3: 3-Pose Sequence & Shortcut -->
+        <section class="supaste-showcase-card">
+          <div class="showcase-card-header">
+            <h3 class="showcase-card-title">3 Pose Beruntun Hanya dengan Satu Tombol</h3>
+            <p class="showcase-card-desc">
+              Tekan tombol kamera di dock atau tombol <kbd>P</kbd> di keyboard kapan pun saat menonton. Hitung mundur 3.. 2.. 1.. otomatis menyinkronkan efek lampu kilat (flash) dan suara rana kamera analog.
             </p>
-            <div class="cta-buttons-row">
-              <button type="button" class="btn btn-primary btn-lg" onclick="scrollToSection('heroSection')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <span>Mulai Nobar Sekarang (Gratis)</span>
+          </div>
+
+          <div class="showcase-window-stage stage-shortcut-demo">
+            <div class="shortcut-demo-center">
+              <div class="shortcut-floating-toast">
+                <span class="toast-step">Foto 1 dari 3: Bersiap!</span>
+                <span class="toast-big">3.. 2.. 1.. 📸</span>
+                <span class="toast-sub">Menangkap adegan film + kedua kamera wajah</span>
+              </div>
+              <div class="shortcut-keycap-badge">
+                <kbd>P</kbd>
+                <span>atau</span>
+                <kbd>Alt</kbd> + <kbd>P</kbd>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- F. 2-Column Split Cards (Like Supaste "Custom Categories" & "Find by App") -->
+        <section class="supaste-split-pair" id="compareSection">
+          <div class="split-card">
+            <h4 class="split-card-title">Kustomisasi Tanpa Batas</h4>
+            <p class="split-card-desc">
+              Pilih gaya tata letak, warna kertas bingkai, filter analog, dan tulis catatan kaki romantis atau lucu sesuai suasana film malam itu.
+            </p>
+            <div class="split-pills-cloud">
+              <span class="cloud-pill active">Strip 1:3 <i>3</i></span>
+              <span class="cloud-pill">Grid 2×2 <i>4</i></span>
+              <span class="cloud-pill">Wide Polaroid <i>2</i></span>
+              <span class="cloud-pill">Classic White</span>
+              <span class="cloud-pill">Vintage Cream</span>
+              <span class="cloud-pill">Deep Noir</span>
+              <span class="cloud-pill">Pastel Blossom</span>
+              <span class="cloud-pill">Matcha Sage</span>
+            </div>
+          </div>
+
+          <div class="split-card">
+            <h4 class="split-card-title">Berjalan di Semua Peramban</h4>
+            <p class="split-card-desc">
+              Tanpa instalasi aplikasi atau ekstensi tambahan. Buka tautan ruang langsung dari laptop, PC, tablet, maupun smartphone Anda.
+            </p>
+            <div class="platform-badges-grid">
+              <div class="plat-icon-box" title="Google Chrome">🌐<span>Chrome</span></div>
+              <div class="plat-icon-box" title="Apple Safari">🧭<span>Safari</span></div>
+              <div class="plat-icon-box" title="Microsoft Edge">💠<span>Edge</span></div>
+              <div class="plat-icon-box" title="Mozilla Firefox">🦊<span>Firefox</span></div>
+              <div class="plat-icon-box" title="macOS & Windows">💻<span>Desktop</span></div>
+              <div class="plat-icon-box" title="Android & iPhone">📱<span>Mobile</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- G. "Built for everyone" 6-Card Grid -->
+        <section class="supaste-personas-section">
+          <h2 class="supaste-section-h2">Dirancang untuk setiap momen kebersamaan</h2>
+          <p class="supaste-section-lead">
+            Dari pasangan jarak jauh hingga sahabat satu geng, ScreenCast mengubah layar biasa menjadi ruang bioskop yang hangat.
+          </p>
+
+          <div class="personas-grid">
+            <div class="persona-card">
+              <span class="persona-icon">💑</span>
+              <h4 class="persona-title">Pasangan LDR</h4>
+              <p class="persona-desc">Kencan malam minggu terasa nyata dengan kamera wajah berdampingan dan foto strip berdua.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-icon">🍿</span>
+              <h4 class="persona-title">Sahabat &amp; Movie Club</h4>
+              <p class="persona-desc">Nobar film horor atau komedi sambil menangkap ekspresi kaget saat adegan jump scare.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-icon">✨</span>
+              <h4 class="persona-title">Komunitas Anime</h4>
+              <p class="persona-desc">Streaming episode terbaru dalam 60 FPS mulus dengan warna tajam dan audio stereo asli.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-icon">📸</span>
+              <h4 class="persona-title">Kreator &amp; Storyteller</h4>
+              <p class="persona-desc">Unduh foto strip 300 DPI siap unggah ke Instagram Stories atau TikTok dalam satu klik.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-icon">🏠</span>
+              <h4 class="persona-title">Keluarga Jarak Jauh</h4>
+              <p class="persona-desc">Cukup bagikan kode 6-digit atau pindai QR code, mudah diakses tanpa perlu daftar akun.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-icon">🔒</span>
+              <h4 class="persona-title">Pencinta Privasi</h4>
+              <p class="persona-desc">100% pemrosesan di browser Anda. Tidak ada video atau foto yang pernah disimpan di server.</p>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /.supaste-white-canvas -->
+
+      <!-- ========================================================
+           3. SUPASTE BLUE GRADIENT BAND + FLOATING ACCESS CARD
+           ======================================================== -->
+      <section class="supaste-pricing-band" id="pricingSection">
+        <div class="pricing-band-header">
+          <h2 class="supaste-section-h2">Tanpa biaya.<br>Akses penuh selamanya.</h2>
+          <p class="supaste-section-lead">
+            Tidak ada langganan bulanan. Tidak ada batas waktu siaran.<br>Langsung buat ruang dan nikmati semua fitur Rollbooth Studio.
+          </p>
+        </div>
+
+        <div class="pricing-floating-card">
+          <div class="pricing-top-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>ScreenCast × Rollbooth Studio</span>
+          </div>
+
+          <div class="pricing-tier-tabs">
+            <span class="tier-tab active">Personal &amp; Couple</span>
+            <span class="tier-tab">Movie Club</span>
+            <span class="tier-tab">Open WebRTC</span>
+          </div>
+
+          <div class="pricing-price-row">
+            <div class="price-meta">
+              <strong>Akses Penuh</strong>
+              <span>Seluruh fitur nobar &amp; photobooth</span>
+            </div>
+            <div class="price-amount">Rp 0</div>
+          </div>
+
+          <ul class="pricing-checklist">
+            <li><span>✓</span> Streaming layar 1080p 60 FPS tanpa batas durasi</li>
+            <li><span>✓</span> Audio sistem stereo jernih + mikrofon dua arah</li>
+            <li><span>✓</span> Rollbooth Studio (Strip 1:3, Grid 2×2, Wide Polaroid)</li>
+            <li><span>✓</span> Ekspor PNG HD 300 DPI &amp; 1-klik bagikan ke medsos</li>
+            <li><span>✓</span> 100% P2P privat tanpa penyimpanan data di server</li>
+          </ul>
+
+          <button type="button" class="supaste-btn-black w-full" onclick="scrollToSection('cooldockHub')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Mulai Nobar Sekarang</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           4. SUPASTE 2-COLUMN FAQ SECTION (ON WHITE CANVAS)
+           ======================================================== -->
+      <div class="supaste-white-canvas faq-canvas" id="faqSection">
+        <section class="supaste-faq-section">
+          <h2 class="supaste-section-h2">Frequently Asked<br>Questions</h2>
+          <p class="supaste-section-lead">
+            Semua yang perlu Anda ketahui tentang cara kerja siaran layar WebRTC dan studio foto Rollbooth.
+          </p>
+
+          <div class="supaste-faq-grid">
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Apakah perlu mengunduh aplikasi atau ekstensi?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Sama sekali tidak. ScreenCast berjalan 100% langsung di peramban web modern (Chrome, Edge, Safari, Firefox) baik di komputer maupun smartphone.</p>
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Apakah foto photobooth disimpan di server?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Tidak pernah. Seluruh komposisi foto strip, filter retro, dan ekspor PNG diproses 100% di memori browser perangkat Anda (Client-Side Canvas).</p>
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Bagaimana cara agar suara film terdengar oleh penonton?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Saat memilih layar atau tab yang ingin dibagikan di Chrome/Edge, pastikan kotak <strong>"Bagikan audio sistem"</strong> atau <strong>"Bagikan audio tab"</strong> dicentang.</p>
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Bisakah menonton dan menyalakan kamera lewat HP?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Bisa! Penonton dapat bergabung dari iPhone maupun Android, mendengarkan suara film, serta menyalakan kamera depan untuk berfoto bersama di Rollbooth.</p>
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Bagaimana cara mengambil foto strip saat film berjalan?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Cukup klik ikon kamera di dock bawah layar atau tekan tombol <kbd>P</kbd> di keyboard. Hitung mundur 3 pose akan dimulai otomatis tanpa menghentikan film.</p>
+              </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+              <div class="faq-question">
+                <span class="faq-plus">+</span>
+                <span>Berapa resolusi gambar strip foto yang diunduh?</span>
+              </div>
+              <div class="faq-answer">
+                <p>Foto diekspor dalam format PNG beresolusi tinggi (setara cetak 300 DPI), siap diunggah ke Instagram Stories tanpa pecah atau dicetak fisik.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cross-promo Banner Card (Like Supaste Cooldock Promo Card) -->
+          <div class="supaste-promo-banner">
+            <div class="promo-left">
+              <div class="promo-eyebrow">📸 Fitur Unggulan di Dalam Ruang</div>
+              <h3 class="promo-title">Dock kaca melayang untuk kontrol instan.</h3>
+              <p class="promo-desc">
+                Atur volume film, aktifkan mikrofon, geser posisi bubble kamera wajah, buka obrolan, dan luncurkan Rollbooth Studio langsung dari satu dock minimalis.
+              </p>
+              <button type="button" class="supaste-btn-black btn-sm" onclick="scrollToSection('cooldockHub')">
+                <span>Coba Sekarang di Atas</span>
               </button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <!-- 8. FOOTER -->
-      <footer class="landing-footer">
-        <div class="footer-container">
-          <!-- Shortcuts Cheatsheet Bar -->
-          <div class="shortcuts-cheatsheet">
-            <span class="cheatsheet-title">Pintasan Keyboard Nobar:</span>
-            <div class="shortcut-pills">
-              <span class="s-pill"><kbd>Alt</kbd>+<kbd>P</kbd> Rollbooth Photo</span>
-              <span class="s-pill"><kbd>M</kbd> Bisu Suara Film</span>
-              <span class="s-pill"><kbd>D</kbd> Bisu Mikrofon</span>
-              <span class="s-pill"><kbd>C</kbd> Kamera Wajah</span>
-              <span class="s-pill"><kbd>F</kbd> Layar Penuh</span>
+      <!-- ========================================================
+           5. SUPASTE PITCH-BLACK FOOTER WITH GIANT WATERMARK
+           ======================================================== -->
+      <footer class="supaste-dark-footer">
+        <div class="footer-inner-wrap">
+          <div class="footer-cols">
+            <div class="footer-col-brand">
+              <div class="supaste-brand">
+                <span class="supaste-app-icon" aria-hidden="true">
+                  <span class="icon-gloss"></span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <rect x="2" y="3" width="20" height="14" rx="2.5"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </span>
+                <span class="supaste-brand-text">ScreenCast</span>
+                <span class="footer-byline">× Rollbooth</span>
+              </div>
+              <p class="footer-tagline">
+                <strong>Nobar bersama. Abadikan selamanya.</strong><br>
+                Streaming layar film P2P berlatensi ultra-rendah dengan studio foto strip retro ala Korea langsung di browser Anda.
+              </p>
+              <button type="button" class="supaste-nav-cta footer-cta-btn" onclick="scrollToSection('cooldockHub')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Mulai Nobar</span>
+              </button>
+              <div class="footer-copy-note">© 2026 ScreenCast × Rollbooth. Zero Data Retention.</div>
+            </div>
+
+            <div class="footer-col">
+              <h5>Navigasi</h5>
+              <a href="#heroSection" onclick="scrollToSection('heroSection', event)">Beranda</a>
+              <a href="#cooldockHub" onclick="scrollToSection('cooldockHub', event)">Masuk Ruang</a>
+              <a href="#photoboothSection" onclick="scrollToSection('photoboothSection', event)">Rollbooth Studio</a>
+              <a href="#featuresSection" onclick="scrollToSection('featuresSection', event)">Fitur WebRTC</a>
+              <a href="#faqSection" onclick="scrollToSection('faqSection', event)">FAQ</a>
+            </div>
+
+            <div class="footer-col">
+              <h5>Layout Foto</h5>
+              <a href="#photoboothSection" onclick="setSampleLayout('strip'); scrollToSection('photoboothSection', event)">Vertical 3-Cut Strip</a>
+              <a href="#photoboothSection" onclick="setSampleLayout('grid'); scrollToSection('photoboothSection', event)">Korean 2×2 Life4Cuts</a>
+              <a href="#photoboothSection" onclick="setSampleLayout('polaroid'); scrollToSection('photoboothSection', event)">Wide Cinema Polaroid</a>
+              <a href="#photoboothSection" onclick="setSampleFilter('vintage'); scrollToSection('photoboothSection', event)">Retro 90s Analog</a>
+            </div>
+
+            <div class="footer-col">
+              <h5>Pintasan Keyboard</h5>
+              <span><kbd>P</kbd> Jepret Photobooth</span>
+              <span><kbd>M</kbd> Bisu Suara Film</span>
+              <span><kbd>D</kbd> Bisu Mikrofon</span>
+              <span><kbd>C</kbd> Kamera Wajah</span>
+              <span><kbd>F</kbd> Layar Penuh</span>
             </div>
           </div>
 
-          <div class="footer-bottom-row">
-            <div class="footer-brand">
-              <span class="brand-name">ScreenCast × Rollbooth</span>
-              <span class="brand-tag">Virtual Cinema Date & Memories Studio</span>
-            </div>
-            <div class="footer-copy">
-              © 2026 ScreenCast. 100% P2P WebRTC. Zero Data Retention.
-            </div>
-          </div>
+          <!-- Giant Watermark Wordmark at Bottom Edge (Just like Supaste!) -->
+          <div class="footer-giant-wordmark" aria-hidden="true">ScreenCast</div>
         </div>
       </footer>
 
@@ -801,7 +887,6 @@
       <div class="player-canvas" id="viewerPlayerWrap">
         <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
 
-        <!-- Floating Facecam Bubbles -->
         <!-- Partner Facecam (Host) -->
         <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <div class="facecam-header" data-drag-handle>
@@ -874,7 +959,6 @@
         <!-- Bottom Floating Liquid Glass HUD Dock -->
         <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <div class="hud-actions">
-            <!-- 1. Suara Film -->
             <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" data-tooltip="Suara Film (M)" aria-label="Beralih Suara Film">
               <svg id="audioIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -885,7 +969,6 @@
               </svg>
             </button>
 
-            <!-- 2. Mikrofon Sendiri -->
             <button class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" data-tooltip="Mikrofon (D)" aria-label="Beralih Mikrofon">
               <svg id="hudMicIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -896,7 +979,6 @@
               </svg>
             </button>
 
-            <!-- 3. Kamera Sendiri -->
             <button class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" data-tooltip="Kamera (C)" aria-label="Beralih Kamera Wajah">
               <svg id="hudCameraIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
@@ -906,22 +988,19 @@
 
             <div class="hud-divider" aria-hidden="true"></div>
 
-            <!-- 4. Obrolan -->
             <button class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" data-tooltip="Obrolan" aria-label="Buka Obrolan">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
             </button>
 
-            <!-- 5. Photobooth Memories -->
-            <button class="hud-btn" id="btnPhotoboothToggle" onclick="triggerPhotobooth()" data-tooltip="Photobooth (Alt+P)" aria-label="Abadikan Momen Photobooth">
+            <button class="hud-btn" id="btnPhotoboothToggle" onclick="triggerPhotobooth()" data-tooltip="Photobooth (P)" aria-label="Abadikan Momen Photobooth">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
               </svg>
             </button>
 
-            <!-- 6. Layar Penuh -->
             <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" data-tooltip="Layar Penuh (F)" aria-label="Layar Penuh">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -970,7 +1049,6 @@
           <div class="video-stage">
             <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
 
-            <!-- Facecams for Host -->
             <div id="hostPartnerBubble" class="facecam-bubble host-facecam-bubble" style="display: none;">
               <div class="facecam-header" data-drag-handle>
                 <span class="facecam-title">
@@ -1036,7 +1114,7 @@
                 </svg>
                 <span>Obrolan</span>
               </button>
-              <button class="btn btn-secondary btn-sm" id="btnHostPhotobooth" onclick="triggerPhotobooth()" title="Abadikan Momen Photobooth (Alt+P)">
+              <button class="btn btn-secondary btn-sm" id="btnHostPhotobooth" onclick="triggerPhotobooth()" title="Abadikan Momen Photobooth (P)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                   <circle cx="12" cy="13" r="4"></circle>
@@ -1137,16 +1215,13 @@
       </div>
 
       <div class="rollbooth-studio-layout">
-        <!-- Left: Live Strip Preview with Paper Drop Shadow -->
         <div class="rollbooth-preview-column">
           <div class="rollbooth-strip-container" id="photoboothCardWrap">
             <img id="photoboothResultImg" class="rollbooth-result-img" alt="Rollbooth Movie Strip" />
           </div>
         </div>
 
-        <!-- Right: Studio Customizer Controls -->
         <div class="rollbooth-controls-column">
-          <!-- 1. Layout Selector -->
           <div class="rollbooth-ctrl-group">
             <label class="rollbooth-ctrl-label">Tata Letak (Layout)</label>
             <div class="rollbooth-segmented-pills">
@@ -1162,7 +1237,6 @@
             </div>
           </div>
 
-          <!-- 2. Frame Color Picker -->
           <div class="rollbooth-ctrl-group">
             <label class="rollbooth-ctrl-label">Warna Bingkai (Frame Color)</label>
             <div class="rollbooth-color-swatches">
@@ -1174,7 +1248,6 @@
             </div>
           </div>
 
-          <!-- 3. Filter Options -->
           <div class="rollbooth-ctrl-group">
             <label class="rollbooth-ctrl-label">Filter Vintage</label>
             <div class="rollbooth-segmented-pills">
@@ -1185,7 +1258,7 @@
                 <span>Normal</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="filterBtnBw" onclick="setRollboothFilter('bw')">
-                <span>B&W Noir</span>
+                <span>B&amp;W Noir</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="filterBtnSunset" onclick="setRollboothFilter('sunset')">
                 <span>Sunset</span>
@@ -1193,7 +1266,6 @@
             </div>
           </div>
 
-          <!-- 4. Custom Caption Input -->
           <div class="rollbooth-ctrl-group">
             <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki (Caption)</label>
             <input
@@ -1207,7 +1279,6 @@
             >
           </div>
 
-          <!-- 5. Action Buttons -->
           <div class="rollbooth-actions">
             <button type="button" class="btn btn-primary w-full" onclick="downloadPhotoboothPhoto()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1255,8 +1326,8 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=5.0"></script>
-  <script src="js/app.js?v=5.0"></script>
-  <script src="js/mesh-drift.js?v=5.0"></script>
+  <script src="js/qrcode.min.js?v=6.0"></script>
+  <script src="js/app.js?v=6.0"></script>
+  <script src="js/mesh-drift.js?v=6.0"></script>
 </body>
 </html>
