@@ -956,11 +956,11 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'sentry-btn-white' : 'sentry-btn-dark-border';
+    hostBtn.className = isHost ? 'pi-btn-forest-pill' : 'pi-btn-outline-pill';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'sentry-btn-white' : 'sentry-btn-dark-border';
+    viewerBtn.className = !isHost ? 'pi-btn-forest-pill' : 'pi-btn-outline-pill';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 
@@ -974,27 +974,101 @@ function switchTab(mode) {
 }
 
 /* ========================================================
- * 10. Landing Page Interactions (Scroll, Playground, FAQ)
+ * 10. Landing Page Interactions (Movie Presets, Playground, FAQ)
  * ======================================================== */
-function toggleMarketingMode() {
-  const sw = document.getElementById('mktSwitchBtn');
-  const txt = document.getElementById('mktStateText');
-  const heroTitle = document.getElementById('heroMainTitle');
-  const heroSub = document.getElementById('heroSubTitle');
-  if (!sw) return;
-  const isOn = sw.classList.toggle('is-on');
-  if (txt) txt.textContent = isOn ? 'ON' : 'OFF';
-  if (heroTitle && heroSub) {
-    if (isOn) {
-      heroTitle.textContent = 'Wake up babe';
-      heroSub.textContent = 'ScreenCast × Rollbooth baru aja rilis.';
-      showToast('Marketing Mode: ON — Mode santai & seru aktif!');
-    } else {
-      heroTitle.textContent = 'WebRTC 60fps + Canvas 2D';
-      heroSub.textContent = 'P2P MediaStream dengan komposit frame film real-time.';
-      showToast('Marketing Mode: OFF — Mode teknis developer aktif.');
+const MOVIE_PRESETS = {
+  lalaland: {
+    code: 'LA LA LAND · 60FPS',
+    caption: 'La La Land Night 💃✨',
+    badges: [
+      'LA LA LAND · 00:24:10',
+      'LA LA LAND · 00:52:18',
+      'LA LA LAND · 01:12:40',
+      'LA LA LAND · 01:58:05'
+    ],
+    toast: 'Contoh Film: La La Land (2016) diterapkan ke Photobooth!'
+  },
+  interstellar: {
+    code: 'INTERSTELLAR · 60FPS',
+    caption: 'Across Gargantua 🪐✨',
+    badges: [
+      'INTERSTELLAR · 00:42:15',
+      'INTERSTELLAR · 01:18:30',
+      'INTERSTELLAR · 02:04:15',
+      'INTERSTELLAR · 02:36:50'
+    ],
+    toast: 'Contoh Film: Interstellar (2014) diterapkan ke Photobooth!'
+  },
+  spiritedaway: {
+    code: 'SPIRITED AWAY · 60FPS',
+    caption: 'Sea Train Memories 🏮🌊',
+    badges: [
+      'SPIRITED AWAY · 00:19:40',
+      'SPIRITED AWAY · 00:54:20',
+      'SPIRITED AWAY · 01:28:12',
+      'SPIRITED AWAY · 01:52:00'
+    ],
+    toast: 'Contoh Film: Spirited Away (2001) diterapkan ke Photobooth!'
+  },
+  bladerunner: {
+    code: 'BLADE RUNNER · 60FPS',
+    caption: 'Tears in Neon Rain 🌧️⚡',
+    badges: [
+      'BLADE RUNNER · 00:31:05',
+      'BLADE RUNNER · 01:14:22',
+      'BLADE RUNNER · 01:48:05',
+      'BLADE RUNNER · 02:21:40'
+    ],
+    toast: 'Contoh Film: Blade Runner 2049 (2017) diterapkan ke Photobooth!'
+  },
+  beforesunrise: {
+    code: 'BEFORE SUNRISE · 60FPS',
+    caption: 'Vienna Listening Booth ☕🎶',
+    badges: [
+      'BEFORE SUNRISE · 00:18:12',
+      'BEFORE SUNRISE · 00:39:10',
+      'BEFORE SUNRISE · 01:05:44',
+      'BEFORE SUNRISE · 01:34:20'
+    ],
+    toast: 'Contoh Film: Before Sunrise (1995) diterapkan ke Photobooth!'
+  }
+};
+
+function selectMoviePreset(movieKey, scrollToStudio = false) {
+  const preset = MOVIE_PRESETS[movieKey] || MOVIE_PRESETS.lalaland;
+  const strip = document.getElementById('sampleStripWrap');
+  if (strip) {
+    strip.classList.remove('preset-lalaland', 'preset-interstellar', 'preset-spiritedaway', 'preset-bladerunner');
+    if (movieKey !== 'lalaland' && movieKey !== 'beforesunrise') {
+      strip.classList.add(`preset-${movieKey}`);
     }
   }
+
+  const topCode = document.getElementById('sampleStripTopCode');
+  if (topCode) topCode.textContent = preset.code;
+
+  const cap = document.getElementById('sampleStripCaption');
+  if (cap) cap.textContent = preset.caption;
+
+  preset.badges.forEach((text, idx) => {
+    const badgeEl = document.getElementById(`sampleFilmBadge${idx + 1}`);
+    if (badgeEl) badgeEl.textContent = text;
+  });
+
+  ['lalaland', 'interstellar', 'spiritedaway', 'bladerunner'].forEach(k => {
+    const btn = document.getElementById(`presetBtn-${k}`);
+    if (btn) btn.classList.toggle('active', k === movieKey);
+  });
+
+  const capInput = document.getElementById('memoriesCaptionInput');
+  if (capInput && !capInput.value) {
+    capInput.placeholder = `Contoh: ${preset.caption}`;
+  }
+
+  if (scrollToStudio) {
+    scrollToSection('studioShowcase');
+  }
+  showToast(preset.toast);
 }
 
 function openHeroAction(mode) {
@@ -1030,37 +1104,60 @@ function setSampleLayout(layout) {
   if (layout === 'polaroid') document.getElementById('sampleLayoutPolaroid')?.classList.add('active');
 }
 
-function setSampleColor(color) {
+function setSampleFrame(bgColor, textColor, btnEl) {
   const strip = document.getElementById('sampleStripWrap');
   if (!strip) return;
-  strip.classList.remove('theme-white', 'theme-cream', 'theme-noir', 'theme-pink', 'theme-matcha');
-  strip.classList.add(`theme-${color}`);
-
-  document.querySelectorAll('.playground-swatches .sample-swatch').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = document.getElementById(`sampleColor${color.charAt(0).toUpperCase() + color.slice(1)}`);
-  if (activeBtn) activeBtn.classList.add('active');
+  strip.style.background = bgColor;
+  strip.style.color = textColor;
+  if (btnEl && btnEl.parentElement) {
+    btnEl.parentElement.querySelectorAll('.pg-swatch').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
 }
 
 function setSampleFilter(filter) {
   const strip = document.getElementById('sampleStripWrap');
   if (!strip) return;
-  strip.classList.remove('filter-vintage', 'filter-bw', 'filter-sunset', 'filter-normal');
+  strip.classList.remove('filter-vintage', 'filter-bw', 'filter-cinema', 'filter-normal');
   strip.classList.add(`filter-${filter}`);
 
-  ['sampleFilterVintage', 'sampleFilterBw', 'sampleFilterSunset', 'sampleFilterNormal'].forEach(id => {
+  ['sampleBtn-normal', 'sampleBtn-bw', 'sampleBtn-vintage', 'sampleBtn-cinema'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) btn.classList.remove('active');
   });
-  const btnId = `sampleFilter${filter.charAt(0).toUpperCase() + filter.slice(1)}`;
-  document.getElementById(btnId)?.classList.add('active');
+  document.getElementById(`sampleBtn-${filter}`)?.classList.add('active');
 }
 
-function toggleFaq(itemEl) {
-  if (!itemEl) return;
-  const isOpen = itemEl.classList.contains('is-open');
-  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('is-open'));
+function toggleSampleSticker(emoji) {
+  const layer = document.getElementById('sampleStickerLayer');
+  if (!layer) return;
+  const existing = Array.from(layer.querySelectorAll('.sample-sticker-item')).find(el => el.dataset.emoji === emoji);
+  if (existing) {
+    existing.remove();
+    return;
+  }
+  const span = document.createElement('span');
+  span.className = 'sample-sticker-item';
+  span.dataset.emoji = emoji;
+  span.textContent = emoji;
+  const positions = [
+    { top: '12px', right: '14px', transform: 'rotate(12deg)' },
+    { bottom: '54px', left: '10px', transform: 'rotate(-14deg)' },
+    { top: '44%', right: '8px', transform: 'rotate(8deg)' },
+    { bottom: '18px', right: '18px', transform: 'rotate(-8deg)' }
+  ];
+  const pos = positions[layer.children.length % positions.length];
+  Object.assign(span.style, pos);
+  layer.appendChild(span);
+}
+
+function toggleFaq(btnEl) {
+  if (!btnEl) return;
+  const itemEl = btnEl.closest('.faq-item') || btnEl;
+  const isOpen = itemEl.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
   if (!isOpen) {
-    itemEl.classList.add('is-open');
+    itemEl.classList.add('open');
   }
 }
 
