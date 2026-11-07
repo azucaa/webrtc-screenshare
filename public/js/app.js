@@ -1078,14 +1078,14 @@ function switchTab(mode) {
 // Theme toggle, mobile navigation, room status states, and darkroom preview controls
 function toggleColorTheme() {
   const htmlEl = document.documentElement;
-  const current = htmlEl.getAttribute('data-theme') || 'dark';
+  const current = htmlEl.getAttribute('data-theme') || 'light';
   const next = current === 'dark' ? 'light' : 'dark';
   htmlEl.setAttribute('data-theme', next);
   const label = document.getElementById('themeToggleLabel');
   if (label) {
     label.textContent = next === 'dark' ? 'Kertas Terang' : 'Kamar Gelap';
   }
-  showToast(next === 'dark' ? 'Mode Kamar Gelap diaktifkan.' : 'Mode Kertas Terang diaktifkan.');
+  showToast(next === 'dark' ? 'Mode Kamar Gelap diaktifkan.' : 'Mode Kertas Hangat diaktifkan.');
 }
 
 function toggleMobileMenu() {
@@ -1150,52 +1150,52 @@ let activeMoviePresetKey = 'lalaland';
 
 const MOVIE_PRESETS = {
   lalaland: {
-    reelTag: 'REEL 01 / LA LA LAND',
-    code: 'LA LA LAND / 60FPS',
-    caption: 'La La Land Night',
+    reelTag: 'ROL 01 / TUNGSTEN 500T',
+    code: 'VISION3 500T / 60FPS',
+    caption: 'Sesi Kamera 35mm',
     badges: [
-      'LA LA LAND / 00:24:10',
-      'LA LA LAND / 00:52:18',
-      'LA LA LAND / 01:12:40',
-      'LA LA LAND / 01:58:05'
+      'FRAME 01 / 00:14:20',
+      'FRAME 02 / 00:38:10',
+      'FRAME 03 / 01:05:42',
+      'FRAME 04 / 01:29:15'
     ],
-    toast: 'Rol film La La Land (2016) dimuat ke meja cetak.'
+    toast: 'Emulsi Tungsten 500T dimuat ke meja cetak.'
   },
   interstellar: {
-    reelTag: 'REEL 02 / INTERSTELLAR',
-    code: 'INTERSTELLAR / 60FPS',
-    caption: 'Across Gargantua',
+    reelTag: 'ROL 02 / AMBER 800T',
+    code: 'SAFELIGHT 800T / 60FPS',
+    caption: 'Amber Safelight',
     badges: [
-      'INTERSTELLAR / 00:42:15',
-      'INTERSTELLAR / 01:18:30',
-      'INTERSTELLAR / 02:04:15',
-      'INTERSTELLAR / 02:36:50'
+      'AMBER 01 / 00:18:15',
+      'AMBER 02 / 00:42:30',
+      'AMBER 03 / 01:12:15',
+      'AMBER 04 / 01:46:50'
     ],
-    toast: 'Rol film Interstellar (2014) dimuat ke meja cetak.'
+    toast: 'Emulsi Amber Safelight 800T dimuat ke meja cetak.'
   },
   spiritedaway: {
-    reelTag: 'REEL 03 / SPIRITED AWAY',
-    code: 'SPIRITED AWAY / 60FPS',
-    caption: 'Sea Railway Memories',
+    reelTag: 'ROL 03 / DAYLIGHT 250D',
+    code: 'ETERNA 250D / 60FPS',
+    caption: 'Daylight Cyan 250D',
     badges: [
-      'SPIRITED AWAY / 00:19:40',
-      'SPIRITED AWAY / 00:54:20',
-      'SPIRITED AWAY / 01:28:12',
-      'SPIRITED AWAY / 01:52:00'
+      'ETERNA 01 / 00:19:40',
+      'ETERNA 02 / 00:54:20',
+      'ETERNA 03 / 01:28:12',
+      'ETERNA 04 / 01:52:00'
     ],
-    toast: 'Rol film Spirited Away (2001) dimuat ke meja cetak.'
+    toast: 'Emulsi Daylight 250D dimuat ke meja cetak.'
   },
   bladerunner: {
-    reelTag: 'REEL 04 / BLADE RUNNER',
-    code: 'BLADE RUNNER / 60FPS',
-    caption: 'Los Angeles Rooftop Rain',
+    reelTag: 'ROL 04 / ILFORD HP5',
+    code: 'ILFORD HP5 / 60FPS',
+    caption: 'Monokrom Perak HP5',
     badges: [
-      'BLADE RUNNER / 00:31:05',
-      'BLADE RUNNER / 01:14:22',
-      'BLADE RUNNER / 01:48:05',
-      'BLADE RUNNER / 02:21:40'
+      'HP5 01 / 00:11:05',
+      'HP5 02 / 00:34:22',
+      'HP5 03 / 01:08:05',
+      'HP5 04 / 01:41:40'
     ],
-    toast: 'Rol film Blade Runner 2049 (2017) dimuat ke meja cetak.'
+    toast: 'Emulsi Perak Ilford HP5 dimuat ke meja cetak.'
   }
 };
 
@@ -1918,7 +1918,7 @@ let rollboothConfig = {
   layout: 'strip',       // 'strip' | 'grid' | 'polaroid'
   frameColor: 'white',   // 'white' | 'cream' | 'noir' | 'pink' | 'matcha'
   filter: 'vintage',     // 'vintage' | 'normal' | 'bw' | 'sunset'
-  caption: 'La La Land Night'
+  caption: 'Sesi Kamera 35mm'
 };
 
 let rollboothSnaps = []; // Array of 3 snapshots: [{ movie, cam1, cam2 }, ...]
@@ -2008,7 +2008,7 @@ function renderPresetMovieCanvas(presetKey, poseIndex = 0) {
     ctx.fillStyle = 'rgba(255, 42, 133, 0.24)';
     ctx.fillRect(360, 0, 140, 360);
   } else {
-    // Default: La La Land
+    // Default: Tungsten 500T
     const g = ctx.createLinearGradient(0, 0, 0, 360);
     g.addColorStop(0, '#190e30');
     g.addColorStop(0.5, '#4e2268');
@@ -2092,7 +2092,7 @@ function triggerPhotobooth() {
 
   // Step 1: Snapshot 1 (Bersiap)
   if (stepBadge) stepBadge.textContent = 'Pose 1 dari 3: Bersiap';
-  if (hintText) hintText.textContent = 'Pose pertama bersama adegan film';
+  if (hintText) hintText.textContent = 'Pose pertama bersama tangkapan layar';
 
   runCountdownStep(3, () => {
     rollboothSnaps[0] = grabCurrentSnap(0);
@@ -2359,7 +2359,7 @@ function renderRollboothCanvas() {
     // Custom Caption
     ctx.fillStyle = theme.text;
     ctx.font = '700 19px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'La La Land Night', W / 2, footerY);
+    ctx.fillText(rollboothConfig.caption || 'Sesi Kamera 35mm', W / 2, footerY);
 
     // Date & Time
     ctx.fillStyle = theme.subtext;
@@ -2396,19 +2396,19 @@ function renderRollboothCanvas() {
 
     // Top Row
     const yTop = pad + 16;
-    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, 'ADEGAN 01');
+    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, 'LAYAR 01');
     drawFilteredPhoto(ctx, snap2.cam1 || snap1.movie, pad + gridW + gap, yTop, gridW, gridH, activeFilter, 'KAMERA 01');
 
     // Bottom Row
     const yBot = yTop + gridH + gap;
     drawFilteredPhoto(ctx, snap2.cam2 || snap2.cam1 || snap2.movie, pad, yBot, gridW, gridH, activeFilter, 'KAMERA 02');
-    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, 'ADEGAN 02');
+    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, 'LAYAR 02');
 
     // Footer
     const footerY = yBot + gridH + 34;
     ctx.fillStyle = theme.text;
     ctx.font = '700 24px -apple-system, sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'La La Land Night', pad, footerY);
+    ctx.fillText(rollboothConfig.caption || 'Sesi Kamera 35mm', pad, footerY);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = theme.subtext;
@@ -2435,8 +2435,8 @@ function renderRollboothCanvas() {
     const heroW = W - pad * 2;
     const heroH = Math.round(heroW * (9 / 16)); // ~477px
 
-    // Hero Movie Scene
-    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, 'ADEGAN FILM');
+    // Hero Screen Frame
+    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, 'TANGKAPAN LAYAR');
 
     // Side-by-side reactions
     const reactY = pad + heroH + 20;
@@ -2450,7 +2450,7 @@ function renderRollboothCanvas() {
     const footerY = reactY + reactH + 34;
     ctx.fillStyle = theme.text;
     ctx.font = '700 22px -apple-system, sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'La La Land Night', pad, footerY);
+    ctx.fillText(rollboothConfig.caption || 'Sesi Kamera 35mm', pad, footerY);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = theme.subtext;

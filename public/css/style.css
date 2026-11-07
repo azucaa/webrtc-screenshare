@@ -2014,21 +2014,21 @@ body.is-watching .player-video {
 }
 
 
-/* inspo-mcp Split Studio design system (furoweb-eu exemplar + DESIGN.md) */
+/* Chill Music Club x inspo-mcp Split Studio design system (DESIGN.md) */
 
 :root,
-html[data-theme="dark"] {
-  --color-paper: #0C0B0A;
-  --color-surface: #141311;
-  --color-elevated: #1D1B18;
-  --color-ink: #EDE8DF;
-  --color-muted: #A8A196;
-  --color-rule: #2E2B26;
-  --color-rule-strong: #6E685F;
-  --color-accent: #B42E04;
-  --color-accent-hover: #962502;
+html[data-theme="light"] {
+  --color-paper: #F4EFE6;
+  --color-surface: #EAE2D3;
+  --color-elevated: #FAF7F2;
+  --color-ink: #181614;
+  --color-muted: #544E46;
+  --color-rule: #D5CBB8;
+  --color-rule-strong: #7A7267;
+  --color-accent: #B03E1A;
+  --color-accent-hover: #943212;
   --color-accent-ink: #FAF6F0;
-  --color-accent-text: #FC9B7D;
+  --color-accent-text: #B03E1A;
   --color-bg: var(--color-paper);
   --color-fg: var(--color-ink);
   --color-fg-muted: var(--color-muted);
@@ -2037,18 +2037,18 @@ html[data-theme="dark"] {
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
-html[data-theme="light"] {
-  --color-paper: #F5F1E8;
-  --color-surface: #EBE5D8;
-  --color-elevated: #FFFFFF;
-  --color-ink: #141311;
-  --color-muted: #524D45;
-  --color-rule: #D4CCC0;
-  --color-rule-strong: #787166;
-  --color-accent: #B42E04;
-  --color-accent-hover: #962502;
+html[data-theme="dark"] {
+  --color-paper: #121110;
+  --color-surface: #1B1917;
+  --color-elevated: #24211E;
+  --color-ink: #EDE8DF;
+  --color-muted: #A8A196;
+  --color-rule: #2E2B26;
+  --color-rule-strong: #6E685F;
+  --color-accent: #B03E1A;
+  --color-accent-hover: #943212;
   --color-accent-ink: #FAF6F0;
-  --color-accent-text: #9E2702;
+  --color-accent-text: #F28B66;
   --color-bg: var(--color-paper);
   --color-fg: var(--color-ink);
   --color-fg-muted: var(--color-muted);
@@ -3022,7 +3022,7 @@ body.inspo-body .setting-select option {
   background: linear-gradient(145deg, #23272D 0%, #3E4856 100%);
 }
 
-/* Default movie preset: La La Land */
+/* Default emulsion preset: Tungsten 500T */
 .film-scene-1 {
   background: linear-gradient(135deg, #190e30 0%, #5c2878 55%, #f5c431 100%);
 }
@@ -3036,7 +3036,7 @@ body.inspo-body .setting-select option {
   background: linear-gradient(160deg, #110920 0%, #4b2369 50%, #e794b5 100%);
 }
 
-/* Movie preset: Interstellar */
+/* Emulsion preset: Amber Safelight 800T */
 .sample-strip-card.preset-interstellar .film-scene-1 {
   background: radial-gradient(circle at 50% 50%, #050508 26%, #ffdf9e 42%, #d97706 62%, #070913 100%);
 }
@@ -3050,7 +3050,7 @@ body.inspo-body .setting-select option {
   background: linear-gradient(145deg, #090d16 0%, #78350f 55%, #fde68a 100%);
 }
 
-/* Movie preset: Spirited Away */
+/* Emulsion preset: Daylight 250D */
 .sample-strip-card.preset-spiritedaway .film-scene-1 {
   background: linear-gradient(180deg, #183642 0%, #397367 55%, #e89973 100%);
 }
@@ -3064,18 +3064,18 @@ body.inspo-body .setting-select option {
   background: linear-gradient(160deg, #7d1814 0%, #e76f51 55%, #fff3b0 100%);
 }
 
-/* Movie preset: Blade Runner 2049 */
+/* Emulsion preset: Ilford HP5 Silver Halide */
 .sample-strip-card.preset-bladerunner .film-scene-1 {
-  background: linear-gradient(135deg, #0d1322 0%, #ff2a85 55%, #00f0ff 100%);
+  background: linear-gradient(135deg, #121110 0%, #3A3732 55%, #B8B2A6 100%);
 }
 .sample-strip-card.preset-bladerunner .film-scene-2 {
-  background: linear-gradient(135deg, #1c1018 0%, #9a3412 50%, #fb923c 100%);
+  background: linear-gradient(135deg, #181715 0%, #524D45 50%, #D8D2C5 100%);
 }
 .sample-strip-card.preset-bladerunner .film-scene-3 {
-  background: radial-gradient(circle at 60% 40%, #00f0ff 0%, #2c1638 55%, #070a12 100%);
+  background: radial-gradient(circle at 60% 40%, #EDE8DF 0%, #3D3A35 55%, #121110 100%);
 }
 .sample-strip-card.preset-bladerunner .film-scene-4 {
-  background: linear-gradient(150deg, #070a12 0%, #be185d 55%, #7df9ff 100%);
+  background: linear-gradient(150deg, #111110 0%, #6E685F 55%, #E5DEC9 100%);
 }
 
 .sample-strip-card.filter-bw .sample-cell {

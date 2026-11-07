@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScreenCast. × Rollbooth : Bioskop P2P &amp; Arsip Cetak 35mm</title>
+  <title>ScreenCast. × Rollbooth : Klub Siaran Layar P2P &amp; Studio Cetak 35mm</title>
   <meta name="description"
-    content="Tonton film favorit seperti La La Land dan Interstellar bersama teman dalam 60fps P2P, lalu cetak strip foto 35mm berdua langsung dengan adegan filmnya.">
+    content="Klub layar bersama dan kamar gelap 35mm di peramban. Bagikan layar dalam 60fps P2P tanpa jeda, lalu cetak strip foto 35mm berdua langsung dari kamera.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=11.0">
+  <link rel="stylesheet" href="/css/style.css?v=13.0">
 </head>
 
 <body class="inspo-body">
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
 
   <!-- ============================================================
-       ARCHETYPE 1: NAV INLINE MINIMAL (inspo-mcp nav/inline)
+       ARCHETYPE 1: NAV INLINE MINIMAL (Chill Music Club × inspo-mcp nav/inline)
        Wordmark left, metadata links inline, tighter mono utility cluster right
        ============================================================ -->
   <header class="app-header inspo-nav-bar" id="appHeader">
     <div class="inspo-nav-inner">
       <a href="#heroSection" class="inspo-wordmark" onclick="switchTab('viewer'); scrollToSection('heroSection', event)">
         ScreenCast<span class="inspo-accent-dot">.</span>
-        <span class="inspo-wordmark-sub">× Rollbooth</span>
+        <span class="inspo-wordmark-sub">× Rollbooth Club</span>
       </a>
 
       <nav class="inspo-nav-cluster" aria-label="Navigasi Utama">
         <div class="inspo-nav-links" id="desktopNav">
-          <a href="#reelCatalog" class="text-meta inspo-nav-link" onclick="scrollToSection('reelCatalog', event)">01 / Arsip Adegan</a>
+          <a href="#reelCatalog" class="text-meta inspo-nav-link" onclick="scrollToSection('reelCatalog', event)">01 / Rak Kaset &amp; Emulsi</a>
           <a href="#studioShowcase" class="text-meta inspo-nav-link" onclick="scrollToSection('studioShowcase', event)">02 / Meja Cetak</a>
-          <a href="#specSection" class="text-meta inspo-nav-link" onclick="scrollToSection('specSection', event)">03 / Protokol</a>
+          <a href="#specSection" class="text-meta inspo-nav-link" onclick="scrollToSection('specSection', event)">03 / Catatan Teknis</a>
           <a href="#faqSection" class="text-meta inspo-nav-link" onclick="scrollToSection('faqSection', event)">04 / Tanya Jawab</a>
         </div>
 
@@ -45,7 +45,7 @@
 
           <button type="button" class="inspo-util-btn" id="themeToggleBtn" onclick="toggleColorTheme()"
             aria-label="Ganti tema gelap atau terang">
-            <span id="themeToggleLabel">Kertas Terang</span>
+            <span id="themeToggleLabel">Kamar Gelap</span>
           </button>
 
           <button type="button" class="inspo-util-btn inspo-util-cta" onclick="openRollboothStudio()">
@@ -62,13 +62,13 @@
 
     <!-- Mobile Off-Canvas Drawer -->
     <nav class="inspo-mobile-drawer" id="mobileNavDrawer" aria-label="Menu Seluler" hidden>
-      <a href="#reelCatalog" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('reelCatalog', event)">01 / Arsip Adegan Film</a>
+      <a href="#reelCatalog" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('reelCatalog', event)">01 / Rak Kaset &amp; Emulsi</a>
       <a href="#studioShowcase" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('studioShowcase', event)">02 / Meja Cetak 35mm</a>
-      <a href="#specSection" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('specSection', event)">03 / Protokol Transmisi</a>
+      <a href="#specSection" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('specSection', event)">03 / Catatan Teknis</a>
       <a href="#faqSection" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('faqSection', event)">04 / Tanya Jawab</a>
       <div class="inspo-mobile-actions">
         <button type="button" class="inspo-btn-primary" onclick="closeMobileMenu(); openHeroAction('host')">
-          Siarkan Layar Film
+          Siarkan Layar
         </button>
         <button type="button" class="inspo-btn-ghost" onclick="closeMobileMenu(); openRollboothStudio()">
           Buka Kamera Rollbooth
@@ -80,28 +80,28 @@
   <main class="main-stage">
 
     <!-- ============================================================
-         LANDING VIEW (INSPO-MCP SPLIT STUDIO MACROSTRUCTURE)
+         LANDING VIEW (CHILL MUSIC CLUB × INSPO-MCP SPLIT STUDIO)
          ============================================================ -->
     <div class="landing-view" id="landingView">
 
       <!-- ============================================================
            ARCHETYPE 2: SPLIT-SCREEN HERO (inspo-mcp hero/split-screen)
-           Left half: Typography + Immediate Room Terminal
-           Right half: Atmospheric Panel + 35mm Cinema Specimen Grid
+           Left half: Editorial Club Typography + Immediate Room Terminal
+           Right half: Analog Crate Sleeve Panel + 2x2 Emulsion J-Cards
            ============================================================ -->
       <section class="inspo-hero-split" id="heroSection">
         <div class="inspo-split-grid">
 
           <!-- LEFT HALF: Typography & Room Terminal -->
           <div class="inspo-split-left">
-            <p class="text-meta">EDISI 02 · PROYEKTOR WEBRTC 60FPS &amp; KAMAR GELAP 35MM</p>
+            <p class="text-meta">KLUB ANALOG DIGITAL · SIARAN WEBRTC 60FPS &amp; CETAK 35MM</p>
 
             <h1 class="inspo-display-h1" id="heroMainTitle">
-              Satu paruh layar memutar film, <em>paruh lainnya mencetak kenangan</em>.
+              Sudut paling tenang di internet untuk <em>berbagi layar &amp; mencetak strip 35mm</em>.
             </h1>
 
             <p class="inspo-lead" id="heroSubTitle">
-              Putar <em>La La Land</em>, <em>Interstellar</em>, atau film apa pun dari laptopmu secara langsung ke peramban teman tanpa jeda. Saat adegan terbaik muncul, potret ekspresi wajah kalian berdampingan dengan frame filmnya di atas lembaran kontak 35mm.
+              Tanpa algoritma, tanpa akun, dan tanpa penyimpanan cloud. Buka ruang pribadi berdua atau bersama teman dalam 60fps, lalu abadikan ekspresi kalian di atas kertas cetak analog langsung dari peramban.
             </p>
 
             <!-- Functional Room Terminal (#cooldockHub) -->
@@ -109,11 +109,11 @@
               <div class="inspo-terminal-tabs" id="tabsBar" role="tablist" aria-label="Pilih Mode Ruang">
                 <button type="button" class="inspo-tab active" id="tabViewerBtn" role="tab" aria-selected="true"
                   onclick="switchTab('viewer')">
-                  01 / Masuk dengan Kode Ruang
+                  SISI A / Masuk dengan Kode Ruang
                 </button>
                 <button type="button" class="inspo-tab" id="tabHostBtn" role="tab" aria-selected="false"
                   onclick="switchTab('host')">
-                  02 / Siarkan Layar Film
+                  SISI B / Siarkan Layar Anda
                 </button>
               </div>
 
@@ -173,16 +173,16 @@
               <!-- PANE B: HOST SETUP -->
               <div class="inspo-terminal-pane" id="hostSetupCard" role="tabpanel" style="display: none;">
                 <p class="inspo-pane-caption">
-                  Konfigurasikan parameter transmisi sebelum memilih jendela pemutar film. Kode 6 karakter dan kode QR akan dibuat otomatis.
+                  Konfigurasikan parameter transmisi sebelum memilih jendela atau layar. Kode 6 karakter dan kode QR akan dibuat otomatis.
                 </p>
 
                 <div class="inspo-settings-matrix">
                   <div class="inspo-setting-cell">
                     <label class="text-meta" for="presetSelect">PROFIL TAYANGAN</label>
                     <select class="setting-select" id="presetSelect" onchange="applyPreset()">
-                      <option value="cinema" selected>Sinema (1080p · 60fps)</option>
+                      <option value="cinema" selected>Standar HD (1080p · 60fps)</option>
                       <option value="motion">Gerak Cepat (720p · 60fps)</option>
-                      <option value="detail">Subtitel Tajam (1080p · 30fps)</option>
+                      <option value="detail">Teks Tajam (1080p · 30fps)</option>
                       <option value="native">Resolusi Asli Layar (60fps)</option>
                     </select>
                   </div>
@@ -207,7 +207,7 @@
                   <div class="inspo-setting-cell">
                     <label class="text-meta" for="optMode">PRIORITAS GAMBAR</label>
                     <select class="setting-select" id="optMode">
-                      <option value="motion" selected>Gerak Film Halus</option>
+                      <option value="motion" selected>Gerak Halus (60fps)</option>
                       <option value="detail">Ketajaman Teks</option>
                     </select>
                   </div>
@@ -233,122 +233,95 @@
             </div>
           </div>
 
-          <!-- RIGHT HALF: Atmospheric Panel + 2x2 Cinema Specimen Archive (#reelCatalog) -->
+          <!-- RIGHT HALF: Atmospheric Panel + 2x2 35mm Emulsion Specimen Archive (#reelCatalog) -->
           <div class="inspo-split-right" id="reelCatalog">
             <div class="inspo-panel-top">
               <div>
-                <p class="text-meta">ARSIP SPESIMEN 35MM · KLIK UNTUK MEMUAT ADEGAN</p>
-                <h2 class="inspo-panel-title">Pilih adegan film untuk diuji pada meja cetak di bawah</h2>
+                <p class="text-meta">ARSIP EMULSI 35MM · KLIK UNTUK MEMUAT KARAKTER ROL</p>
+                <h2 class="inspo-panel-title">Pilih karakter pencahayaan untuk diuji pada meja cetak di bawah</h2>
               </div>
-              <span class="inspo-reel-tag mono" id="activeReelCode">REEL 01 / LA LA LAND</span>
+              <span class="inspo-reel-tag mono" id="activeReelCode">ROL 01 / TUNGSTEN 500T</span>
             </div>
 
             <!-- Hairline-Ruled 2x2 Contact Sheet Grid -->
             <div class="inspo-specimen-grid">
 
-              <!-- Specimen 01: La La Land (2016) -->
+              <!-- Specimen 01: Tungsten 500T -->
               <article class="inspo-specimen-cell active" id="reelCard-lalaland" tabindex="0" role="button"
                 aria-pressed="true" onclick="selectMoviePreset('lalaland', false)"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('lalaland', false);}">
                 <div class="inspo-cell-head">
-                  <span class="mono">01A · KODAK 5219</span>
-                  <span class="mono">01:12:40</span>
+                  <span class="mono">01A · VISION3 500T</span>
+                  <span class="mono">ISO 500</span>
                 </div>
                 <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi adegan tarian senja La La Land di observatorium">
+                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Tungsten 500T">
                     <defs>
-                      <linearGradient id="lllGrad" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="lllGrad" x1="0" y1="0" x2="1" y2="1">
                         <stop offset="0%" stop-color="#190e30" />
-                        <stop offset="48%" stop-color="#4e2268" />
-                        <stop offset="82%" stop-color="#b84a72" />
+                        <stop offset="52%" stop-color="#4e2268" />
                         <stop offset="100%" stop-color="#f09c67" />
                       </linearGradient>
                     </defs>
                     <rect width="320" height="190" fill="url(#lllGrad)" />
-                    <circle cx="52" cy="30" r="1.4" fill="#fff" opacity="0.85" />
-                    <circle cx="128" cy="20" r="1.8" fill="#ffe28a" />
-                    <circle cx="242" cy="36" r="1.5" fill="#fff" opacity="0.8" />
-                    <circle cx="288" cy="22" r="1.2" fill="#ffe28a" opacity="0.7" />
-                    <rect x="0" y="146" width="320" height="44" fill="#110920" />
-                    <line x1="0" y1="146" x2="320" y2="146" stroke="#f5c431" stroke-width="1.5" opacity="0.6" />
-                    <g fill="#f5c431" opacity="0.55">
-                      <rect x="18" y="149" width="6" height="2" />
-                      <rect x="42" y="150" width="10" height="2" />
-                      <rect x="115" y="149" width="8" height="2" />
-                      <rect x="210" y="150" width="12" height="2" />
-                      <rect x="268" y="149" width="9" height="2" />
-                    </g>
-                    <line x1="84" y1="44" x2="84" y2="146" stroke="#110920" stroke-width="4" />
-                    <circle cx="84" cy="42" r="16" fill="#ffe89e" opacity="0.28" />
-                    <circle cx="84" cy="42" r="6.5" fill="#fff7d6" />
-                    <g transform="translate(164, 74)">
-                      <circle cx="-12" cy="8" r="6.5" fill="#110920" />
-                      <path d="M-19 17 L-5 17 L-8 44 L-17 44 Z" fill="#f3efe6" />
-                      <path d="M-15 44 L-21 70 M-9 44 L-3 70" stroke="#110920" stroke-width="4.5" stroke-linecap="round" />
-                      <path d="M-5 20 L15 13" stroke="#f3efe6" stroke-width="3.5" stroke-linecap="round" />
-                      <circle cx="24" cy="11" r="6" fill="#110920" />
-                      <path d="M18 20 L30 20 L40 52 L10 50 Z" fill="#f5c431" />
-                      <path d="M18 22 L6 13" stroke="#f5c431" stroke-width="3.5" stroke-linecap="round" />
-                      <path d="M20 50 L16 70 M28 50 L35 68" stroke="#110920" stroke-width="4" stroke-linecap="round" />
-                    </g>
-                    <rect x="20" y="156" width="280" height="22" rx="2" fill="rgba(10,7,16,0.82)" />
-                    <text x="160" y="171" text-anchor="middle" fill="#ffe66d" font-family="sans-serif" font-size="10.5" font-style="italic">"City of stars, are you shining just for me?"</text>
+                    <line x1="0" y1="48" x2="320" y2="48" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
+                    <line x1="0" y1="142" x2="320" y2="142" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
+                    <line x1="160" y1="0" x2="160" y2="190" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
+                    <circle cx="160" cy="95" r="36" fill="none" stroke="#ffe66d" stroke-width="1.5" opacity="0.75" />
+                    <circle cx="160" cy="95" r="6" fill="#ffe66d" />
+                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(10,7,16,0.82)" />
+                    <text x="160" y="169" text-anchor="middle" fill="#ffe66d" font-family="monospace" font-size="10">KODAK 5219 · TUNGSTEN SENJA · 3200K</text>
                   </svg>
                 </div>
                 <div class="inspo-cell-foot">
-                  <strong>La La Land (2016)</strong>
-                  <span>Griffith Park Twilight Dance</span>
+                  <strong>Tungsten 500T</strong>
+                  <span>Gradasi Hangat &amp; Bayangan Pekat</span>
                 </div>
               </article>
 
-              <!-- Specimen 02: Interstellar (2014) -->
+              <!-- Specimen 02: Amber Safelight -->
               <article class="inspo-specimen-cell" id="reelCard-interstellar" tabindex="0" role="button"
                 aria-pressed="false" onclick="selectMoviePreset('interstellar', false)"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('interstellar', false);}">
                 <div class="inspo-cell-head">
-                  <span class="mono">02A · IMAX 70MM</span>
-                  <span class="mono">02:04:15</span>
+                  <span class="mono">02A · SAFELIGHT 800T</span>
+                  <span class="mono">ISO 800</span>
                 </div>
                 <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi lubang hitam Gargantua dari film Interstellar">
+                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Amber Safelight Kamar Gelap">
                     <defs>
                       <radialGradient id="gargantuaGrad" cx="50%" cy="48%" r="54%">
                         <stop offset="0%" stop-color="#050508" />
-                        <stop offset="36%" stop-color="#050508" />
-                        <stop offset="43%" stop-color="#fff7d6" />
-                        <stop offset="55%" stop-color="#f59e2d" />
-                        <stop offset="76%" stop-color="#6e2b0e" />
+                        <stop offset="38%" stop-color="#050508" />
+                        <stop offset="46%" stop-color="#fff7d6" />
+                        <stop offset="60%" stop-color="#f59e2d" />
+                        <stop offset="82%" stop-color="#6e2b0e" />
                         <stop offset="100%" stop-color="#070913" />
                       </radialGradient>
                     </defs>
                     <rect width="320" height="190" fill="#070913" />
-                    <circle cx="38" cy="34" r="1.2" fill="#fff" opacity="0.7" />
-                    <circle cx="278" cy="28" r="1.5" fill="#ffdf9e" opacity="0.85" />
-                    <circle cx="72" cy="118" r="1.1" fill="#fff" opacity="0.5" />
-                    <circle cx="160" cy="86" r="68" fill="url(#gargantuaGrad)" />
-                    <ellipse cx="160" cy="86" rx="108" ry="15" fill="none" stroke="#ffdf9e" stroke-width="6" opacity="0.88" transform="rotate(-12 160 86)" />
-                    <ellipse cx="160" cy="86" rx="120" ry="6" fill="none" stroke="#fff9eb" stroke-width="2.5" opacity="0.95" transform="rotate(-12 160 86)" />
-                    <circle cx="160" cy="86" r="27" fill="#040407" />
-                    <rect x="20" y="156" width="280" height="22" rx="2" fill="rgba(7,9,19,0.84)" />
-                    <text x="160" y="171" text-anchor="middle" fill="#ffdf9e" font-family="sans-serif" font-size="10.5" font-style="italic">"Love is the one thing that transcends time and space."</text>
+                    <circle cx="160" cy="88" r="64" fill="url(#gargantuaGrad)" />
+                    <circle cx="160" cy="88" r="26" fill="#040407" stroke="#ffdf9e" stroke-width="1.5" />
+                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(7,9,19,0.84)" />
+                    <text x="160" y="169" text-anchor="middle" fill="#ffdf9e" font-family="monospace" font-size="10">AMBER HALATION · KONTRAS TINGGI · 2800K</text>
                   </svg>
                 </div>
                 <div class="inspo-cell-foot">
-                  <strong>Interstellar (2014)</strong>
-                  <span>Gargantua Accretion Horizon</span>
+                  <strong>Amber Safelight</strong>
+                  <span>Pijar Oranye Kamar Gelap</span>
                 </div>
               </article>
 
-              <!-- Specimen 03: Spirited Away (2001) -->
+              <!-- Specimen 03: Daylight 250D -->
               <article class="inspo-specimen-cell" id="reelCard-spiritedaway" tabindex="0" role="button"
                 aria-pressed="false" onclick="selectMoviePreset('spiritedaway', false)"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('spiritedaway', false);}">
                 <div class="inspo-cell-head">
-                  <span class="mono">03A · FUJI ETERNA</span>
-                  <span class="mono">00:54:20</span>
+                  <span class="mono">03A · ETERNA 250D</span>
+                  <span class="mono">ISO 250</span>
                 </div>
                 <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi kereta laut senja dari film Spirited Away">
+                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Daylight 250D">
                     <defs>
                       <linearGradient id="seaTrainGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stop-color="#183642" />
@@ -357,62 +330,49 @@
                       </linearGradient>
                     </defs>
                     <rect width="320" height="190" fill="url(#seaTrainGrad)" />
-                    <rect x="0" y="118" width="320" height="72" fill="#17444c" opacity="0.88" />
-                    <rect x="28" y="94" width="172" height="25" rx="3" fill="#c83e37" />
-                    <rect x="28" y="105" width="172" height="5" fill="#f4d58d" />
-                    <g fill="#fff3b0">
-                      <rect x="38" y="97" width="16" height="8" rx="1" />
-                      <rect x="62" y="97" width="16" height="8" rx="1" />
-                      <rect x="86" y="97" width="16" height="8" rx="1" />
-                      <rect x="110" y="97" width="16" height="8" rx="1" />
-                      <rect x="134" y="97" width="16" height="8" rx="1" />
-                      <rect x="158" y="97" width="16" height="8" rx="1" />
-                    </g>
-                    <line x1="256" y1="48" x2="256" y2="128" stroke="#7d1814" stroke-width="4.5" />
-                    <circle cx="246" cy="60" r="8" fill="#ff5a36" />
-                    <circle cx="246" cy="60" r="4" fill="#ffea85" />
-                    <rect x="20" y="156" width="280" height="22" rx="2" fill="rgba(14,36,42,0.84)" />
-                    <text x="160" y="171" text-anchor="middle" fill="#fff3b0" font-family="sans-serif" font-size="10.5" font-style="italic">"Once you've met someone you never really forget them."</text>
+                    <rect x="36" y="42" width="248" height="92" fill="none" stroke="rgba(255,243,176,0.55)" stroke-width="1.5" stroke-dasharray="4 4" />
+                    <circle cx="160" cy="88" r="22" fill="#f4d58d" opacity="0.85" />
+                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(14,36,42,0.84)" />
+                    <text x="160" y="169" text-anchor="middle" fill="#fff3b0" font-family="monospace" font-size="10">FUJI ETERNA · CYAN NATURAL · 5600K</text>
                   </svg>
                 </div>
                 <div class="inspo-cell-foot">
-                  <strong>Spirited Away (2001)</strong>
-                  <span>Sixth Station Sea Railway</span>
+                  <strong>Daylight 250D</strong>
+                  <span>Nada Hijau Toska &amp; Koral Lembut</span>
                 </div>
               </article>
 
-              <!-- Specimen 04: Blade Runner 2049 (2017) -->
+              <!-- Specimen 04: Silver Halide B&W -->
               <article class="inspo-specimen-cell" id="reelCard-bladerunner" tabindex="0" role="button"
                 aria-pressed="false" onclick="selectMoviePreset('bladerunner', false)"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('bladerunner', false);}">
                 <div class="inspo-cell-head">
-                  <span class="mono">04A · ARRI ALEXA</span>
-                  <span class="mono">01:48:05</span>
+                  <span class="mono">04A · ILFORD HP5</span>
+                  <span class="mono">ISO 400</span>
                 </div>
                 <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi neon hujan dari film Blade Runner 2049">
+                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Ilford HP5 Monokrom">
                     <defs>
                       <linearGradient id="br2049Grad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#0d1322" />
-                        <stop offset="50%" stop-color="#2c1638" />
-                        <stop offset="100%" stop-color="#d95b26" />
+                        <stop offset="0%" stop-color="#111110" />
+                        <stop offset="50%" stop-color="#3A3732" />
+                        <stop offset="100%" stop-color="#B8B2A6" />
                       </linearGradient>
                     </defs>
                     <rect width="320" height="190" fill="url(#br2049Grad)" />
-                    <polygon points="55,0 125,0 165,190 20,190" fill="#00f0ff" opacity="0.18" />
-                    <polygon points="185,0 255,0 285,190 150,190" fill="#ff2a85" opacity="0.22" />
-                    <rect x="18" y="52" width="36" height="138" fill="#070a12" />
-                    <rect x="258" y="38" width="44" height="152" fill="#070a12" />
-                    <circle cx="96" cy="76" r="20" fill="#ff2a85" opacity="0.5" />
-                    <path d="M168 98 L184 98 L190 148 L162 148 Z" fill="#070a12" />
-                    <circle cx="176" cy="90" r="6.5" fill="#070a12" />
-                    <rect x="20" y="156" width="280" height="22" rx="2" fill="rgba(7,10,18,0.84)" />
-                    <text x="160" y="171" text-anchor="middle" fill="#7df9ff" font-family="sans-serif" font-size="10.5" font-style="italic">"All the best memories are hers."</text>
+                    <g stroke="rgba(255,255,255,0.22)" stroke-width="1">
+                      <rect x="34" y="34" width="56" height="96" fill="#181715" />
+                      <rect x="98" y="34" width="56" height="96" fill="#3D3A35" />
+                      <rect x="162" y="34" width="56" height="96" fill="#78736A" />
+                      <rect x="226" y="34" width="56" height="96" fill="#D8D2C5" />
+                    </g>
+                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(12,11,10,0.86)" />
+                    <text x="160" y="169" text-anchor="middle" fill="#EDE8DF" font-family="monospace" font-size="10">PERAK HALIDA · SKALA ABU-ABU · BARYTA</text>
                   </svg>
                 </div>
                 <div class="inspo-cell-foot">
-                  <strong>Blade Runner 2049 (2017)</strong>
-                  <span>Los Angeles Rooftop Rain</span>
+                  <strong>Perak Ilford HP5</strong>
+                  <span>Monokrom Klasik Kontras Penuh</span>
                 </div>
               </article>
 
@@ -420,7 +380,7 @@
 
             <!-- Panel Bottom Marginalia Rule (per inspo-mcp HeroSplitScreen) -->
             <div class="inspo-panel-marginalia">
-              <span class="mono">PANEL SPESIMEN · 4 ADEGAN SIAP CETAK</span>
+              <span class="mono">PANEL SPESIMEN · 4 EMULSI SIAP CETAK</span>
               <a href="#studioShowcase" class="mono inspo-marginal-link" onclick="scrollToSection('studioShowcase', event)">
                 Buka Meja Cetak 35mm &rarr;
               </a>
@@ -441,21 +401,21 @@
           <div class="inspo-col-5">
             <p class="text-meta">02 / MEJA CETAK KONTAK ROLLBOOTH</p>
             <h2 class="inspo-display-h2">
-              Empat bidikan wajah berdampingan langsung dengan <em>adegan filmnya</em>.
+              Empat bidikan wajah berdampingan langsung dengan <em>tangkapan layar</em>.
             </h2>
             <p class="inspo-body-copy">
-              Setiap kali tombol rana ditekan saat menonton, kanvas menggabungkan ekspresi kamera kalian dengan frame film yang sedang tampil pada detik itu. Uji pengaturan kertas, emulsi optik, dan rol film secara langsung di samping.
+              Setiap kali tombol rana ditekan saat siaran berlangsung, kanvas menggabungkan ekspresi kamera kalian dengan tangkapan layar yang sedang tampil pada detik itu. Uji pengaturan kertas, emulsi optik, dan karakter rol secara langsung di samping.
             </p>
 
             <div class="inspo-control-ledger">
               <!-- Control 01 -->
               <div class="inspo-ctrl-row">
-                <span class="text-meta">01 · ROL FILM AKTIF</span>
+                <span class="text-meta">01 · STOK EMULSI ROL</span>
                 <div class="inspo-pill-group" id="moviePresetPills">
-                  <button type="button" class="pg-pill active" id="presetBtn-lalaland" onclick="selectMoviePreset('lalaland')">La La Land</button>
-                  <button type="button" class="pg-pill" id="presetBtn-interstellar" onclick="selectMoviePreset('interstellar')">Interstellar</button>
-                  <button type="button" class="pg-pill" id="presetBtn-spiritedaway" onclick="selectMoviePreset('spiritedaway')">Spirited Away</button>
-                  <button type="button" class="pg-pill" id="presetBtn-bladerunner" onclick="selectMoviePreset('bladerunner')">Blade Runner 2049</button>
+                  <button type="button" class="pg-pill active" id="presetBtn-lalaland" onclick="selectMoviePreset('lalaland')">Tungsten 500T</button>
+                  <button type="button" class="pg-pill" id="presetBtn-interstellar" onclick="selectMoviePreset('interstellar')">Amber 800T</button>
+                  <button type="button" class="pg-pill" id="presetBtn-spiritedaway" onclick="selectMoviePreset('spiritedaway')">Daylight 250D</button>
+                  <button type="button" class="pg-pill" id="presetBtn-bladerunner" onclick="selectMoviePreset('bladerunner')">Ilford HP5</button>
                 </div>
               </div>
 
@@ -471,12 +431,12 @@
 
               <!-- Control 03 -->
               <div class="inspo-ctrl-row">
-                <span class="text-meta">03 · EMULSI OPTIK</span>
+                <span class="text-meta">03 · FILTER OPTIK</span>
                 <div class="inspo-pill-group">
                   <button type="button" class="pg-pill active" id="sampleBtn-normal" onclick="setSampleFilter('normal')">Warna Asli</button>
                   <button type="button" class="pg-pill" id="sampleBtn-bw" onclick="setSampleFilter('bw')">Perak B&amp;W</button>
                   <button type="button" class="pg-pill" id="sampleBtn-vintage" onclick="setSampleFilter('vintage')">Sepia Hangat</button>
-                  <button type="button" class="pg-pill" id="sampleBtn-cinema" onclick="setSampleFilter('cinema')">Kontras Sinema</button>
+                  <button type="button" class="pg-pill" id="sampleBtn-cinema" onclick="setSampleFilter('cinema')">Kontras Tinggi</button>
                 </div>
               </div>
 
@@ -497,7 +457,7 @@
                   <div class="inspo-pill-group">
                     <button type="button" class="pg-pill" onclick="toggleSampleSticker('35MM')">35MM</button>
                     <button type="button" class="pg-pill" onclick="toggleSampleSticker('REC')">REC</button>
-                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('24FPS')">24FPS</button>
+                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('60FPS')">60FPS</button>
                     <button type="button" class="pg-pill" onclick="toggleSampleSticker('A+B')">A+B</button>
                   </div>
                 </div>
@@ -516,7 +476,7 @@
             <div class="inspo-workbench-platen">
               <div class="inspo-platen-bar">
                 <span class="mono">SPESIMEN CETAKAN KONTAK · SKALA 1:1</span>
-                <span class="mono" id="sampleStripTopCode">LA LA LAND / 60FPS</span>
+                <span class="mono" id="sampleStripTopCode">VISION3 500T / 60FPS</span>
               </div>
 
               <div class="inspo-platen-stage">
@@ -541,7 +501,7 @@
                         <span class="sample-badge">KAMERA 01</span>
                       </div>
                       <div class="sample-cell film-cell film-scene-1" id="sampleFilmCell1">
-                        <span class="sample-badge film" id="sampleFilmBadge1">LA LA LAND / 00:24:10</span>
+                        <span class="sample-badge film" id="sampleFilmBadge1">FRAME 01 / 00:14:20</span>
                       </div>
                     </div>
 
@@ -557,7 +517,7 @@
                         <span class="sample-badge">KAMERA 02</span>
                       </div>
                       <div class="sample-cell film-cell film-scene-2" id="sampleFilmCell2">
-                        <span class="sample-badge film" id="sampleFilmBadge2">LA LA LAND / 00:52:18</span>
+                        <span class="sample-badge film" id="sampleFilmBadge2">FRAME 02 / 00:38:10</span>
                       </div>
                     </div>
 
@@ -573,7 +533,7 @@
                         <span class="sample-badge">KAMERA 03</span>
                       </div>
                       <div class="sample-cell film-cell film-scene-3" id="sampleFilmCell3">
-                        <span class="sample-badge film" id="sampleFilmBadge3">LA LA LAND / 01:12:40</span>
+                        <span class="sample-badge film" id="sampleFilmBadge3">FRAME 03 / 01:05:42</span>
                       </div>
                     </div>
 
@@ -589,13 +549,13 @@
                         <span class="sample-badge">KAMERA 04</span>
                       </div>
                       <div class="sample-cell film-cell film-scene-4" id="sampleFilmCell4">
-                        <span class="sample-badge film" id="sampleFilmBadge4">LA LA LAND / 01:58:05</span>
+                        <span class="sample-badge film" id="sampleFilmBadge4">FRAME 04 / 01:29:15</span>
                       </div>
                     </div>
                   </div>
 
                   <div class="sample-strip-footer">
-                    <p class="sample-caption" id="sampleStripCaption">La La Land Night</p>
+                    <p class="sample-caption" id="sampleStripCaption">Sesi Kamera 35mm</p>
                     <div class="sample-barcode" aria-hidden="true"></div>
                     <span class="sample-meta mono">CETAKAN KONTAK LOKAL · 300 DPI PNG</span>
                   </div>
@@ -635,7 +595,7 @@
               <p class="text-meta">TAHAP 02 · SINKRONISASI RANA</p>
               <h3 class="inspo-triplet-title">Bidikan 3 Pose Beruntun</h3>
               <p class="inspo-triplet-body">
-                Menekan tombol pintas <code>P</code> atau membuka kamera Rollbooth akan menjalankan hitung mundur 3 pose yang menyalin gambar dari webcam sekaligus membekukan frame film pada detik tersebut.
+                Menekan tombol pintas <code>P</code> atau membuka kamera Rollbooth akan menjalankan hitung mundur 3 pose yang menyalin gambar dari webcam sekaligus membekukan tangkapan layar pada detik tersebut.
               </p>
             </li>
 
@@ -662,7 +622,7 @@
             </div>
             <div class="inspo-col-9">
               <h2 class="inspo-display-h2">
-                Hal yang paling sering ditanyakan sebelum mulai menonton.
+                Hal yang paling sering ditanyakan sebelum memulai sesi.
               </h2>
             </div>
           </div>
@@ -670,36 +630,36 @@
           <div class="inspo-faq-list">
             <div class="faq-item">
               <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Mengapa suara film tidak terdengar di sisi penonton saat saya membagikan layar?</span>
+                <span class="faq-q-text">Mengapa suara tidak terdengar di sisi penonton saat saya membagikan layar?</span>
                 <span class="faq-icon mono" aria-hidden="true">+</span>
               </button>
               <div class="faq-answer">
                 <p>
-                  Saat jendela pemilihan layar Chrome atau Edge terbuka, pilih tab peramban tempat film diputar atau seluruh layar, lalu pastikan kotak <strong>Bagikan audio tab</strong> (<em>Share tab audio</em> / <em>Share system audio</em>) di sudut kiri bawah sudah dicentang sebelum menekan tombol Bagikan.
+                  Saat jendela pemilihan layar Chrome atau Edge terbuka, pilih tab peramban atau seluruh layar, lalu pastikan kotak <strong>Bagikan audio tab</strong> (<em>Share tab audio</em> / <em>Share system audio</em>) di sudut kiri bawah sudah dicentang sebelum menekan tombol Bagikan.
                 </p>
               </div>
             </div>
 
             <div class="faq-item">
               <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Bagaimana cara agar adegan film ikut tercetak di sebelah foto kamera kami?</span>
+                <span class="faq-q-text">Bagaimana cara agar tangkapan layar ikut tercetak di sebelah foto kamera kami?</span>
                 <span class="faq-icon mono" aria-hidden="true">+</span>
               </button>
               <div class="faq-answer">
                 <p>
-                  Saat sedang berada di dalam ruang tayangan aktif, klik tombol <strong>Photobooth (P)</strong> pada bilah kontrol bawah. Setiap kali hitungan mundur mencapai nol, sistem otomatis memotret kamera wajah sekaligus menyalin frame film yang sedang tampil di layar.
+                  Saat sedang berada di dalam ruang siaran aktif, klik tombol <strong>Photobooth (P)</strong> pada bilah kontrol bawah. Setiap kali hitungan mundur mencapai nol, sistem otomatis memotret kamera wajah sekaligus menyalin tangkapan layar yang sedang tampil.
                 </p>
               </div>
             </div>
 
             <div class="faq-item">
               <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Apakah saya bisa menggunakan studio cetak foto tanpa membuat ruang tayangan terlebih dahulu?</span>
+                <span class="faq-q-text">Apakah saya bisa menggunakan studio cetak foto tanpa membuat ruang siaran terlebih dahulu?</span>
                 <span class="faq-icon mono" aria-hidden="true">+</span>
               </button>
               <div class="faq-answer">
                 <p>
-                  Bisa. Pilih salah satu film di bagian atas (misalnya <em>La La Land</em> atau <em>Interstellar</em>), lalu tekan tombol <strong>Buka Studio Kamera (Tanpa Kode)</strong>. Kamera Anda akan memotret 3 pose beruntun bersanding dengan adegan film pilihan tersebut.
+                  Bisa. Pilih salah satu stok emulsi di bagian atas (misalnya <em>Tungsten 500T</em> atau <em>Ilford HP5</em>), lalu tekan tombol <strong>Buka Studio Kamera (Tanpa Kode)</strong>. Kamera Anda akan memotret 3 pose beruntun di atas kertas cetak analog pilihan Anda.
                 </p>
               </div>
             </div>
@@ -730,7 +690,7 @@
             <p class="inspo-colophon-copy">
               Instrument Serif untuk tajuk utama.<br>
               Plus Jakarta Sans untuk antarmuka.<br>
-              IBM Plex Mono untuk catatan tepi.
+              IBM Plex Mono untuk catatan katalog.
             </p>
           </div>
 
@@ -747,10 +707,10 @@
             <p class="text-meta">KOLOFON &amp; NAVIGASI CEPAT</p>
             <p class="inspo-colophon-copy">
               <a href="#cooldockHub" onclick="scrollToSection('cooldockHub', event)">Konsol Ruang</a> ·
-              <a href="#reelCatalog" onclick="scrollToSection('reelCatalog', event)">Spesimen Film</a> ·
+              <a href="#reelCatalog" onclick="scrollToSection('reelCatalog', event)">Rak Emulsi</a> ·
               <a href="#studioShowcase" onclick="scrollToSection('studioShowcase', event)">Meja Cetak</a> ·
               <button type="button" class="inspo-colophon-btn" onclick="openRollboothStudio()">Buka Kamera</button><br>
-              <span class="inspo-colophon-muted">© 2026 ScreenCast × Rollbooth. Disusun dengan arsitektur Inspo-MCP.</span>
+              <span class="inspo-colophon-muted">© 2026 ScreenCast × Rollbooth Club. Referensi Chill Music Club &amp; Inspo-MCP.</span>
             </p>
           </div>
         </div>
@@ -1077,7 +1037,7 @@
     <div class="countdown-card">
       <div class="countdown-badge" id="photoboothStepBadge">Pose 1 dari 3: Bersiap</div>
       <div class="countdown-big-num" id="photoboothCountText">3</div>
-      <div class="countdown-hint" id="photoboothHintText">Pose pertama bersama adegan film</div>
+      <div class="countdown-hint" id="photoboothHintText">Pose pertama bersama tangkapan layar</div>
     </div>
     <div class="shutter-flash" id="photoboothShutterFlash"></div>
   </div>
@@ -1147,14 +1107,14 @@
           </div>
 
           <div class="rollbooth-ctrl-group">
-            <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki / Judul Film</label>
+            <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki / Label Strip</label>
             <input
               type="text"
               id="rollboothCaptionInput"
               class="form-input rollbooth-input"
-              placeholder="Contoh: La La Land Night"
+              placeholder="Contoh: Sesi Kamera 35mm"
               maxlength="36"
-              value="La La Land Night"
+              value="Sesi Kamera 35mm"
               oninput="setRollboothCaption(this.value)"
             >
           </div>
@@ -1187,7 +1147,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="/js/app.js?v=11.0"></script>
+  <script src="/js/app.js?v=13.0"></script>
 </body>
 
 </html>
