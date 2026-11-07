@@ -1,934 +1,648 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScreenCast × Rollbooth — Nonton Bareng & Photobooth Sinematik</title>
+  <title>ScreenCast x Rollbooth : Bioskop P2P &amp; Cetak Strip 35mm</title>
   <meta name="description"
-    content="Nonton bareng film favorit seperti La La Land & Interstellar dalam kualitas 60fps dan abadikan momen kebersamaan dengan photobooth strip ala Rollbooth.">
+    content="Tonton film favorit seperti La La Land dan Interstellar bersama teman dalam 60fps P2P, lalu cetak strip foto 35mm berdua langsung dengan adegan filmnya.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=8.0">
+  <link rel="stylesheet" href="/css/style.css?v=9.0">
 </head>
 
-<body class="pi-theme">
-  <!-- Toast Container -->
+<body class="darkroom-body">
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
 
-  <!-- ============================================================
-       TOP NAVIGATION BAR (PI.AI MINIMAL EDITORIAL HEADER)
-       ============================================================ -->
-  <header class="app-header pi-header" id="appHeader">
-    <div class="pi-nav-inner">
-      <a href="#" class="pi-logo-link" onclick="switchTab('viewer'); return false;" aria-label="ScreenCast Beranda">
-        <span class="pi-logo-serif">Sc</span>
+  <!-- Top Navigation Header -->
+  <header class="app-header dr-header" id="appHeader">
+    <div class="dr-header-inner">
+      <a href="#heroSection" class="dr-brand" onclick="switchTab('viewer'); scrollToSection('heroSection', event)">
+        <span class="dr-brand-sprocket" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="dr-brand-title">ScreenCast <small>x</small> Rollbooth</span>
       </a>
 
-      <div class="pi-nav-right">
-        <nav class="pi-nav-links" aria-label="Navigasi Utama">
-          <a href="#movieBentoSection" class="pi-nav-link" onclick="scrollToSection('movieBentoSection', event)">Koleksi Film</a>
-          <a href="#studioShowcase" class="pi-nav-link" onclick="scrollToSection('studioShowcase', event)">Rollbooth Studio</a>
-          <a href="#faqSection" class="pi-nav-link" onclick="scrollToSection('faqSection', event)">Bantuan</a>
-        </nav>
+      <nav class="dr-nav" id="desktopNav" aria-label="Navigasi Utama">
+        <a href="#reelCatalog" class="dr-nav-link" onclick="scrollToSection('reelCatalog', event)">Koleksi Adegan</a>
+        <a href="#studioShowcase" class="dr-nav-link" onclick="scrollToSection('studioShowcase', event)">Meja Cetak 35mm</a>
+        <a href="#specSection" class="dr-nav-link" onclick="scrollToSection('specSection', event)">Arsitektur</a>
+        <a href="#faqSection" class="dr-nav-link" onclick="scrollToSection('faqSection', event)">Tanya Jawab</a>
+      </nav>
 
-        <!-- Active Room Chip (Shown during live stream) -->
+      <div class="dr-header-actions">
+        <!-- Active Room Status Indicator (Visible only when connected to a live room) -->
         <div class="room-chip" id="roomChip">
           <span class="live-dot"></span>
           <span id="roomChipLabel">RUANG</span>
-          <strong class="mono" id="roomChipCode">------</strong>
+          <strong class="mono" id="roomChipCode">000000</strong>
         </div>
 
-        <button class="pi-btn-forest pi-btn-sm" onclick="openHeroAction('host')">
-          Mulai Nobar
+        <!-- Working Light / Dark Theme Toggle (R-21, R-34) -->
+        <button type="button" class="dr-theme-toggle" id="themeToggleBtn" onclick="toggleColorTheme()"
+          aria-label="Ganti tema gelap atau terang">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+          <span id="themeToggleLabel">Kertas Terang</span>
+        </button>
+
+        <button type="button" class="dr-btn-primary dr-btn-nav" onclick="openHeroAction('host')">
+          Buka Ruang Tayang
+        </button>
+
+        <!-- Mobile Menu Button (Reflows navigation on narrow viewports per R-03) -->
+        <button type="button" class="dr-mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()"
+          aria-expanded="false" aria-controls="mobileNavDrawer">
+          Menu
         </button>
       </div>
     </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <nav class="dr-mobile-drawer" id="mobileNavDrawer" aria-label="Menu Seluler" hidden>
+      <a href="#reelCatalog" class="dr-mobile-link" onclick="closeMobileMenu(); scrollToSection('reelCatalog', event)">Koleksi Adegan Film</a>
+      <a href="#studioShowcase" class="dr-mobile-link" onclick="closeMobileMenu(); scrollToSection('studioShowcase', event)">Meja Cetak 35mm</a>
+      <a href="#specSection" class="dr-mobile-link" onclick="closeMobileMenu(); scrollToSection('specSection', event)">Arsitektur Teknis</a>
+      <a href="#faqSection" class="dr-mobile-link" onclick="closeMobileMenu(); scrollToSection('faqSection', event)">Tanya Jawab</a>
+      <button type="button" class="dr-btn-primary dr-mobile-cta" onclick="closeMobileMenu(); openRollboothStudio()">
+        Buka Kamera Rollbooth
+      </button>
+    </nav>
   </header>
 
   <main class="main-stage">
 
     <!-- ============================================================
-         1. LANDING VIEW (PI.AI EDITORIAL + MOVIE SHOWCASE)
+         1. LANDING VIEW (ANALOG 35MM DARKROOM & PROJECTION PRINT HOUSE)
          ============================================================ -->
     <div class="landing-view" id="landingView">
 
-      <!-- ============================================================
-           HERO STAGE: BLOOMING SERIF LOGO + EDITORIAL HEADLINE + MOVIE MARQUEE
-           ============================================================ -->
-      <section class="pi-hero-section" id="heroSection">
-        <div class="pi-hero-container">
-          
-          <!-- Iconic Pi.ai Style Serif Logo with Blooming Pink Flower & Green Vine -->
-          <div class="pi-hero-emblem" aria-hidden="true">
-            <svg viewBox="0 0 180 150" class="pi-emblem-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Botanical Green Stem & Leaves sprouting from the serif letter -->
-              <path d="M108 62 C114 44, 128 36, 134 26" stroke="#15895D" stroke-width="5.5" stroke-linecap="round" />
-              <path d="M116 48 C132 42, 144 48, 142 57 C140 65, 124 62, 114 54" stroke="#15895D" stroke-width="4.5" stroke-linecap="round" fill="none" />
-              <path d="M110 58 C98 48, 92 38, 98 32 C104 26, 114 38, 112 52" stroke="#15895D" stroke-width="4.5" stroke-linecap="round" fill="none" />
-              <!-- Blooming Pink Flower (#E794B5) with Warm Gold Center -->
-              <g transform="translate(124, 24)">
-                <ellipse cx="0" cy="-12" rx="6.5" ry="11" fill="#E794B5" transform="rotate(-10)" />
-                <ellipse cx="11" cy="-6" rx="6.5" ry="11" fill="#E794B5" transform="rotate(45)" />
-                <ellipse cx="10" cy="7" rx="6.5" ry="11" fill="#E794B5" transform="rotate(105)" />
-                <ellipse cx="-1" cy="11" rx="6.5" ry="11" fill="#E794B5" transform="rotate(165)" />
-                <ellipse cx="-11" cy="5" rx="6.5" ry="11" fill="#E794B5" transform="rotate(225)" />
-                <ellipse cx="-10" cy="-7" rx="6.5" ry="11" fill="#E794B5" transform="rotate(295)" />
-                <circle cx="0" cy="0" r="6.5" fill="#F5B841" />
-              </g>
-              <!-- Giant Forest Green Serif Monogram "Sc" -->
-              <text x="26" y="132" fill="#0D3C26" font-family="'Fraunces', Georgia, serif" font-size="112" font-weight="600" letter-spacing="-4">Sc</text>
-            </svg>
-          </div>
+      <!-- SECTION 1: ASYMMETRIC WORKBENCH HERO + IMMEDIATE ROOM CONSOLE -->
+      <section class="dr-hero-section" id="heroSection">
+        <div class="dr-container dr-hero-grid">
 
-          <!-- Editorial Headline (Mix of Roman & Italic Serif) -->
-          <h1 class="pi-hero-title" id="heroMainTitle">
-            Nonton film favorit lebih hangat dengan <em>bioskop &amp; photobooth</em> paling sinematik
-          </h1>
+          <!-- Left Column: Editorial Headline + Direct Room Console (#cooldockHub) -->
+          <div class="dr-hero-left">
+            <h1 class="dr-hero-title" id="heroMainTitle">
+              Bioskop satu atap dan <em>ruang cetak 35mm</em> untuk film yang kalian tonton bersama.
+            </h1>
 
-          <p class="pi-hero-subtitle" id="heroSubTitle">
-            Putar <em>La La Land</em>, <em>Interstellar</em>, hingga anime favorit dalam kualitas 60fps tanpa jeda—lalu cetak photobooth strip kebersamaan kalian langsung bersama adegan filmnya.
-          </p>
-
-          <!-- Centered Dual Pill CTAs (Pi.ai style) -->
-          <div class="pi-hero-ctas">
-            <button type="button" class="pi-btn-outline-pill" onclick="scrollToSection('movieBentoSection', event)">
-              Lihat contoh film
-            </button>
-            <button type="button" class="pi-btn-forest-pill" onclick="scrollToSection('cooldockHub', event)">
-              Mulai Nobar
-            </button>
-          </div>
-        </div>
-
-        <!-- ============================================================
-             HORIZONTAL MOVIE SCENE MARQUEE ROW (PI.AI FLOATING PILL CARDS)
-             Click any movie to preview its scene in Rollbooth Studio!
-             ============================================================ -->
-        <div class="pi-marquee-wrapper" aria-label="Contoh Film Nobar Populer">
-          <div class="pi-marquee-track">
-
-            <!-- Movie Card 1: La La Land (2016) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('lalaland', true)" title="Klik untuk coba adegan La La Land di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="lllSky" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#1c1136" />
-                      <stop offset="45%" stop-color="#4b2369" />
-                      <stop offset="80%" stop-color="#b54872" />
-                      <stop offset="100%" stop-color="#f29f67" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="320" height="220" fill="url(#lllSky)" />
-                  <!-- Stars -->
-                  <circle cx="45" cy="35" r="1.3" fill="#fff" opacity="0.8" />
-                  <circle cx="110" cy="22" r="1.8" fill="#ffd97d" opacity="0.9" />
-                  <circle cx="200" cy="30" r="1.2" fill="#fff" opacity="0.7" />
-                  <circle cx="270" cy="48" r="1.5" fill="#fff" opacity="0.85" />
-                  <circle cx="80" cy="65" r="1" fill="#fff" opacity="0.6" />
-                  <!-- Los Angeles City Lights Grid on Horizon -->
-                  <path d="M0 165 L320 165 L320 220 L0 220 Z" fill="#120b24" />
-                  <g fill="#f7c86a" opacity="0.65">
-                    <rect x="10" y="158" width="300" height="2" />
-                    <circle cx="30" cy="162" r="1.5" /><circle cx="55" cy="161" r="1" /><circle cx="95" cy="162" r="1.5" />
-                    <circle cx="145" cy="161" r="1.2" /><circle cx="195" cy="162" r="1.5" /><circle cx="245" cy="161" r="1.2" /><circle cx="285" cy="162" r="1.5" />
-                  </g>
-                  <!-- Iconic Vintage Streetlamp -->
-                  <line x1="78" y1="58" x2="78" y2="168" stroke="#120b24" stroke-width="4" />
-                  <path d="M68 168 L88 168" stroke="#120b24" stroke-width="5" stroke-linecap="round" />
-                  <circle cx="78" cy="54" r="18" fill="#ffefc2" opacity="0.25" />
-                  <circle cx="78" cy="54" r="8" fill="#fff6d6" />
-                  <!-- Dancing Silhouettes (Mia in Yellow Dress & Sebastian) -->
-                  <g transform="translate(155, 92)">
-                    <!-- Sebastian silhouette -->
-                    <circle cx="-12" cy="8" r="7" fill="#120b24" />
-                    <path d="M-20 18 Q-12 16 -4 20 L-8 48 L-18 48 Z" fill="#f4efe6" />
-                    <path d="M-18 46 L-24 74 M-8 46 L-2 74" stroke="#120b24" stroke-width="5" stroke-linecap="round" />
-                    <path d="M-4 22 L16 14" stroke="#f4efe6" stroke-width="4" stroke-linecap="round" />
-                    <!-- Mia in iconic Yellow Dress -->
-                    <circle cx="26" cy="12" r="6.5" fill="#120b24" />
-                    <path d="M20 22 L32 22 L44 58 L10 56 Z" fill="#f5c431" />
-                    <path d="M20 24 L8 14" stroke="#f5c431" stroke-width="3.5" stroke-linecap="round" />
-                    <path d="M22 56 L18 74 M30 56 L38 72" stroke="#120b24" stroke-width="4" stroke-linecap="round" />
-                  </g>
-                  <!-- Cinema Subtitle Overlay -->
-                  <rect x="44" y="176" width="232" height="22" rx="4" fill="rgba(0,0,0,0.55)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#ffe66d" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"City of stars, are you shining just for me?"</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-pink">
-                <span>💃</span> La La Land · 01:12:40
-              </div>
-            </article>
-
-            <!-- Movie Card 2: Interstellar (2014) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('interstellar', true)" title="Klik untuk coba adegan Interstellar di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <radialGradient id="gargantuaGlow" cx="50%" cy="50%" r="55%">
-                      <stop offset="0%" stop-color="#050508" />
-                      <stop offset="38%" stop-color="#050508" />
-                      <stop offset="44%" stop-color="#fff7d6" />
-                      <stop offset="55%" stop-color="#f59e2d" />
-                      <stop offset="75%" stop-color="#6e2b0e" />
-                      <stop offset="100%" stop-color="#070913" />
-                    </radialGradient>
-                  </defs>
-                  <rect width="320" height="220" fill="#070913" />
-                  <!-- Deep Space Starfield -->
-                  <circle cx="30" cy="40" r="1" fill="#fff" opacity="0.6" />
-                  <circle cx="280" cy="30" r="1.4" fill="#ffd89c" opacity="0.8" />
-                  <circle cx="260" cy="150" r="1" fill="#fff" opacity="0.5" />
-                  <circle cx="50" cy="140" r="1.2" fill="#fff" opacity="0.7" />
-                  <!-- Gargantua Black Hole Halo & Accretion Disk -->
-                  <circle cx="160" cy="102" r="78" fill="url(#gargantuaGlow)" />
-                  <ellipse cx="160" cy="102" rx="118" ry="18" fill="none" stroke="#ffdf9e" stroke-width="7" opacity="0.85" transform="rotate(-12 160 102)" />
-                  <ellipse cx="160" cy="102" rx="132" ry="8" fill="none" stroke="#fff9eb" stroke-width="3" opacity="0.95" transform="rotate(-12 160 102)" />
-                  <circle cx="160" cy="102" r="32" fill="#040407" />
-                  <!-- Endurance Ring Spacecraft Silhouette -->
-                  <g transform="translate(222, 68)">
-                    <circle cx="0" cy="0" r="7" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="2 2" />
-                    <circle cx="0" cy="0" r="2" fill="#fff" />
-                  </g>
-                  <!-- Cinema Subtitle Overlay -->
-                  <rect x="40" y="176" width="240" height="22" rx="4" fill="rgba(0,0,0,0.65)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#ffdf9e" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"Love is the one thing that transcends time and space."</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-blue">
-                <span>🪐</span> Interstellar · 02:04:15
-              </div>
-            </article>
-
-            <!-- Movie Card 3: Spirited Away (2001) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('spiritedaway', true)" title="Klik untuk coba adegan Spirited Away di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="ghibliSky" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#183642" />
-                      <stop offset="55%" stop-color="#397367" />
-                      <stop offset="100%" stop-color="#e89973" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="320" height="220" fill="url(#ghibliSky)" />
-                  <!-- Soft Clouds -->
-                  <ellipse cx="80" cy="70" rx="55" ry="16" fill="#f7d6be" opacity="0.35" />
-                  <ellipse cx="240" cy="55" rx="65" ry="18" fill="#f7d6be" opacity="0.3" />
-                  <!-- Sea Reflection Water -->
-                  <rect x="0" y="135" width="320" height="85" fill="#1d4e56" opacity="0.85" />
-                  <!-- Glowing Sea Train on Water -->
-                  <rect x="28" y="112" width="165" height="26" rx="4" fill="#c83e37" />
-                  <rect x="28" y="122" width="165" height="6" fill="#f4d58d" />
-                  <!-- Warm Lit Train Windows -->
-                  <g fill="#fff3b0">
-                    <rect x="38" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="60" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="82" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="104" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="126" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="148" y="115" width="16" height="9" rx="1.5" />
-                    <rect x="170" y="115" width="14" height="9" rx="1.5" />
-                  </g>
-                  <!-- Water Reflections -->
-                  <g fill="#fff3b0" opacity="0.35">
-                    <rect x="38" y="142" width="16" height="14" />
-                    <rect x="60" y="142" width="16" height="14" />
-                    <rect x="82" y="142" width="16" height="14" />
-                    <rect x="104" y="142" width="16" height="14" />
-                    <rect x="126" y="142" width="16" height="14" />
-                    <rect x="148" y="142" width="16" height="14" />
-                  </g>
-                  <!-- Red Lantern Gate Silhouette -->
-                  <line x1="255" y1="60" x2="255" y2="145" stroke="#8c1d18" stroke-width="5" />
-                  <circle cx="245" cy="72" r="9" fill="#ff5a36" />
-                  <circle cx="245" cy="72" r="5" fill="#ffea85" />
-                  <!-- Subtitle -->
-                  <rect x="44" y="176" width="232" height="22" rx="4" fill="rgba(0,0,0,0.55)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#fff3b0" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"Once you've met someone you never really forget them."</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-mint">
-                <span>🏮</span> Spirited Away · 00:54:20
-              </div>
-            </article>
-
-            <!-- Movie Card 4: Blade Runner 2049 (2017) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('bladerunner', true)" title="Klik untuk coba adegan Blade Runner 2049 di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="brBg" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stop-color="#0d1322" />
-                      <stop offset="50%" stop-color="#2c1638" />
-                      <stop offset="100%" stop-color="#d95b26" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="320" height="220" fill="url(#brBg)" />
-                  <!-- Neon Cyan & Magenta Hologram Beams -->
-                  <polygon points="60,0 130,0 175,220 20,220" fill="#00f0ff" opacity="0.18" />
-                  <polygon points="180,0 260,0 290,220 150,220" fill="#ff2a85" opacity="0.22" />
-                  <!-- Cyberpunk Skyscraper Silhouettes -->
-                  <rect x="18" y="65" width="38" height="155" fill="#070a12" />
-                  <rect x="255" y="45" width="48" height="175" fill="#070a12" />
-                  <!-- Neon Kanji / Signs -->
-                  <circle cx="95" cy="88" r="24" fill="#ff2a85" opacity="0.45" />
-                  <circle cx="95" cy="88" r="14" fill="#ff9de2" opacity="0.8" />
-                  <!-- Lone Trenchcoat Figure on Rooftop -->
-                  <path d="M168 118 L184 118 L190 168 L162 168 Z" fill="#070a12" />
-                  <circle cx="176" cy="109" r="7" fill="#070a12" />
-                  <rect x="44" y="176" width="232" height="22" rx="4" fill="rgba(0,0,0,0.65)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#7df9ff" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"All the best memories are hers."</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-cream">
-                <span>🌧️</span> Blade Runner 2049 · 01:48:05
-              </div>
-            </article>
-
-            <!-- Movie Card 5: Before Sunrise (1995) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('beforesunrise', true)" title="Klik untuk coba adegan Before Sunrise di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="320" height="220" fill="#5e3023" />
-                  <!-- Warm Vienna Listening Booth Wood Panels -->
-                  <rect x="20" y="16" width="280" height="188" rx="8" fill="#895737" />
-                  <rect x="38" y="28" width="244" height="132" rx="4" fill="#dab49d" />
-                  <!-- Vinyl Record Player in Center -->
-                  <circle cx="160" cy="96" r="38" fill="#1e1b18" />
-                  <circle cx="160" cy="96" r="26" fill="none" stroke="#3e3832" stroke-width="1.5" />
-                  <circle cx="160" cy="96" r="12" fill="#e06d53" />
-                  <circle cx="160" cy="96" r="3" fill="#fff" />
-                  <!-- Two Listeners Looking Sideways -->
-                  <circle cx="88" cy="88" r="16" fill="#3a2318" />
-                  <path d="M66 160 Q88 112 110 160 Z" fill="#2d4739" />
-                  <circle cx="232" cy="92" r="15" fill="#c98a5b" />
-                  <path d="M210 160 Q232 115 254 160 Z" fill="#1e1b18" />
-                  <rect x="44" y="176" width="232" height="22" rx="4" fill="rgba(0,0,0,0.6)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#ffe6a7" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"Isn't everything we do in life a way to be loved a little more?"</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-pink">
-                <span>☕</span> Before Sunrise · 00:39:10
-              </div>
-            </article>
-
-            <!-- Movie Card 6: About Time (2013) -->
-            <article class="pi-marquee-card" onclick="selectMoviePreset('lalaland', true)" title="Klik untuk coba adegan di Photobooth">
-              <div class="pi-marquee-art">
-                <svg viewBox="0 0 320 220" class="pi-movie-svg" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="320" height="220" fill="#2b4c5e" />
-                  <circle cx="160" cy="85" r="95" fill="#e87a5d" opacity="0.35" />
-                  <!-- Warm Rain Streaks -->
-                  <g stroke="#f4e8c1" stroke-width="1.5" opacity="0.45">
-                    <line x1="60" y1="20" x2="45" y2="70" />
-                    <line x1="120" y1="30" x2="105" y2="80" />
-                    <line x1="210" y1="15" x2="195" y2="65" />
-                    <line x1="270" y1="40" x2="255" y2="90" />
-                  </g>
-                  <!-- Red Umbrella & Joyful Couple -->
-                  <path d="M105 95 Q160 42 215 95 Z" fill="#d13438" />
-                  <line x1="160" y1="95" x2="160" y2="145" stroke="#f4e8c1" stroke-width="3" />
-                  <circle cx="146" cy="118" r="9" fill="#1d2d35" />
-                  <circle cx="174" cy="120" r="8.5" fill="#1d2d35" />
-                  <path d="M160 130 L188 168 L158 168 Z" fill="#c92a2a" />
-                  <path d="M134 130 L156 130 L158 168 L130 168 Z" fill="#1d2d35" />
-                  <rect x="44" y="176" width="232" height="22" rx="4" fill="rgba(0,0,0,0.6)" />
-                  <text x="160" y="191" text-anchor="middle" fill="#ffdf9e" font-family="sans-serif" font-size="10.5" font-style="italic" font-weight="600">"We're all traveling through time together, every day."</text>
-                </svg>
-              </div>
-              <div class="pi-marquee-pill pill-blue">
-                <span>🎞️</span> About Time · 01:19:50
-              </div>
-            </article>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           2. ROOM COMMAND HUB (6-DIGIT OTP JOIN / HOST SETUP IN PI WARM STYLE)
-           ============================================================ -->
-      <section class="pi-hub-section" id="cooldockHub">
-        <div class="pi-container">
-          <div class="pi-hub-card">
-            <div class="pi-hub-header">
-              <div>
-                <span class="pi-eyebrow">RUANG BIOSKOP P2P INSTAN</span>
-                <h2 class="pi-hub-title">Masuk ke ruang nobar atau <em>mulai tayanganmu</em></h2>
-              </div>
-
-              <!-- Mode Switcher (Viewer vs Host) -->
-              <div class="pi-tab-switcher" role="tablist" aria-label="Pilih Peran">
-                <button class="pi-btn-forest-pill" id="tabViewerBtn" role="tab" aria-selected="true" onclick="switchTab('viewer')">
-                  Gabung Menonton
-                </button>
-                <button class="pi-btn-outline-pill" id="tabHostBtn" role="tab" aria-selected="false" onclick="switchTab('host')">
-                  Buat Ruang Siaran
-                </button>
-              </div>
-            </div>
-
-            <!-- VIEWER JOIN CARD -->
-            <div class="pi-hub-pane" id="viewerJoinCard" role="tabpanel">
-              <p class="pi-hub-desc">
-                Masukkan <strong>6 digit kode ruang</strong> dari temanmu untuk langsung menonton film bersama dan berfoto di Rollbooth Studio.
-              </p>
-
-              <!-- 6-Box OTP Input Grid -->
-              <div class="otp-grid pi-otp-grid" id="otpGrid">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Digit 1" data-index="0">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 2" data-index="1">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 3" data-index="2">
-                <span class="otp-sep" aria-hidden="true">-</span>
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 4" data-index="3">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 5" data-index="4">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" aria-label="Digit 6" data-index="5">
-              </div>
-
-              <!-- Hidden legacy input synced for app.js -->
-              <input type="hidden" id="roomCodeInput" value="">
-
-              <div class="pi-hub-actions">
-                <button class="pi-btn-forest-pill pi-btn-lg" id="joinBtn" onclick="joinRoom()">
-                  Masuk ke Ruang Bioskop
-                </button>
-                <button class="pi-btn-outline-pill pi-btn-lg" type="button" onclick="openRollboothStudio()">
-                  📸 Coba Photobooth Studio
-                </button>
-              </div>
-            </div>
-
-            <!-- HOST SETUP CARD -->
-            <div class="pi-hub-pane" id="hostSetupCard" role="tabpanel" style="display: none;">
-              <p class="pi-hub-desc">
-                Pilih resolusi dan frame rate terbaik untuk memutar film (Disney+, Netflix, VLC, atau browser), lalu bagikan 6 digit kode ke pasangan atau sahabatmu.
-              </p>
-
-              <div class="pi-host-grid">
-                <div class="setting-item">
-                  <span class="setting-label">Profil Kualitas</span>
-                  <select class="setting-select" id="presetSelect" onchange="applyPreset()" aria-label="Profil Kualitas">
-                    <option value="ultra">Ultra (4K / 60fps)</option>
-                    <option value="high" selected>Tinggi (1080p / 60fps)</option>
-                    <option value="motion">Gerak Halus (720p / 60fps)</option>
-                    <option value="sharp">Tajam / Teks (1440p / 30fps)</option>
-                    <option value="low">Hemat Kuota (720p / 30fps)</option>
-                  </select>
-                </div>
-
-                <div class="setting-item">
-                  <span class="setting-label">Resolusi</span>
-                  <select class="setting-select" id="resolutionSelect" aria-label="Resolusi">
-                    <option value="2160">4K (2160p)</option>
-                    <option value="1440">QHD (1440p)</option>
-                    <option value="1080" selected>FHD (1080p)</option>
-                    <option value="720">HD (720p)</option>
-                    <option value="native">Asli Layar</option>
-                  </select>
-                </div>
-
-                <div class="setting-item">
-                  <span class="setting-label">Frame Rate</span>
-                  <select class="setting-select" id="fpsSelect" aria-label="Frame Rate">
-                    <option value="60" selected>60 FPS</option>
-                    <option value="30">30 FPS</option>
-                    <option value="24">24 FPS (Sinema)</option>
-                  </select>
-                </div>
-
-                <div class="setting-item">
-                  <span class="setting-label">Target Bitrate</span>
-                  <select class="setting-select" id="bitrateSelect" aria-label="Target Bitrate">
-                    <option value="20000000">20 Mbps</option>
-                    <option value="12000000" selected>12 Mbps</option>
-                    <option value="8000000">8 Mbps</option>
-                    <option value="5000000">5 Mbps</option>
-                    <option value="2500000">2.5 Mbps</option>
-                  </select>
-                </div>
-
-                <div class="setting-item">
-                  <span class="setting-label">Video Codec</span>
-                  <select class="setting-select" id="codecSelect" aria-label="Video Codec">
-                    <option value="vp9" selected>VP9 (Kualitas Terbaik)</option>
-                    <option value="h264">H.264 (Akselerasi GPU)</option>
-                    <option value="vp8">VP8 (Kompatibilitas)</option>
-                    <option value="av1">AV1 (Generasi Baru)</option>
-                  </select>
-                </div>
-
-                <div class="setting-item">
-                  <span class="setting-label">Optimasi Konten</span>
-                  <select class="setting-select" id="contentHintSelect" aria-label="Optimasi Konten">
-                    <option value="motion" selected>Video / Film (Halus)</option>
-                    <option value="detail">Teks / Presentasi (Tajam)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="pi-hub-actions">
-                <button class="pi-btn-forest-pill pi-btn-lg" id="startShareBtn" onclick="startHosting()">
-                  Mulai Bagikan Layar Film
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           3. PI.AI 3x2 EDITORIAL BENTO GRID WITH MOVIE EXAMPLES
-           ("Ask Pi anything. Talk about everything" -> "Putar film apa saja. Abadikan setiap adegannya")
-           ============================================================ -->
-      <section class="pi-bento-section" id="movieBentoSection">
-        <div class="pi-container">
-          <div class="pi-section-header">
-            <h2 class="pi-section-title">
-              Putar film apa saja. <em>Abadikan setiap adegannya</em>
-            </h2>
-            <p class="pi-section-subtitle">
-              ScreenCast × Rollbooth selalu siap menemani malam minggumu—dari musikal penuh warna hingga petualangan luar angkasa. Klik kartu film untuk melihat hasil fotonya di studio.
+            <p class="dr-hero-lead" id="heroSubTitle">
+              Bagikan tayangan <em>La La Land</em>, <em>Interstellar</em>, atau koleksi film di laptopmu secara langsung ke teman lewat jalur WebRTC 60fps. Saat adegan terbaik muncul, abadikan ekspresi wajah kalian bersanding dengan frame filmnya di atas lembaran kontak foto.
             </p>
+
+            <!-- Functional Room Hub directly in the Hero -->
+            <div class="dr-console-card" id="cooldockHub">
+              <div class="dr-console-tabs" role="tablist" aria-label="Pilih Mode Ruang">
+                <button type="button" class="dr-tab-btn active" id="tabViewerBtn" role="tab" aria-selected="true"
+                  onclick="switchTab('viewer')">
+                  Masuk dengan Kode Ruang
+                </button>
+                <button type="button" class="dr-tab-btn" id="tabHostBtn" role="tab" aria-selected="false"
+                  onclick="switchTab('host')">
+                  Siarkan Layar Film
+                </button>
+              </div>
+
+              <!-- VIEWER JOIN PANE -->
+              <div class="dr-console-pane" id="viewerJoinCard" role="tabpanel">
+                <label class="dr-field-label" for="otpBox1">
+                  Masukkan 6 angka kode ruang dari penyelenggara tayangan
+                </label>
+
+                <div class="otp-grid dr-otp-grid" id="otpGrid">
+                  <input type="text" id="otpBox1" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    autocomplete="one-time-code" aria-label="Digit 1" data-index="0" placeholder="0">
+                  <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    aria-label="Digit 2" data-index="1" placeholder="0">
+                  <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    aria-label="Digit 3" data-index="2" placeholder="0">
+                  <span class="otp-sep" aria-hidden="true">:</span>
+                  <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    aria-label="Digit 4" data-index="3" placeholder="0">
+                  <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    aria-label="Digit 5" data-index="4" placeholder="0">
+                  <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                    aria-label="Digit 6" data-index="5" placeholder="0">
+                </div>
+
+                <input type="hidden" id="roomCodeInput" value="">
+
+                <!-- Explicit UI State Feedback Banner (Empty / Loading / Error per R-27) -->
+                <div class="dr-status-banner state-empty" id="roomStatusBanner" role="status" aria-live="polite">
+                  <span class="dr-status-tag" id="roomStatusTag">SIAP</span>
+                  <span class="dr-status-text" id="roomStatusText">
+                    Belum ada ruang aktif. Ketik 6 angka kode dari temanmu, atau buka Studio Kamera untuk berfoto tanpa ruang.
+                  </span>
+                </div>
+
+                <div class="dr-console-actions">
+                  <button type="button" class="dr-btn-primary" id="joinBtn" onclick="joinRoomWithState()">
+                    Hubungkan ke Proyektor Ruang
+                  </button>
+                  <button type="button" class="dr-btn-secondary" onclick="openRollboothStudio()">
+                    Buka Studio Kamera (Tanpa Kode)
+                  </button>
+                </div>
+              </div>
+
+              <!-- HOST SETUP PANE -->
+              <div class="dr-console-pane" id="hostSetupCard" role="tabpanel" style="display: none;">
+                <p class="dr-console-note">
+                  Pilih parameter transmisi video sebelum memilih jendela pemutar film. Kode 6 angka akan dibuat otomatis begitu siaran dimulai.
+                </p>
+
+                <div class="dr-host-settings-grid">
+                  <div class="setting-item">
+                    <label class="setting-label" for="presetSelect">Profil Tayangan</label>
+                    <select class="setting-select" id="presetSelect" onchange="applyPreset()">
+                      <option value="ultra">Ultra (4K / 60fps)</option>
+                      <option value="high" selected>Sinema (1080p / 60fps)</option>
+                      <option value="motion">Gerak Cepat (720p / 60fps)</option>
+                      <option value="sharp">Subtitel Tajam (1440p / 30fps)</option>
+                      <option value="low">Hemat Bandwidth (720p / 30fps)</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label class="setting-label" for="resolutionSelect">Resolusi</label>
+                    <select class="setting-select" id="resolutionSelect">
+                      <option value="2160">2160p (4K)</option>
+                      <option value="1440">1440p (QHD)</option>
+                      <option value="1080" selected>1080p (Full HD)</option>
+                      <option value="720">720p (HD)</option>
+                      <option value="native">Resolusi Asli Layar</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label class="setting-label" for="fpsSelect">Kecepatan Frame</label>
+                    <select class="setting-select" id="fpsSelect">
+                      <option value="60" selected>60 FPS</option>
+                      <option value="30">30 FPS</option>
+                      <option value="24">24 FPS (Standar Film)</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label class="setting-label" for="bitrateSelect">Batas Bitrate</label>
+                    <select class="setting-select" id="bitrateSelect">
+                      <option value="20000000">20 Mbps</option>
+                      <option value="12000000" selected>12 Mbps</option>
+                      <option value="8000000">8 Mbps</option>
+                      <option value="5000000">5 Mbps</option>
+                      <option value="2500000">2.5 Mbps</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label class="setting-label" for="codecSelect">Enkoder Video</label>
+                    <select class="setting-select" id="codecSelect">
+                      <option value="vp9" selected>VP9 (Detail Gelap Terbaik)</option>
+                      <option value="h264">H.264 (Perangkat Keras)</option>
+                      <option value="vp8">VP8 (Kompatibilitas Luas)</option>
+                      <option value="av1">AV1 (Kompresi Tinggi)</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-item">
+                    <label class="setting-label" for="contentHintSelect">Prioritas Gambar</label>
+                    <select class="setting-select" id="contentHintSelect">
+                      <option value="motion" selected>Gerak Film Halus</option>
+                      <option value="detail">Ketajaman Teks</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="dr-console-actions">
+                  <button type="button" class="dr-btn-primary" id="startShareBtn" onclick="startHosting()">
+                    Pilih Layar &amp; Mulai Siaran
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="pi-bento-grid">
+          <!-- Right Column: Interactive 35mm Celluloid Film Reel Specimen (#reelCatalog) -->
+          <div class="dr-hero-right" id="reelCatalog">
+            <div class="dr-reel-header">
+              <div>
+                <span class="dr-mono-label">SPESIMEN ROL FILM 35MM</span>
+                <h2 class="dr-reel-heading">Klik judul film untuk memuat adegannya ke meja cetak</h2>
+              </div>
+              <span class="dr-mono-badge" id="activeReelCode">REEL 01 / LA LA LAND</span>
+            </div>
 
-            <!-- Bento Card 1: La La Land (2016) -->
-            <article class="pi-bento-card" onclick="selectMoviePreset('lalaland', true)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading"><em>Berdansa</em> bersama di La La Land</h3>
-                <p class="pi-bento-copy">
-                  Nikmati warna senja ungu Los Angeles dan alunan jazz Seb's Club dalam 60fps + audio stereo jernih, lalu foto bareng saat tarian di observatorium.
-                </p>
+            <!-- 2x2 Film Frame Contact Sheet -->
+            <div class="dr-celluloid-sheet">
+              <!-- Top Sprocket Rail -->
+              <div class="dr-sprocket-rail" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
               </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="bentoLll" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#190e33" />
-                      <stop offset="45%" stop-color="#512475" />
-                      <stop offset="82%" stop-color="#c94b76" />
-                      <stop offset="100%" stop-color="#f5a265" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="400" height="320" fill="url(#bentoLll)" />
-                  <!-- Stars & Moon -->
-                  <circle cx="320" cy="54" r="18" fill="#fff6d6" opacity="0.9" />
-                  <circle cx="326" cy="50" r="16" fill="#321850" />
-                  <circle cx="65" cy="48" r="1.8" fill="#fff" />
-                  <circle cx="140" cy="34" r="1.5" fill="#ffd97d" />
-                  <circle cx="220" cy="60" r="2" fill="#fff" />
-                  <!-- Griffith Observatory Silhouette on Hill -->
-                  <path d="M0 245 Q130 220 260 238 T400 235 L400 320 L0 320 Z" fill="#130926" />
-                  <path d="M40 236 L110 236 L110 218 L40 218 Z" fill="#1d1038" />
-                  <path d="M55 218 A20 20 0 0 1 95 218 Z" fill="#1d1038" />
-                  <!-- Vintage Streetlamp -->
-                  <line x1="125" y1="88" x2="125" y2="236" stroke="#130926" stroke-width="5" />
-                  <circle cx="125" cy="82" r="24" fill="#ffe999" opacity="0.3" />
-                  <circle cx="125" cy="82" r="10" fill="#fff8d6" />
-                  <!-- Dancing Couple Centerpiece -->
-                  <g transform="translate(215, 126)">
-                    <circle cx="-18" cy="10" r="9" fill="#130926" />
-                    <path d="M-28 22 L-6 22 L-10 62 L-24 62 Z" fill="#f7f3ea" />
-                    <path d="M-22 62 L-30 104 M-12 62 L-4 104" stroke="#130926" stroke-width="6" stroke-linecap="round" />
-                    <path d="M-6 26 L22 16" stroke="#f7f3ea" stroke-width="5" stroke-linecap="round" />
-                    <!-- Mia Yellow Dress -->
-                    <circle cx="34" cy="14" r="8.5" fill="#130926" />
-                    <path d="M26 26 L42 26 L58 76 L12 72 Z" fill="#f7c832" />
-                    <path d="M26 28 L10 16" stroke="#f7c832" stroke-width="4.5" stroke-linecap="round" />
-                    <path d="M28 72 L22 104 M40 72 L50 100" stroke="#130926" stroke-width="5" stroke-linecap="round" />
-                  </g>
-                  <!-- PiP Webcam Bubble & Film Tag -->
-                  <rect x="20" y="20" width="136" height="28" rx="14" fill="rgba(13,60,38,0.88)" />
-                  <text x="88" y="38" text-anchor="middle" fill="#f7f3ea" font-family="sans-serif" font-size="11" font-weight="600">🎬 La La Land (2016)</text>
-                  <rect x="36" y="264" width="328" height="32" rx="8" fill="rgba(19,9,38,0.78)" />
-                  <text x="200" y="284" text-anchor="middle" fill="#ffe66d" font-family="sans-serif" font-size="12" font-style="italic">"Here's to the ones who dream, foolish as they may seem."</text>
-                </svg>
-              </div>
-            </article>
 
-            <!-- Bento Card 2: Interstellar (2014) -->
-            <article class="pi-bento-card" onclick="selectMoviePreset('interstellar', true)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading">Menembus ruang &amp; waktu di <em>Interstellar</em></h3>
-                <p class="pi-bento-copy">
-                  Saksikan kilau cakram akresi Gargantua dan adegan gelombang Miller's Planet dalam bitrate 20 Mbps yang tajam bersama teman nobarmu.
-                </p>
-              </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <radialGradient id="bentoGargantua" cx="50%" cy="48%" r="54%">
-                      <stop offset="0%" stop-color="#040407" />
-                      <stop offset="36%" stop-color="#040407" />
-                      <stop offset="42%" stop-color="#fff8de" />
-                      <stop offset="52%" stop-color="#f59b23" />
-                      <stop offset="72%" stop-color="#78290b" />
-                      <stop offset="100%" stop-color="#060812" />
-                    </radialGradient>
-                  </defs>
-                  <rect width="400" height="320" fill="#060812" />
-                  <!-- Stars -->
-                  <circle cx="48" cy="60" r="1.5" fill="#fff" opacity="0.7" />
-                  <circle cx="350" cy="45" r="2" fill="#ffdf9e" opacity="0.8" />
-                  <circle cx="330" cy="210" r="1.2" fill="#fff" opacity="0.6" />
-                  <circle cx="70" cy="200" r="1.5" fill="#fff" opacity="0.7" />
-                  <!-- Gargantua Black Hole -->
-                  <circle cx="200" cy="148" r="108" fill="url(#bentoGargantua)" />
-                  <ellipse cx="200" cy="148" rx="162" ry="24" fill="none" stroke="#ffdf9e" stroke-width="9" opacity="0.88" transform="rotate(-14 200 148)" />
-                  <ellipse cx="200" cy="148" rx="178" ry="10" fill="none" stroke="#fff9eb" stroke-width="4" opacity="0.95" transform="rotate(-14 200 148)" />
-                  <circle cx="200" cy="148" r="44" fill="#040407" />
-                  <!-- Endurance Ring -->
-                  <g transform="translate(285, 95)">
-                    <circle cx="0" cy="0" r="10" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="3 3" />
-                    <circle cx="0" cy="0" r="2.5" fill="#fff" />
-                  </g>
-                  <!-- Tag & Quote -->
-                  <rect x="20" y="20" width="142" height="28" rx="14" fill="rgba(13,60,38,0.88)" />
-                  <text x="91" y="38" text-anchor="middle" fill="#f7f3ea" font-family="sans-serif" font-size="11" font-weight="600">🪐 Interstellar (2014)</text>
-                  <rect x="36" y="264" width="328" height="32" rx="8" fill="rgba(6,8,18,0.82)" />
-                  <text x="200" y="284" text-anchor="middle" fill="#ffdf9e" font-family="sans-serif" font-size="12" font-style="italic">"Do not go gentle into that good night."</text>
-                </svg>
-              </div>
-            </article>
+              <div class="dr-reel-grid">
+                <!-- Frame 01A: La La Land (2016) -->
+                <article class="dr-reel-frame active" id="reelCard-lalaland" tabindex="0" role="button"
+                  aria-pressed="true" onclick="selectMoviePreset('lalaland', false)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('lalaland', false);}">
+                  <div class="dr-frame-meta">
+                    <span class="mono">FRM 01A</span>
+                    <span class="mono">01:12:40</span>
+                  </div>
+                  <div class="dr-frame-canvas">
+                    <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi adegan tarian senja La La Land di observatorium">
+                      <defs>
+                        <linearGradient id="lllGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#190e30" />
+                          <stop offset="48%" stop-color="#4e2268" />
+                          <stop offset="82%" stop-color="#b84a72" />
+                          <stop offset="100%" stop-color="#f09c67" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="320" height="190" fill="url(#lllGrad)" />
+                      <circle cx="52" cy="30" r="1.4" fill="#fff" opacity="0.85" />
+                      <circle cx="128" cy="20" r="1.8" fill="#ffe28a" />
+                      <circle cx="242" cy="36" r="1.5" fill="#fff" opacity="0.8" />
+                      <!-- Horizon LA City Grid -->
+                      <rect x="0" y="146" width="320" height="44" fill="#110920" />
+                      <line x1="0" y1="146" x2="320" y2="146" stroke="#f5c431" stroke-width="1.5" opacity="0.6" />
+                      <!-- Vintage Streetlamp -->
+                      <line x1="84" y1="44" x2="84" y2="146" stroke="#110920" stroke-width="4" />
+                      <circle cx="84" cy="42" r="15" fill="#ffe89e" opacity="0.28" />
+                      <circle cx="84" cy="42" r="6.5" fill="#fff7d6" />
+                      <!-- Dancing Couple Silhouette (Yellow Dress) -->
+                      <g transform="translate(164, 74)">
+                        <circle cx="-12" cy="8" r="6.5" fill="#110920" />
+                        <path d="M-19 17 L-5 17 L-8 44 L-17 44 Z" fill="#f3efe6" />
+                        <path d="M-15 44 L-21 70 M-9 44 L-3 70" stroke="#110920" stroke-width="4.5" stroke-linecap="round" />
+                        <path d="M-5 20 L15 13" stroke="#f3efe6" stroke-width="3.5" stroke-linecap="round" />
+                        <circle cx="24" cy="11" r="6" fill="#110920" />
+                        <path d="M18 20 L30 20 L40 52 L10 50 Z" fill="#f5c431" />
+                        <path d="M18 22 L6 13" stroke="#f5c431" stroke-width="3.5" stroke-linecap="round" />
+                        <path d="M20 50 L16 70 M28 50 L35 68" stroke="#110920" stroke-width="4" stroke-linecap="round" />
+                      </g>
+                      <rect x="24" y="156" width="272" height="22" rx="2" fill="rgba(10,7,16,0.78)" />
+                      <text x="160" y="171" text-anchor="middle" fill="#ffe66d" font-family="sans-serif" font-size="10.5" font-style="italic">"City of stars, are you shining just for me?"</text>
+                    </svg>
+                  </div>
+                  <div class="dr-frame-caption">
+                    <strong>La La Land (2016)</strong>
+                    <span>Griffith Park Twilight Dance</span>
+                  </div>
+                </article>
 
-            <!-- Bento Card 3: Spirited Away (2001) -->
-            <article class="pi-bento-card" onclick="selectMoviePreset('spiritedaway', true)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading"><em>Tenggelam</em> dalam dunia Spirited Away</h3>
-                <p class="pi-bento-copy">
-                  Rasakan ketenangan perjalanan kereta di atas laut bersama Chihiro &amp; No-Face sambil ngobrol santai dengan fitur peredam suara otomatis.
-                </p>
-              </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="bentoGhibli" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#14313d" />
-                      <stop offset="52%" stop-color="#3c7a6d" />
-                      <stop offset="100%" stop-color="#eb9c75" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="400" height="320" fill="url(#bentoGhibli)" />
-                  <ellipse cx="110" cy="95" rx="75" ry="22" fill="#fae1cf" opacity="0.35" />
-                  <ellipse cx="300" cy="78" rx="85" ry="24" fill="#fae1cf" opacity="0.3" />
-                  <!-- Sea Water -->
-                  <rect x="0" y="195" width="400" height="125" fill="#17444c" opacity="0.88" />
-                  <!-- Sea Train -->
-                  <rect x="36" y="158" width="230" height="38" rx="6" fill="#c93b34" />
-                  <rect x="36" y="174" width="230" height="8" fill="#f5d78e" />
-                  <g fill="#fff4b8">
-                    <rect x="50" y="163" width="22" height="13" rx="2" />
-                    <rect x="80" y="163" width="22" height="13" rx="2" />
-                    <rect x="110" y="163" width="22" height="13" rx="2" />
-                    <rect x="140" y="163" width="22" height="13" rx="2" />
-                    <rect x="170" y="163" width="22" height="13" rx="2" />
-                    <rect x="200" y="163" width="22" height="13" rx="2" />
-                    <rect x="230" y="163" width="22" height="13" rx="2" />
-                  </g>
-                  <!-- Glowing Water Reflection -->
-                  <g fill="#fff4b8" opacity="0.32">
-                    <rect x="50" y="204" width="22" height="24" />
-                    <rect x="80" y="204" width="22" height="24" />
-                    <rect x="110" y="204" width="22" height="24" />
-                    <rect x="140" y="204" width="22" height="24" />
-                    <rect x="170" y="204" width="22" height="24" />
-                    <rect x="200" y="204" width="22" height="24" />
-                  </g>
-                  <!-- Japanese Lantern Pole -->
-                  <line x1="328" y1="88" x2="328" y2="205" stroke="#7d1814" stroke-width="6" />
-                  <circle cx="314" cy="105" r="13" fill="#ff5a36" />
-                  <circle cx="314" cy="105" r="7" fill="#fff099" />
-                  <rect x="20" y="20" width="152" height="28" rx="14" fill="rgba(13,60,38,0.88)" />
-                  <text x="96" y="38" text-anchor="middle" fill="#f7f3ea" font-family="sans-serif" font-size="11" font-weight="600">🏮 Spirited Away (2001)</text>
-                  <rect x="36" y="264" width="328" height="32" rx="8" fill="rgba(15,40,46,0.78)" />
-                  <text x="200" y="284" text-anchor="middle" fill="#fff4b8" font-family="sans-serif" font-size="12" font-style="italic">"Now go, and don't look back."</text>
-                </svg>
-              </div>
-            </article>
+                <!-- Frame 02A: Interstellar (2014) -->
+                <article class="dr-reel-frame" id="reelCard-interstellar" tabindex="0" role="button"
+                  aria-pressed="false" onclick="selectMoviePreset('interstellar', false)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('interstellar', false);}">
+                  <div class="dr-frame-meta">
+                    <span class="mono">FRM 02A</span>
+                    <span class="mono">02:04:15</span>
+                  </div>
+                  <div class="dr-frame-canvas">
+                    <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi lubang hitam Gargantua dari film Interstellar">
+                      <defs>
+                        <radialGradient id="gargantuaGrad" cx="50%" cy="48%" r="54%">
+                          <stop offset="0%" stop-color="#050508" />
+                          <stop offset="36%" stop-color="#050508" />
+                          <stop offset="43%" stop-color="#fff7d6" />
+                          <stop offset="55%" stop-color="#f59e2d" />
+                          <stop offset="76%" stop-color="#6e2b0e" />
+                          <stop offset="100%" stop-color="#070913" />
+                        </radialGradient>
+                      </defs>
+                      <rect width="320" height="190" fill="#070913" />
+                      <circle cx="38" cy="34" r="1.2" fill="#fff" opacity="0.7" />
+                      <circle cx="278" cy="28" r="1.5" fill="#ffdf9e" opacity="0.85" />
+                      <circle cx="160" cy="86" r="68" fill="url(#gargantuaGrad)" />
+                      <ellipse cx="160" cy="86" rx="108" ry="15" fill="none" stroke="#ffdf9e" stroke-width="6" opacity="0.88" transform="rotate(-12 160 86)" />
+                      <ellipse cx="160" cy="86" rx="120" ry="6" fill="none" stroke="#fff9eb" stroke-width="2.5" opacity="0.95" transform="rotate(-12 160 86)" />
+                      <circle cx="160" cy="86" r="27" fill="#040407" />
+                      <rect x="24" y="156" width="272" height="22" rx="2" fill="rgba(7,9,19,0.82)" />
+                      <text x="160" y="171" text-anchor="middle" fill="#ffdf9e" font-family="sans-serif" font-size="10.5" font-style="italic">"Love is the one thing that transcends time and space."</text>
+                    </svg>
+                  </div>
+                  <div class="dr-frame-caption">
+                    <strong>Interstellar (2014)</strong>
+                    <span>Gargantua Accretion Horizon</span>
+                  </div>
+                </article>
 
-            <!-- Bento Card 4: Dual-Column Photobooth Strip -->
-            <article class="pi-bento-card" onclick="scrollToSection('studioShowcase', event)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading">Cetak <em>Rollbooth</em> 2-kolom otomatis</h3>
-                <p class="pi-bento-copy">
-                  Satu klik saat adegan favorit muncul: 4 pose ekspresi webcam kalian di kiri, bersanding dengan tangkapan adegan film di kanan.
-                </p>
-              </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="400" height="320" fill="#DFD8CA" />
-                  <!-- Warm Botanical Circle Accent -->
-                  <circle cx="200" cy="165" r="120" fill="#D2C9B8" />
-                  <!-- Tilted Photobooth Strip Preview -->
-                  <g transform="translate(115, 22) rotate(-3 85 140)">
-                    <rect x="0" y="0" width="174" height="274" rx="10" fill="#FBF9F5" stroke="#D5CCBB" stroke-width="2" />
-                    <text x="87" y="20" text-anchor="middle" fill="#0D3C26" font-family="monospace" font-size="8" font-weight="700">SCREENCAST × ROLLBOOTH</text>
-                    <!-- Row 1 -->
-                    <rect x="12" y="28" width="72" height="58" rx="4" fill="#2c3e35" />
-                    <circle cx="48" cy="52" r="11" fill="#e794b5" />
-                    <rect x="90" y="28" width="72" height="58" rx="4" fill="#4b2369" />
-                    <circle cx="126" cy="50" r="8" fill="#f7c832" />
-                    <!-- Row 2 -->
-                    <rect x="12" y="94" width="72" height="58" rx="4" fill="#324b3e" />
-                    <circle cx="48" cy="118" r="11" fill="#f5b841" />
-                    <rect x="90" y="94" width="72" height="58" rx="4" fill="#070913" />
-                    <ellipse cx="126" cy="123" rx="22" ry="5" fill="none" stroke="#ffdf9e" stroke-width="2.5" />
-                    <!-- Row 3 -->
-                    <rect x="12" y="160" width="72" height="58" rx="4" fill="#23382e" />
-                    <circle cx="48" cy="184" r="11" fill="#91e19f" />
-                    <rect x="90" y="160" width="72" height="58" rx="4" fill="#2d6359" />
-                    <rect x="104" y="185" width="44" height="10" rx="2" fill="#c93b34" />
-                    <!-- Footer -->
-                    <text x="87" y="242" text-anchor="middle" fill="#0D3C26" font-family="'Fraunces', serif" font-style="italic" font-size="14">Movie Night '26</text>
-                    <text x="87" y="258" text-anchor="middle" fill="#6b7065" font-family="monospace" font-size="7.5">LA LA LAND · INTERSTELLAR</text>
-                  </g>
-                </svg>
-              </div>
-            </article>
+                <!-- Frame 03A: Spirited Away (2001) -->
+                <article class="dr-reel-frame" id="reelCard-spiritedaway" tabindex="0" role="button"
+                  aria-pressed="false" onclick="selectMoviePreset('spiritedaway', false)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('spiritedaway', false);}">
+                  <div class="dr-frame-meta">
+                    <span class="mono">FRM 03A</span>
+                    <span class="mono">00:54:20</span>
+                  </div>
+                  <div class="dr-frame-canvas">
+                    <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi kereta laut senja dari film Spirited Away">
+                      <defs>
+                        <linearGradient id="seaTrainGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#183642" />
+                          <stop offset="55%" stop-color="#397367" />
+                          <stop offset="100%" stop-color="#e89973" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="320" height="190" fill="url(#seaTrainGrad)" />
+                      <rect x="0" y="118" width="320" height="72" fill="#17444c" opacity="0.88" />
+                      <rect x="28" y="94" width="172" height="25" rx="3" fill="#c83e37" />
+                      <rect x="28" y="105" width="172" height="5" fill="#f4d58d" />
+                      <g fill="#fff3b0">
+                        <rect x="38" y="97" width="16" height="8" rx="1" />
+                        <rect x="62" y="97" width="16" height="8" rx="1" />
+                        <rect x="86" y="97" width="16" height="8" rx="1" />
+                        <rect x="110" y="97" width="16" height="8" rx="1" />
+                        <rect x="134" y="97" width="16" height="8" rx="1" />
+                        <rect x="158" y="97" width="16" height="8" rx="1" />
+                      </g>
+                      <line x1="256" y1="48" x2="256" y2="128" stroke="#7d1814" stroke-width="4.5" />
+                      <circle cx="246" cy="60" r="8" fill="#ff5a36" />
+                      <circle cx="246" cy="60" r="4" fill="#ffea85" />
+                      <rect x="24" y="156" width="272" height="22" rx="2" fill="rgba(14,36,42,0.82)" />
+                      <text x="160" y="171" text-anchor="middle" fill="#fff3b0" font-family="sans-serif" font-size="10.5" font-style="italic">"Once you've met someone you never really forget them."</text>
+                    </svg>
+                  </div>
+                  <div class="dr-frame-caption">
+                    <strong>Spirited Away (2001)</strong>
+                    <span>Sixth Station Sea Railway</span>
+                  </div>
+                </article>
 
-            <!-- Bento Card 5: Live Voice Activity & Auto-Ducking -->
-            <article class="pi-bento-card" onclick="scrollToSection('cooldockHub', event)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading">Ngobrol <em>live</em> tanpa ganggu dialog film</h3>
-                <p class="pi-bento-copy">
-                  Komentari plot twist *Before Sunrise* atau *Blade Runner 2049* secara real-time dengan cincin suara responsif dan kontrol volume terpisah.
-                </p>
+                <!-- Frame 04A: Blade Runner 2049 (2017) -->
+                <article class="dr-reel-frame" id="reelCard-bladerunner" tabindex="0" role="button"
+                  aria-pressed="false" onclick="selectMoviePreset('bladerunner', false)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('bladerunner', false);}">
+                  <div class="dr-frame-meta">
+                    <span class="mono">FRM 04A</span>
+                    <span class="mono">01:48:05</span>
+                  </div>
+                  <div class="dr-frame-canvas">
+                    <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrasi neon hujan dari film Blade Runner 2049">
+                      <defs>
+                        <linearGradient id="br2049Grad" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stop-color="#0d1322" />
+                          <stop offset="50%" stop-color="#2c1638" />
+                          <stop offset="100%" stop-color="#d95b26" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="320" height="190" fill="url(#br2049Grad)" />
+                      <polygon points="55,0 125,0 165,190 20,190" fill="#00f0ff" opacity="0.18" />
+                      <polygon points="185,0 255,0 285,190 150,190" fill="#ff2a85" opacity="0.22" />
+                      <rect x="18" y="52" width="36" height="138" fill="#070a12" />
+                      <rect x="258" y="38" width="44" height="152" fill="#070a12" />
+                      <circle cx="96" cy="76" r="20" fill="#ff2a85" opacity="0.5" />
+                      <path d="M168 98 L184 98 L190 148 L162 148 Z" fill="#070a12" />
+                      <circle cx="176" cy="90" r="6.5" fill="#070a12" />
+                      <rect x="24" y="156" width="272" height="22" rx="2" fill="rgba(7,10,18,0.82)" />
+                      <text x="160" y="171" text-anchor="middle" fill="#7df9ff" font-family="sans-serif" font-size="10.5" font-style="italic">"All the best memories are hers."</text>
+                    </svg>
+                  </div>
+                  <div class="dr-frame-caption">
+                    <strong>Blade Runner 2049 (2017)</strong>
+                    <span>Los Angeles Rooftop Rain</span>
+                  </div>
+                </article>
               </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="400" height="320" fill="#204E43" />
-                  <!-- Cozy Train/Couch Window Backdrop inspired by Pi's 'Talk it out live' -->
-                  <rect x="28" y="34" width="155" height="190" rx="16" fill="#D5E5DE" opacity="0.22" />
-                  <rect x="217" y="34" width="155" height="190" rx="16" fill="#D5E5DE" opacity="0.22" />
-                  <!-- Two Connected Avatars with Active Green Speaking Rings -->
-                  <g transform="translate(125, 145)">
-                    <circle cx="0" cy="0" r="46" fill="none" stroke="#91E19F" stroke-width="3" opacity="0.5" />
-                    <circle cx="0" cy="0" r="36" fill="#F7F3EA" stroke="#15895D" stroke-width="4" />
-                    <text x="0" y="8" text-anchor="middle" fill="#0D3C26" font-family="'Fraunces', serif" font-size="24" font-weight="600">A</text>
-                  </g>
-                  <g transform="translate(275, 145)">
-                    <circle cx="0" cy="0" r="46" fill="none" stroke="#E794B5" stroke-width="3" opacity="0.5" />
-                    <circle cx="0" cy="0" r="36" fill="#F7F3EA" stroke="#E794B5" stroke-width="4" />
-                    <text x="0" y="8" text-anchor="middle" fill="#0D3C26" font-family="'Fraunces', serif" font-size="24" font-weight="600">R</text>
-                  </g>
-                  <!-- Soundwave Pill in Center -->
-                  <rect x="115" y="238" width="170" height="40" rx="20" fill="#F7F3EA" />
-                  <text x="200" y="263" text-anchor="middle" fill="#0D3C26" font-family="sans-serif" font-size="12" font-weight="700">🎙️ Suara Jernih Aktif</text>
-                </svg>
-              </div>
-            </article>
 
-            <!-- Bento Card 6: Have some fun with Filters & Stickers -->
-            <article class="pi-bento-card" onclick="scrollToSection('studioShowcase', event)">
-              <div class="pi-bento-top">
-                <h3 class="pi-bento-heading">Berkreasi <em>seru</em> dengan filter estetik</h3>
-                <p class="pi-bento-copy">
-                  Sesuaikan mood photobooth dengan film yang kalian tonton—mulai dari *B&amp;W Noir*, *Vintage Warm*, *Cinema Contrast*, hingga stiker lucu.
-                </p>
+              <!-- Bottom Sprocket Rail -->
+              <div class="dr-sprocket-rail" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
               </div>
-              <div class="pi-bento-visual">
-                <svg viewBox="0 0 400 320" class="pi-bento-svg" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Joyful Swirl Art inspired by Pi's 'Have some fun' card -->
-                  <rect width="400" height="320" fill="#EE7637" />
-                  <circle cx="200" cy="160" r="145" fill="#E794B5" />
-                  <circle cx="200" cy="160" r="110" fill="#F5B841" />
-                  <circle cx="200" cy="160" r="78" fill="#15895D" />
-                  <circle cx="200" cy="160" r="46" fill="#0D3C26" />
-                  <!-- Floating Filter & Sticker Pills -->
-                  <rect x="42" y="54" width="118" height="34" rx="17" fill="#F7F3EA" />
-                  <text x="101" y="75" text-anchor="middle" fill="#0D3C26" font-family="sans-serif" font-size="12" font-weight="700">🎞️ Vintage Warm</text>
-                  <rect x="240" y="76" width="118" height="34" rx="17" fill="#F7F3EA" />
-                  <text x="299" y="97" text-anchor="middle" fill="#0D3C26" font-family="sans-serif" font-size="12" font-weight="700">🖤 B&amp;W Noir</text>
-                  <rect x="136" y="232" width="128" height="36" rx="18" fill="#F7F3EA" />
-                  <text x="200" y="255" text-anchor="middle" fill="#0D3C26" font-family="sans-serif" font-size="12" font-weight="700">🍿❤️✨ Stiker</text>
-                </svg>
-              </div>
-            </article>
-
+            </div>
           </div>
+
         </div>
       </section>
 
       <!-- ============================================================
-           4. INTERACTIVE ROLLBOOTH STUDIO SHOWCASE (PI.AI DEVICE SHOWCASE STYLE)
-           Includes Movie Scene Switcher (La La Land, Interstellar, Spirited Away, Blade Runner)
+           SECTION 2: INTERACTIVE DARKROOM CONTACT SHEET TABLE (#studioShowcase)
            ============================================================ -->
-      <section class="pi-studio-section" id="studioShowcase">
-        <div class="pi-container">
-          <div class="pi-studio-top-row">
-            <div class="pi-studio-copy">
-              <h2 class="pi-section-title pi-left-title">
-                Cetak strip foto <em>dengan adegan film</em> favoritmu
+      <section class="dr-darkroom-section" id="studioShowcase">
+        <div class="dr-container">
+          <div class="dr-darkroom-layout">
+
+            <!-- Left Column: Darkroom Print Controls -->
+            <div class="dr-darkroom-controls">
+              <span class="dr-mono-label">MEJA CETAK ROLLBOOTH 35MM</span>
+              <h2 class="dr-section-title">
+                Satu lembar cetakan memuat ekspresi wajah kalian dan <em>frame film yang sedang diputar</em>.
               </h2>
-              <p class="pi-studio-desc">
-                Pilih film yang sedang kalian tonton di bawah ini untuk melihat bagaimana <strong>Rollbooth Studio</strong> menggabungkan foto kamera kalian dengan adegan sinematik dari <em>La La Land</em>, <em>Interstellar</em>, <em>Spirited Away</em>, atau <em>Blade Runner 2049</em>.
+              <p class="dr-section-desc">
+                Saat menonton bersama, menekan tombol kamera di layar pemutar akan menangkap 4 pose dari webcam berdampingan dengan 4 tangkapan adegan film pada detik tersebut. Uji kombinasi film, tata letak, dan emulsi kertas di bawah ini.
               </p>
 
-              <!-- Interactive Controls Panel -->
-              <div class="pi-controls-box">
-                <!-- 0. Movie Scene Preset Switcher -->
+              <div class="dr-control-panel">
+                <!-- 1. Film Reel Selector -->
                 <div class="pg-group">
-                  <span class="pg-label">01 · PILIH CONTOH FILM YANG SEDANG DITONTON</span>
+                  <span class="pg-label">01 / ROL FILM AKTIF</span>
                   <div class="pg-pills" id="moviePresetPills">
-                    <button type="button" class="pg-pill active" id="presetBtn-lalaland" onclick="selectMoviePreset('lalaland')">💃 La La Land</button>
-                    <button type="button" class="pg-pill" id="presetBtn-interstellar" onclick="selectMoviePreset('interstellar')">🪐 Interstellar</button>
-                    <button type="button" class="pg-pill" id="presetBtn-spiritedaway" onclick="selectMoviePreset('spiritedaway')">🏮 Spirited Away</button>
-                    <button type="button" class="pg-pill" id="presetBtn-bladerunner" onclick="selectMoviePreset('bladerunner')">🌧️ Blade Runner 2049</button>
+                    <button type="button" class="pg-pill active" id="presetBtn-lalaland" onclick="selectMoviePreset('lalaland')">La La Land</button>
+                    <button type="button" class="pg-pill" id="presetBtn-interstellar" onclick="selectMoviePreset('interstellar')">Interstellar</button>
+                    <button type="button" class="pg-pill" id="presetBtn-spiritedaway" onclick="selectMoviePreset('spiritedaway')">Spirited Away</button>
+                    <button type="button" class="pg-pill" id="presetBtn-bladerunner" onclick="selectMoviePreset('bladerunner')">Blade Runner 2049</button>
                   </div>
                 </div>
 
-                <!-- 1. Layout Switcher -->
+                <!-- 2. Print Format -->
                 <div class="pg-group">
-                  <span class="pg-label">02 · LAYOUT CETAKAN</span>
+                  <span class="pg-label">02 / FORMAT POTONGAN KERTAS</span>
                   <div class="pg-pills">
-                    <button type="button" class="pg-pill active" id="sampleLayoutStrip" onclick="setSampleLayout('strip')">Strip 4×1</button>
-                    <button type="button" class="pg-pill" id="sampleLayoutGrid" onclick="setSampleLayout('grid')">Grid 2×2</button>
-                    <button type="button" class="pg-pill" id="sampleLayoutPolaroid" onclick="setSampleLayout('polaroid')">Polaroid</button>
+                    <button type="button" class="pg-pill active" id="sampleLayoutStrip" onclick="setSampleLayout('strip')">Strip 4x1</button>
+                    <button type="button" class="pg-pill" id="sampleLayoutGrid" onclick="setSampleLayout('grid')">Kontak 2x2</button>
+                    <button type="button" class="pg-pill" id="sampleLayoutPolaroid" onclick="setSampleLayout('polaroid')">Polaroid Tunggal</button>
                   </div>
                 </div>
 
-                <!-- 2. Filter Switcher -->
+                <!-- 3. Emulsion Filter -->
                 <div class="pg-group">
-                  <span class="pg-label">03 · FILTER MOOD FILM</span>
+                  <span class="pg-label">03 / EMULSI OPTIK</span>
                   <div class="pg-pills">
-                    <button type="button" class="pg-pill active" id="sampleBtn-normal" onclick="setSampleFilter('normal')">Normal</button>
-                    <button type="button" class="pg-pill" id="sampleBtn-bw" onclick="setSampleFilter('bw')">B&amp;W Noir</button>
-                    <button type="button" class="pg-pill" id="sampleBtn-vintage" onclick="setSampleFilter('vintage')">Vintage Warm</button>
-                    <button type="button" class="pg-pill" id="sampleBtn-cinema" onclick="setSampleFilter('cinema')">Cinema</button>
+                    <button type="button" class="pg-pill active" id="sampleBtn-normal" onclick="setSampleFilter('normal')">Warna Asli</button>
+                    <button type="button" class="pg-pill" id="sampleBtn-bw" onclick="setSampleFilter('bw')">Perak Hitam-Putih</button>
+                    <button type="button" class="pg-pill" id="sampleBtn-vintage" onclick="setSampleFilter('vintage')">Sepia Hangat</button>
+                    <button type="button" class="pg-pill" id="sampleBtn-cinema" onclick="setSampleFilter('cinema')">Kontras Sinema</button>
                   </div>
                 </div>
 
-                <!-- 3. Frame Color & Stickers -->
+                <!-- 4. Paper Stock & Stamp Mark -->
                 <div class="pg-group-row">
                   <div class="pg-group">
-                    <span class="pg-label">04 · WARNA KERTAS</span>
+                    <span class="pg-label">04 / WARNA KERTAS CETAK</span>
                     <div class="pg-swatches">
-                      <button type="button" class="pg-swatch active" style="background:#FBF9F5;" onclick="setSampleFrame('#FBF9F5', '#0D3C26', this)" aria-label="Classic Ivory"></button>
-                      <button type="button" class="pg-swatch" style="background:#0D3C26;" onclick="setSampleFrame('#0D3C26', '#F7F3EA', this)" aria-label="Forest Green"></button>
-                      <button type="button" class="pg-swatch" style="background:#181225;" onclick="setSampleFrame('#181225', '#F8F6FC', this)" aria-label="Cinema Black"></button>
-                      <button type="button" class="pg-swatch" style="background:#F4DCE3;" onclick="setSampleFrame('#F4DCE3', '#4A192C', this)" aria-label="Soft Rose"></button>
+                      <button type="button" class="pg-swatch active" style="background:#F4F0E6;" onclick="setSampleFrame('#F4F0E6', '#181614', this)" aria-label="Kertas Baryta Terang"></button>
+                      <button type="button" class="pg-swatch" style="background:#181614;" onclick="setSampleFrame('#181614', '#F3EFE6', this)" aria-label="Kertas Karbon Gelap"></button>
+                      <button type="button" class="pg-swatch" style="background:#261C1A;" onclick="setSampleFrame('#261C1A', '#F3EFE6', this)" aria-label="Kertas Safelight Merah Tua"></button>
+                      <button type="button" class="pg-swatch" style="background:#E6DEC8;" onclick="setSampleFrame('#E6DEC8', '#181614', this)" aria-label="Kertas Arsip Gading"></button>
                     </div>
                   </div>
 
                   <div class="pg-group">
-                    <span class="pg-label">05 · STIKER</span>
+                    <span class="pg-label">05 / CAP TANDA CETAK</span>
                     <div class="pg-pills">
-                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('🍿')">🍿</button>
-                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('❤️')">❤️</button>
-                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('✨')">✨</button>
-                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('🎬')">🎬</button>
+                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('35MM')">35MM</button>
+                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('REC')">REC</button>
+                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('24FPS')">24FPS</button>
+                      <button type="button" class="pg-pill" onclick="toggleSampleSticker('A+B')">A+B</button>
                     </div>
                   </div>
                 </div>
 
-                <div class="pi-studio-cta-row">
-                  <button type="button" class="pi-btn-forest-pill pi-btn-lg" onclick="openRollboothStudio()">
-                    📸 Buka Studio &amp; Coba Kamera Asli
+                <div class="dr-panel-cta">
+                  <button type="button" class="dr-btn-primary" onclick="openRollboothStudio()">
+                    Nyalakan Kamera &amp; Cetak Strip Asli
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Right Interactive Sample Photobooth Strip Stage -->
-            <div class="pi-studio-preview-stage">
+            <!-- Right Column: Live Contact Strip Specimen -->
+            <div class="dr-darkroom-stage">
               <div class="sample-strip-card layout-strip" id="sampleStripWrap">
                 <div class="sample-strip-top">
-                  <span class="mono" id="sampleStripTopBrand">SCREENCAST × ROLLBOOTH</span>
-                  <span class="mono" id="sampleStripTopCode">LA LA LAND · 60FPS</span>
+                  <span class="mono" id="sampleStripTopBrand">ROLLBOOTH 35MM PRINT</span>
+                  <span class="mono" id="sampleStripTopCode">LA LA LAND / 60FPS</span>
                 </div>
 
                 <div class="sample-strip-StickerLayer" id="sampleStickerLayer"></div>
 
                 <div class="sample-strip-rows" id="sampleStripRows">
-                  <!-- Row 1 -->
                   <div class="sample-row">
-                    <div class="sample-cell cam-cell cam-pose-1"><span class="sample-badge">KAMERA #1</span></div>
-                    <div class="sample-cell film-cell film-scene-1" id="sampleFilmCell1"><span class="sample-badge film" id="sampleFilmBadge1">LA LA LAND · 00:24:10</span></div>
+                    <div class="sample-cell cam-cell cam-pose-1">
+                      <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
+                        <circle cx="52" cy="34" r="14" fill="rgba(243,239,230,0.85)" />
+                        <path d="M30 78 Q52 52 74 78 Z" fill="rgba(243,239,230,0.85)" />
+                        <circle cx="92" cy="38" r="13" fill="rgba(243,239,230,0.7)" />
+                        <path d="M72 78 Q92 54 112 78 Z" fill="rgba(243,239,230,0.7)" />
+                      </svg>
+                      <span class="sample-badge">POSE 01</span>
+                    </div>
+                    <div class="sample-cell film-cell film-scene-1" id="sampleFilmCell1">
+                      <span class="sample-badge film" id="sampleFilmBadge1">LA LA LAND / 00:24:10</span>
+                    </div>
                   </div>
-                  <!-- Row 2 -->
+
                   <div class="sample-row">
-                    <div class="sample-cell cam-cell cam-pose-2"><span class="sample-badge">KAMERA #2</span></div>
-                    <div class="sample-cell film-cell film-scene-2" id="sampleFilmCell2"><span class="sample-badge film" id="sampleFilmBadge2">LA LA LAND · 00:52:18</span></div>
+                    <div class="sample-cell cam-cell cam-pose-2">
+                      <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
+                        <circle cx="48" cy="32" r="14" fill="rgba(243,239,230,0.85)" />
+                        <path d="M26 78 Q48 50 70 78 Z" fill="rgba(243,239,230,0.85)" />
+                        <circle cx="88" cy="34" r="13" fill="rgba(243,239,230,0.75)" />
+                        <path d="M68 78 Q88 52 108 78 Z" fill="rgba(243,239,230,0.75)" />
+                      </svg>
+                      <span class="sample-badge">POSE 02</span>
+                    </div>
+                    <div class="sample-cell film-cell film-scene-2" id="sampleFilmCell2">
+                      <span class="sample-badge film" id="sampleFilmBadge2">LA LA LAND / 00:52:18</span>
+                    </div>
                   </div>
-                  <!-- Row 3 -->
+
                   <div class="sample-row">
-                    <div class="sample-cell cam-cell cam-pose-3"><span class="sample-badge">KAMERA #3</span></div>
-                    <div class="sample-cell film-cell film-scene-3" id="sampleFilmCell3"><span class="sample-badge film" id="sampleFilmBadge3">LA LA LAND · 01:12:40</span></div>
+                    <div class="sample-cell cam-cell cam-pose-3">
+                      <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
+                        <circle cx="54" cy="34" r="14" fill="rgba(243,239,230,0.85)" />
+                        <path d="M32 78 Q54 52 76 78 Z" fill="rgba(243,239,230,0.85)" />
+                        <circle cx="90" cy="34" r="13" fill="rgba(243,239,230,0.75)" />
+                        <path d="M70 78 Q90 52 110 78 Z" fill="rgba(243,239,230,0.75)" />
+                      </svg>
+                      <span class="sample-badge">POSE 03</span>
+                    </div>
+                    <div class="sample-cell film-cell film-scene-3" id="sampleFilmCell3">
+                      <span class="sample-badge film" id="sampleFilmBadge3">LA LA LAND / 01:12:40</span>
+                    </div>
                   </div>
-                  <!-- Row 4 -->
+
                   <div class="sample-row">
-                    <div class="sample-cell cam-cell cam-pose-4"><span class="sample-badge">KAMERA #4</span></div>
-                    <div class="sample-cell film-cell film-scene-4" id="sampleFilmCell4"><span class="sample-badge film" id="sampleFilmBadge4">LA LA LAND · 01:58:05</span></div>
+                    <div class="sample-cell cam-cell cam-pose-4">
+                      <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
+                        <circle cx="50" cy="36" r="14" fill="rgba(243,239,230,0.85)" />
+                        <path d="M28 78 Q50 54 72 78 Z" fill="rgba(243,239,230,0.85)" />
+                        <circle cx="88" cy="36" r="13" fill="rgba(243,239,230,0.75)" />
+                        <path d="M68 78 Q88 54 108 78 Z" fill="rgba(243,239,230,0.75)" />
+                      </svg>
+                      <span class="sample-badge">POSE 04</span>
+                    </div>
+                    <div class="sample-cell film-cell film-scene-4" id="sampleFilmCell4">
+                      <span class="sample-badge film" id="sampleFilmBadge4">LA LA LAND / 01:58:05</span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="sample-strip-footer">
-                  <p class="sample-caption" id="sampleStripCaption">La La Land Night 💃✨</p>
-                  <span class="sample-meta mono">07 NOV 2026 · ROLLBOOTH STUDIO</span>
+                  <p class="sample-caption" id="sampleStripCaption">La La Land Night</p>
+                  <span class="sample-meta mono">CETAKAN KONTAK LOKAL / KANVAS 2D</span>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       <!-- ============================================================
-           5. FAQ SECTION IN PI.AI WARM EDITORIAL STYLE
+           SECTION 3: ARCHITECTURAL TWO-COLUMN TECHNICAL LEDGER (#specSection)
+           (Distinct composition rhythm: sticky left header + numbered horizontal ledger rows)
            ============================================================ -->
-      <section class="pi-faq-section" id="faqSection">
-        <div class="pi-container">
-          <div class="pi-section-header">
-            <h2 class="pi-section-title">Pertanyaan yang <em>sering ditanyakan</em></h2>
-            <p class="pi-section-subtitle">
-              Semua yang perlu kamu tahu tentang nonton bareng dan berfoto di ScreenCast × Rollbooth.
+      <section class="dr-ledger-section" id="specSection">
+        <div class="dr-container dr-ledger-grid">
+          <div class="dr-ledger-sidebar">
+            <span class="dr-mono-label">SPESIFIKASI PROYEKTOR &amp; KAMERA</span>
+            <h2 class="dr-section-title">
+              Dibangun di atas protokol terbuka tanpa perantara penyimpanan cloud.
+            </h2>
+            <p class="dr-section-desc">
+              Setiap aliran gambar dan proses pencetakan foto berlangsung langsung di antara peramban peserta.
             </p>
           </div>
 
-          <div class="pi-faq-grid">
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span>Bagaimana cara nonton film seperti La La Land atau Interstellar bareng teman?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Klik <strong>Buat Ruang Siaran</strong>, pilih tab browser atau pemutar film di laptopmu (centang <em>Share Audio</em>), lalu bagikan 6 digit kode ruang ke temanmu. Temanmu langsung bisa menonton dan mendengar filmnya secara sinkron.</p>
+          <div class="dr-ledger-rows">
+            <div class="dr-ledger-row">
+              <span class="dr-ledger-num mono">01</span>
+              <div class="dr-ledger-body">
+                <h3>Transmisi Layar Peer-to-Peer (WebRTC)</h3>
+                <p>
+                  Aliran video 1080p hingga 4K pada 60fps dikirim langsung dari peramban penyelenggara ke penonton menggunakan enkoder VP9, H.264, atau AV1 dengan kontrol bitrate hingga 20 Mbps.
+                </p>
               </div>
             </div>
 
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span>Apakah adegan film otomatis ikut tercetak di photobooth?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Ya! Saat kamu menekan tombol <strong>Rollbooth</strong> ketika sedang menonton, sistem mengambil 4 pose kamera webcam sekaligus menangkap adegan film yang sedang diputar di layar secara real-time.</p>
+            <div class="dr-ledger-row">
+              <span class="dr-ledger-num mono">02</span>
+              <div class="dr-ledger-body">
+                <h3>Komposit Dua Kolom Kanvas 2D Real-Time</h3>
+                <p>
+                  Saat sesi foto dimulai, elemen <code>HTMLCanvasElement</code> membaca frame dari kamera pengguna dan frame dari elemen video film secara serentak, lalu menyusunnya ke dalam resolusi cetak 1080x1620 piksel.
+                </p>
               </div>
             </div>
 
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span>Apakah saya bisa mencoba Photobooth tanpa harus share screen dulu?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Bisa banget! Klik tombol <strong>Coba Photobooth Studio</strong> kapan saja untuk berfoto solo maupun bersama pasangan menggunakan kamera perangkatmu.</p>
+            <div class="dr-ledger-row">
+              <span class="dr-ledger-num mono">03</span>
+              <div class="dr-ledger-body">
+                <h3>Jalur Suara Terpisah &amp; Deteksi Aktivitas Vokal</h3>
+                <p>
+                  Suara percakapan mikrofon dan audio film berjalan di jalur terpisah sehingga penonton dapat mengatur volume film tanpa mengecilkan suara teman bicara.
+                </p>
               </div>
             </div>
 
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span>Apakah video dan foto kami aman?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>100% privat. Seluruh aliran video menggunakan koneksi langsung <em>Peer-to-Peer (WebRTC)</em> dan proses cetak foto dilakukan di browser perangkatmu tanpa pernah diunggah ke server mana pun.</p>
+            <div class="dr-ledger-row">
+              <span class="dr-ledger-num mono">04</span>
+              <div class="dr-ledger-body">
+                <h3>Privasi Proses Lokal di Perangkat</h3>
+                <p>
+                  Server hanya meneruskan pertukaran sinyal koneksi awal (WebSocket). Tidak ada rekaman video maupun hasil foto yang disimpan atau dikirim ke server eksternal.
+                </p>
               </div>
             </div>
           </div>
@@ -936,29 +650,83 @@
       </section>
 
       <!-- ============================================================
-           6. PI.AI EDITORIAL FOOTER ("Created by ScreenCast × Rollbooth")
+           SECTION 4: PRODUCT-SPECIFIC FAQ ACCORDION (#faqSection)
            ============================================================ -->
-      <footer class="pi-footer">
-        <div class="pi-footer-cta">
-          <h2 class="pi-footer-heading">Dirancang untuk Penikmat Film</h2>
-          <p class="pi-footer-sub">
-            ScreenCast × Rollbooth menggabungkan bioskop virtual berlatensi rendah dengan kehangatan photobooth analog—agar setiap film yang kalian tonton meninggalkan kenangan nyata.
-          </p>
-          <button type="button" class="pi-btn-forest-pill pi-btn-lg" onclick="scrollToSection('cooldockHub', event)">
-            Mulai Nobar Sekarang
-          </button>
-        </div>
-
-        <div class="pi-footer-bottom">
-          <div class="pi-footer-links">
-            <span class="pi-logo-serif pi-footer-logo">Sc</span>
-            <a href="#cooldockHub" onclick="scrollToSection('cooldockHub', event)">Ruang Bioskop</a>
-            <a href="#movieBentoSection" onclick="scrollToSection('movieBentoSection', event)">Koleksi Film</a>
-            <a href="#studioShowcase" onclick="openRollboothStudio(); return false;">Rollbooth Studio</a>
-            <a href="#faqSection" onclick="scrollToSection('faqSection', event)">Bantuan</a>
+      <section class="dr-faq-section" id="faqSection">
+        <div class="dr-container dr-faq-layout">
+          <div class="dr-faq-header">
+            <span class="dr-mono-label">DOKUMENTASI PENGGUNAAN</span>
+            <h2 class="dr-section-title">Pertanyaan teknis seputar tayangan dan kamera</h2>
           </div>
-          <div class="pi-footer-credit">
-            by <strong>ScreenCast × Rollbooth</strong>
+
+          <div class="dr-faq-list">
+            <div class="faq-item">
+              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+                <span>Mengapa suara film tidak terdengar di sisi penonton saat saya membagikan layar?</span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Saat jendela pemilihan layar Chrome atau Edge terbuka, pilih tab peramban tempat film diputar atau seluruh layar, lalu pastikan kotak <strong>Bagikan audio tab</strong> (<em>Share tab audio</em> / <em>Share system audio</em>) di sudut kiri bawah sudah dicentang sebelum menekan tombol Bagikan.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+                <span>Bagaimana cara agar adegan film ikut tercetak di sebelah foto kamera kami?</span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Saat sedang berada di dalam ruang tayangan aktif, klik tombol <strong>Rollbooth</strong> pada bilah kontrol bawah, lalu pilih tata letak <strong>Nobar Dual-Strip (Kamera + Film)</strong>. Setiap kali hitungan mundur mencapai nol, sistem otomatis memotret kamera Anda sekaligus menyalin frame film yang sedang tampil.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+                <span>Apakah saya bisa menggunakan studio cetak foto tanpa membuat ruang tayangan terlebih dahulu?</span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Bisa. Tekan tombol <strong>Buka Studio Kamera (Tanpa Kode)</strong> di bagian atas halaman. Anda dapat mengambil 4 pose beruntun menggunakan kamera laptop atau ponsel dan mengunduh hasilnya dalam format PNG.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+                <span>Format dan ukuran berkas apa yang dihasilkan oleh cetakan Rollbooth?</span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Setiap cetakan di-render sebagai berkas PNG beresolusi tinggi (1080 x 1620 piksel untuk strip vertikal dan 1200 x 1500 piksel untuk format grid/polaroid) lengkap dengan tekstur grain analog dan catatan kaki yang Anda ketik.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SINGLE-ROW ARCHITECTURAL COLOPHON FOOTER
+           ============================================================ -->
+      <footer class="dr-footer">
+        <div class="dr-container dr-footer-inner">
+          <div class="dr-footer-brand">
+            <strong>ScreenCast x Rollbooth</strong>
+            <span>Proyektor WebRTC P2P &amp; Kamar Gelap 35mm</span>
+          </div>
+
+          <div class="dr-footer-links">
+            <a href="#cooldockHub" onclick="scrollToSection('cooldockHub', event)">Konsol Ruang</a>
+            <a href="#reelCatalog" onclick="scrollToSection('reelCatalog', event)">Spesimen Film</a>
+            <a href="#studioShowcase" onclick="scrollToSection('studioShowcase', event)">Meja Cetak</a>
+            <a href="#faqSection" onclick="scrollToSection('faqSection', event)">Dokumentasi</a>
+            <button type="button" class="dr-footer-link-btn" onclick="openRollboothStudio()">Buka Kamera</button>
           </div>
         </div>
       </footer>
@@ -972,50 +740,47 @@
       <div class="broadcast-banner">
         <div class="room-code-Share">
           <span class="share-label">KODE RUANG</span>
-          <span class="share-code mono" id="hostRoomCodeDisplay">------</span>
+          <span class="share-code mono" id="hostRoomCodeDisplay">000000</span>
         </div>
 
         <div class="share-actions">
-          <button class="btn btn-secondary" onclick="copyRoomCode()" title="Salin Kode">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button type="button" class="btn btn-secondary" onclick="copyRoomCode()" title="Salin Kode">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
             Salin Kode
           </button>
-          <button class="btn btn-secondary" onclick="copyShareLink()" title="Salin Tautan">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button type="button" class="btn btn-secondary" onclick="copyShareLink()" title="Salin Tautan">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
             </svg>
             Salin Tautan
           </button>
-          <button class="btn btn-secondary" onclick="openRollboothStudio()" title="Ambil Foto Kenangan Nobar">
-            📸 Rollbooth
+          <button type="button" class="btn btn-secondary" onclick="openRollboothStudio()" title="Ambil Foto Kenangan Nobar">
+            Rollbooth Studio
           </button>
-          <button class="btn btn-secondary" onclick="changeScreenSource()" title="Ganti Layar">
+          <button type="button" class="btn btn-secondary" onclick="changeScreenSource()" title="Ganti Layar">
             Ganti Sumber
           </button>
-          <button class="btn btn-danger" onclick="stopHosting()">
+          <button type="button" class="btn btn-danger" onclick="stopHosting()">
             Hentikan Siaran
           </button>
         </div>
       </div>
 
-      <!-- Host Video Preview Stage -->
       <div class="video-stage" id="hostVideoContainer">
         <video id="hostPreviewVideo" autoplay muted playsinline></video>
 
-        <!-- Stats HUD -->
         <div class="stats-hud" id="hostStatsOverlay">
-          <div class="stat-pill"><span class="label">RES</span> <span class="value" id="statRes">--</span></div>
-          <div class="stat-pill"><span class="label">FPS</span> <span class="value" id="statFps">--</span></div>
-          <div class="stat-pill"><span class="label">BITRATE</span> <span class="value" id="statBitrate">--</span></div>
+          <div class="stat-pill"><span class="label">RES</span> <span class="value" id="statRes">0x0</span></div>
+          <div class="stat-pill"><span class="label">FPS</span> <span class="value" id="statFps">0</span></div>
+          <div class="stat-pill"><span class="label">BITRATE</span> <span class="value" id="statBitrate">0 kbps</span></div>
           <div class="stat-pill"><span class="label">PENONTON</span> <span class="value" id="statViewers">0</span></div>
         </div>
       </div>
 
-      <!-- Participants Voice & Camera Bar -->
       <div class="participants-bar" id="hostParticipantsBar">
         <div class="participants-header">
           <div class="participants-title">
@@ -1023,17 +788,16 @@
             <span class="participant-count-badge mono" id="hostParticipantCount">1</span>
           </div>
           <div class="media-controls-group">
-            <button class="btn-media" id="hostVoiceBtn" onclick="toggleVoice()" title="Aktifkan/Matikan Mikrofon (M)">
-              <span id="hostVoiceIcon">🔇</span>
+            <button type="button" class="btn-media" id="hostVoiceBtn" onclick="toggleVoice()" title="Aktifkan atau Matikan Mikrofon (M)">
+              <span id="hostVoiceIcon">MIC</span>
               <span id="hostVoiceLabel">Suara Mati</span>
             </button>
-            <button class="btn-media" id="hostCamBtn" onclick="toggleCamera()" title="Aktifkan/Matikan Kamera">
-              <span id="hostCamIcon">📷</span>
+            <button type="button" class="btn-media" id="hostCamBtn" onclick="toggleCamera()" title="Aktifkan atau Matikan Kamera">
+              <span id="hostCamIcon">CAM</span>
               <span id="hostCamLabel">Kamera Mati</span>
             </button>
-            <button class="btn-media btn-memories" onclick="openRollboothStudio()" title="Abadikan Momen Nobar">
-              <span>📸</span>
-              <span>Rollbooth</span>
+            <button type="button" class="btn-media btn-memories" onclick="openRollboothStudio()" title="Abadikan Momen Nobar">
+              <span>Rollbooth 35mm</span>
             </button>
           </div>
         </div>
@@ -1049,46 +813,43 @@
       <div class="cinema-stage" id="videoContainer">
         <video id="remoteVideo" autoplay playsinline></video>
 
-        <!-- Connecting / Buffering State Overlay -->
         <div class="video-state-overlay" id="videoOverlay">
           <div class="spinner"></div>
           <p class="overlay-text" id="overlayText">Menghubungkan ke siaran...</p>
         </div>
 
-        <!-- Top-Left Live Telemetry HUD -->
         <div class="stats-hud" id="viewerStatsOverlay">
-          <div class="stat-pill"><span class="label">RES</span> <span class="value" id="viewerStatRes">--</span></div>
-          <div class="stat-pill"><span class="label">FPS</span> <span class="value" id="viewerStatFps">--</span></div>
-          <div class="stat-pill"><span class="label">BITRATE</span> <span class="value" id="viewerStatBitrate">--</span></div>
-          <div class="stat-pill"><span class="label">PING</span> <span class="value" id="viewerStatPing">--</span></div>
+          <div class="stat-pill"><span class="label">RES</span> <span class="value" id="viewerStatRes">0x0</span></div>
+          <div class="stat-pill"><span class="label">FPS</span> <span class="value" id="viewerStatFps">0</span></div>
+          <div class="stat-pill"><span class="label">BITRATE</span> <span class="value" id="viewerStatBitrate">0 kbps</span></div>
+          <div class="stat-pill"><span class="label">PING</span> <span class="value" id="viewerStatPing">0 ms</span></div>
         </div>
 
-        <!-- Bottom Auto-Hiding Glass HUD Dock -->
         <div class="hud-dock-wrapper">
           <div class="hud-dock" role="toolbar" aria-label="Kontrol Pemutar">
-            <button class="hud-btn" id="StatsToggleBtn" onclick="toggleViewerStats()" title="Tampilkan Statistik (S)" aria-label="Tampilkan Statistik">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button type="button" class="hud-btn" id="StatsToggleBtn" onclick="toggleViewerStats()" title="Tampilkan Statistik (S)" aria-label="Tampilkan Statistik">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M18 20V10M12 20V4M6 20v-6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
 
-            <button class="hud-btn" id="muteBtn" onclick="toggleMute()" title="Suara Layar ( V )" aria-label="Suara Layar">
-              🔊
+            <button type="button" class="hud-btn" id="muteBtn" onclick="toggleMute()" title="Suara Layar (V)" aria-label="Suara Layar">
+              VOL
             </button>
             <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100"
               oninput="changeVolume(this.value)" aria-label="Volume Suara">
 
             <div class="hud-divider"></div>
 
-            <button class="hud-btn" id="pipBtn" onclick="togglePiP()" title="Gambar-dalam-Gambar (P)" aria-label="Picture in Picture">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button type="button" class="hud-btn" id="pipBtn" onclick="togglePiP()" title="Gambar-dalam-Gambar (P)" aria-label="Picture in Picture">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <rect x="2" y="3" width="20" height="14" rx="2" />
                 <rect x="12" y="9" width="8" height="6" rx="1" fill="currentColor" />
               </svg>
             </button>
 
-            <button class="hud-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Layar Penuh (F)" aria-label="Layar Penuh">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button type="button" class="hud-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Layar Penuh (F)" aria-label="Layar Penuh">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
                   stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -1096,15 +857,14 @@
 
             <div class="hud-divider"></div>
 
-            <!-- Rollbooth Photobooth Trigger inside HUD -->
-            <button class="hud-btn hud-btn-memories" onclick="openRollboothStudio()" title="Buka Rollbooth Photobooth (B)" aria-label="Rollbooth Photobooth">
-              📸
+            <button type="button" class="hud-btn hud-btn-memories" onclick="openRollboothStudio()" title="Buka Rollbooth Photobooth (B)" aria-label="Rollbooth Photobooth">
+              35MM
             </button>
 
             <div class="hud-divider"></div>
 
-            <button class="hud-btn danger" onclick="disconnectViewer()" title="Keluar dari Ruang" aria-label="Keluar dari Ruang">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button type="button" class="hud-btn danger" onclick="disconnectViewer()" title="Keluar dari Ruang" aria-label="Keluar dari Ruang">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
@@ -1113,7 +873,6 @@
         </div>
       </div>
 
-      <!-- Viewer Participants & Voice Bar -->
       <div class="participants-bar" id="viewerParticipantsBar">
         <div class="participants-header">
           <div class="participants-title">
@@ -1121,17 +880,16 @@
             <span class="participant-count-badge mono" id="viewerParticipantCount">1</span>
           </div>
           <div class="media-controls-group">
-            <button class="btn-media" id="viewerVoiceBtn" onclick="toggleVoice()" title="Aktifkan/Matikan Mikrofon (M)">
-              <span id="viewerVoiceIcon">🔇</span>
+            <button type="button" class="btn-media" id="viewerVoiceBtn" onclick="toggleVoice()" title="Aktifkan atau Matikan Mikrofon (M)">
+              <span id="viewerVoiceIcon">MIC</span>
               <span id="viewerVoiceLabel">Gabung Suara</span>
             </button>
-            <button class="btn-media" id="viewerCamBtn" onclick="toggleCamera()" title="Aktifkan/Matikan Kamera">
-              <span id="viewerCamIcon">📷</span>
+            <button type="button" class="btn-media" id="viewerCamBtn" onclick="toggleCamera()" title="Aktifkan atau Matikan Kamera">
+              <span id="viewerCamIcon">CAM</span>
               <span id="viewerCamLabel">Kamera Mati</span>
             </button>
-            <button class="btn-media btn-memories" onclick="openRollboothStudio()" title="Abadikan Momen Nobar">
-              <span>📸</span>
-              <span>Rollbooth</span>
+            <button type="button" class="btn-media btn-memories" onclick="openRollboothStudio()" title="Abadikan Momen Nobar">
+              <span>Rollbooth 35mm</span>
             </button>
           </div>
         </div>
@@ -1144,31 +902,30 @@
          4. ROLLBOOTH STUDIO MODAL (INTERACTIVE PHOTOBOOTH WORKFLOW)
          ============================================================ -->
     <div class="memories-modal-backdrop" id="memoriesModal" aria-hidden="true">
-      <div class="memories-modal rollbooth-modal" role="dialog" aria-labelledby="memoriesModalTitle">
+      <div class="memories-modal rollbooth-modal" role="dialog" aria-modal="true" aria-labelledby="memoriesModalTitle">
         
-        <!-- Top Header with Step Indicator -->
         <div class="memories-modal-header">
           <div class="memories-title-wrap">
-            <span class="memories-badge">ROLLBOOTH STUDIO</span>
-            <h3 id="memoriesModalTitle">Photobooth &amp; Kenangan Nobar</h3>
+            <span class="memories-badge">ROLLBOOTH 35MM</span>
+            <h3 id="memoriesModalTitle">Kamar Gelap &amp; Cetak Kenangan Nobar</h3>
           </div>
 
           <div class="rollbooth-steps-nav">
-            <span class="rb-step-pill active" id="rbStepInd1">1. Pilih Layout</span>
-            <span class="rb-step-sep">→</span>
+            <span class="rb-step-pill active" id="rbStepInd1">1. Format Kertas</span>
+            <span class="rb-step-sep">/</span>
             <span class="rb-step-pill" id="rbStepInd2">2. Ambil Pose</span>
-            <span class="rb-step-sep">→</span>
-            <span class="rb-step-pill" id="rbStepInd3">3. Kustomisasi &amp; Cetak</span>
+            <span class="rb-step-sep">/</span>
+            <span class="rb-step-pill" id="rbStepInd3">3. Kustomisasi &amp; Unduh</span>
           </div>
 
-          <button class="memories-close-btn" onclick="closeMemoriesModal()" aria-label="Tutup">&times;</button>
+          <button type="button" class="memories-close-btn" onclick="closeMemoriesModal()" aria-label="Tutup dialog">&times;</button>
         </div>
 
         <!-- STEP 1: CHOOSE LAYOUT & MODE -->
         <div class="rb-step-pane active" id="rbStep1">
           <div class="rb-step-intro">
-            <h4>Pilih Format Cetakan Photobooth</h4>
-            <p>Pilih gaya layout foto yang ingin kamu abadikan bersama momen film malam ini.</p>
+            <h4>Pilih Format Cetakan Kontak</h4>
+            <p>Tentukan komposisi bingkai sebelum memulai pemotretan beruntun.</p>
           </div>
 
           <div class="rb-layout-cards">
@@ -1180,7 +937,7 @@
               </div>
               <div class="rb-layout-meta">
                 <strong>Classic Strip (4 Pose)</strong>
-                <span>Strip vertikal klasik ala Rollbooth dengan 4 beruntun foto.</span>
+                <span>Strip vertikal klasik dengan 4 bidikan kamera beruntun.</span>
               </div>
             </button>
 
@@ -1205,8 +962,8 @@
                 </div>
               </div>
               <div class="rb-layout-meta">
-                <strong>Editorial Grid (2×2)</strong>
-                <span>Susunan 4 kuadran simetris yang pas untuk dibagikan ke Instagram Story &amp; Feed.</span>
+                <strong>Contact Sheet Grid (2x2)</strong>
+                <span>Susunan 4 kuadran simetris menyerupai lembaran kontak arsip.</span>
               </div>
             </button>
 
@@ -1219,32 +976,32 @@
               </div>
               <div class="rb-layout-meta">
                 <strong>Cinema Polaroid (1 Pose Utama)</strong>
-                <span>Tangkapan layar lebar film dengan prangko reaksi wajah di sudutnya.</span>
+                <span>Tangkapan layar lebar film dengan sisipan reaksi wajah di sudutnya.</span>
               </div>
             </button>
           </div>
 
           <div class="rb-step1-options">
             <div class="rb-opt-item">
-              <label for="rbTimerSelect">Timer Hitung Mundur</label>
+              <label for="rbTimerSelect">Jeda Hitung Mundur</label>
               <select id="rbTimerSelect" class="setting-select">
                 <option value="3" selected>3 Detik per Pose</option>
                 <option value="5">5 Detik per Pose</option>
-                <option value="1">1 Detik (Kilat)</option>
+                <option value="1">1 Detik per Pose</option>
               </select>
             </div>
             <div class="rb-opt-item">
-              <label for="rbCaptureFilmCheck">Sertakan Adegan Film</label>
+              <label for="rbCaptureFilmCheck">Sumber Bingkai Film</label>
               <select id="rbCaptureFilmCheck" class="setting-select">
-                <option value="auto" selected>Otomatis (Jika ada film diputar)</option>
+                <option value="auto" selected>Otomatis (Dari tayangan aktif)</option>
                 <option value="cam-only">Hanya Kamera Webcam</option>
               </select>
             </div>
           </div>
 
           <div class="rb-step-footer">
-            <button type="button" class="btn btn-primary btn-lg" onclick="goToRollboothCapture()">
-              Lanjut ke Kamera Studio →
+            <button type="button" class="dr-btn-primary" onclick="goToRollboothCapture()">
+              Buka Jendela Bidik Kamera
             </button>
           </div>
         </div>
@@ -1259,35 +1016,32 @@
                 <span class="rb-pip-tag">LAYAR FILM</span>
               </div>
 
-              <!-- Countdown & Flash Overlay -->
               <div class="rb-countdown-overlay" id="rbCountdownOverlay">
                 <span class="rb-countdown-num" id="rbCountdownNum">3</span>
               </div>
               <div class="rb-flash-overlay" id="rbFlashOverlay"></div>
 
-              <!-- Live Filter Preview Bar -->
               <div class="rb-live-filter-bar">
                 <button type="button" class="rb-filter-chip active" onclick="setRollboothFilter('normal', this)">Normal</button>
-                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('bw', this)">B&amp;W Classic</button>
-                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('vintage', this)">Vintage Warm</button>
-                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('cinema', this)">Cinema</button>
-                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('soft', this)">Soft Glow</button>
+                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('bw', this)">B&amp;W Silver</button>
+                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('vintage', this)">Sepia Hangat</button>
+                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('cinema', this)">Kontras Sinema</button>
+                <button type="button" class="rb-filter-chip" onclick="setRollboothFilter('soft', this)">Halus</button>
               </div>
             </div>
 
-            <!-- Shot Thumbnails Progress Tray -->
             <div class="rb-shots-tray">
               <div class="rb-shots-header">
                 <span class="mono" id="rbShotProgressText">POSE 0 / 4</span>
-                <span class="rb-shots-sub">Bersiaplah bergaya di setiap hitungan mundur!</span>
+                <span class="rb-shots-sub">Ambil posisi sebelum hitungan selesai.</span>
               </div>
               <div class="rb-shots-list" id="rbShotsList"></div>
               <div class="rb-booth-actions">
-                <button type="button" class="btn btn-secondary" onclick="goToRollboothStep(1)">
-                  ← Ganti Layout
+                <button type="button" class="dr-btn-secondary" onclick="goToRollboothStep(1)">
+                  Kembali ke Format
                 </button>
-                <button type="button" class="btn btn-primary btn-lg" id="rbStartShutterBtn" onclick="startRollboothSession()">
-                  📸 Mulai Ambil Foto
+                <button type="button" class="dr-btn-primary" id="rbStartShutterBtn" onclick="startRollboothSession()">
+                  Mulai Pemotretan
                 </button>
               </div>
             </div>
@@ -1297,7 +1051,6 @@
         <!-- STEP 3: CUSTOMIZE & PRINT STRIP -->
         <div class="rb-step-pane" id="rbStep3">
           <div class="memories-modal-body">
-            <!-- Left: High-Res Canvas Preview with Paper Print Animation -->
             <div class="memories-preview-stage">
               <div class="printer-slot-bar"></div>
               <div class="polaroid-Developing-wrap" id="polaroidWrap">
@@ -1305,60 +1058,55 @@
               </div>
             </div>
 
-            <!-- Right: Rollbooth Customization Controls -->
             <div class="memories-controls">
               <div class="memories-control-group">
                 <label class="setting-label">Warna Kertas Strip</label>
                 <div class="rb-color-swatches">
-                  <button type="button" class="rb-color-btn active" style="background:#F7F4EE;" onclick="setRollboothFrameColor('#F7F4EE', this)" title="Classic Ivory"></button>
-                  <button type="button" class="rb-color-btn" style="background:#0D3C26;" onclick="setRollboothFrameColor('#0D3C26', this)" title="Forest Green"></button>
-                  <button type="button" class="rb-color-btn" style="background:#141416;" onclick="setRollboothFrameColor('#141416', this)" title="Cinema Black"></button>
-                  <button type="button" class="rb-color-btn" style="background:#F4DCE3;" onclick="setRollboothFrameColor('#F4DCE3', this)" title="Millennial Pink"></button>
-                  <button type="button" class="rb-color-btn" style="background:#DCE6DF;" onclick="setRollboothFrameColor('#DCE6DF', this)" title="Sage Film"></button>
-                  <button type="button" class="rb-color-btn" style="background:#5C1D24;" onclick="setRollboothFrameColor('#5C1D24', this)" title="Velvet Red"></button>
+                  <button type="button" class="rb-color-btn active" style="background:#F7F4EE;" onclick="setRollboothFrameColor('#F7F4EE', this)" title="Kertas Baryta"></button>
+                  <button type="button" class="rb-color-btn" style="background:#141416;" onclick="setRollboothFrameColor('#141416', this)" title="Karbon Gelap"></button>
+                  <button type="button" class="rb-color-btn" style="background:#261C1A;" onclick="setRollboothFrameColor('#261C1A', this)" title="Safelight"></button>
+                  <button type="button" class="rb-color-btn" style="background:#F4DCE3;" onclick="setRollboothFrameColor('#F4DCE3', this)" title="Merah Muda Pucat"></button>
+                  <button type="button" class="rb-color-btn" style="background:#DCE6DF;" onclick="setRollboothFrameColor('#DCE6DF', this)" title="Hijau Arsip"></button>
+                  <button type="button" class="rb-color-btn" style="background:#5C1D24;" onclick="setRollboothFrameColor('#5C1D24', this)" title="Merah Beludru"></button>
                 </div>
               </div>
 
               <div class="memories-control-group">
-                <label class="setting-label">Filter Nuansa Foto</label>
+                <label class="setting-label">Emulsi Foto</label>
                 <div class="memories-theme-pills">
                   <button type="button" class="theme-pill active" onclick="setRollboothFilterAndRender('normal', this)">Normal</button>
                   <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('bw', this)">B&amp;W</button>
-                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('vintage', this)">Vintage</button>
-                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('cinema', this)">Cinema</button>
-                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('soft', this)">Soft</button>
+                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('vintage', this)">Sepia</button>
+                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('cinema', this)">Sinema</button>
+                  <button type="button" class="theme-pill" onclick="setRollboothFilterAndRender('soft', this)">Halus</button>
                 </div>
               </div>
 
               <div class="memories-control-group">
-                <label class="setting-label">Tambahkan Stiker</label>
-                <div class=" memories-theme-pills">
-                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('🍿', this)">🍿 Popcorn</button>
-                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('🎬', this)">🎬 Clapper</button>
-                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('❤️', this)">❤️ Love</button>
-                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('✨', this)">✨ Sparkle</button>
-                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('🎟️', this)">🎟️ Ticket</button>
+                <label class="setting-label">Cap Tanda Cetak</label>
+                <div class="memories-theme-pills">
+                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('35MM', this)">35MM</button>
+                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('REC', this)">REC</button>
+                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('24FPS', this)">24FPS</button>
+                  <button type="button" class="theme-pill" onclick="toggleRollboothSticker('SCENE', this)">SCENE</button>
                 </div>
               </div>
 
               <div class="memories-control-group">
-                <label class="setting-label" for="memoriesCaptionInput">Catatan / Judul Film</label>
+                <label class="setting-label" for="memoriesCaptionInput">Catatan Kaki / Judul Film</label>
                 <input type="text" class="setting-select memories-input" id="memoriesCaptionInput"
-                  placeholder="Contoh: Nobar La La Land bareng..." maxlength="50" oninput="renderMemoriesCanvas()">
+                  placeholder="Contoh: La La Land (07 Nov 2026)" maxlength="50" oninput="renderMemoriesCanvas()">
               </div>
 
               <div class="memories-actions">
-                <button type="button" class="btn btn-primary" onclick="downloadMemoriesImage()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  Unduh Strip Foto (PNG)
+                <button type="button" class="dr-btn-primary" onclick="downloadMemoriesImage()">
+                  Unduh Berkas Strip (PNG)
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="shareMemoriesImage()">
-                  Bagikan ke Teman / Sosmed
+                <button type="button" class="dr-btn-secondary" onclick="shareMemoriesImage()">
+                  Bagikan Lembar Foto
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="retakeRollbooth()">
-                  🔄 Foto Ulang
+                <button type="button" class="dr-btn-secondary" onclick="retakeRollbooth()">
+                  Ulangi Pemotretan
                 </button>
               </div>
             </div>
@@ -1370,7 +1118,7 @@
 
   </main>
 
-  <script src="/js/app.js?v=8.0"></script>
+  <script src="/js/app.js?v=9.0"></script>
 </body>
 
 </html>

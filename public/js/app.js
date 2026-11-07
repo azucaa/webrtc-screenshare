@@ -956,11 +956,11 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'pi-btn-forest-pill' : 'pi-btn-outline-pill';
+    hostBtn.className = isHost ? 'dr-tab-btn active' : 'dr-tab-btn';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'pi-btn-forest-pill' : 'pi-btn-outline-pill';
+    viewerBtn.className = !isHost ? 'dr-tab-btn active' : 'dr-tab-btn';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 
@@ -973,64 +973,124 @@ function switchTab(mode) {
   }
 }
 
-/* ========================================================
- * 10. Landing Page Interactions (Movie Presets, Playground, FAQ)
- * ======================================================== */
+// Theme toggle, mobile navigation, room status states, and darkroom preview controls
+function toggleColorTheme() {
+  const htmlEl = document.documentElement;
+  const current = htmlEl.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  htmlEl.setAttribute('data-theme', next);
+  const label = document.getElementById('themeToggleLabel');
+  if (label) {
+    label.textContent = next === 'dark' ? 'Kertas Terang' : 'Kamar Gelap';
+  }
+  showToast(next === 'dark' ? 'Mode Kamar Gelap diaktifkan.' : 'Mode Kertas Terang diaktifkan.');
+}
+
+function toggleMobileMenu() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const btn = document.getElementById('mobileMenuBtn');
+  if (!drawer || !btn) return;
+  const isHidden = drawer.hasAttribute('hidden');
+  if (isHidden) {
+    drawer.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.textContent = 'Tutup';
+  } else {
+    drawer.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.textContent = 'Menu';
+  }
+}
+
+function closeMobileMenu() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const btn = document.getElementById('mobileMenuBtn');
+  if (drawer) drawer.setAttribute('hidden', '');
+  if (btn) {
+    btn.setAttribute('aria-expanded', 'false');
+    btn.textContent = 'Menu';
+  }
+}
+
+function setRoomStatusBanner(state, tagText, messageText) {
+  const banner = document.getElementById('roomStatusBanner');
+  const tag = document.getElementById('roomStatusTag');
+  const text = document.getElementById('roomStatusText');
+  if (!banner || !tag || !text) return;
+  banner.classList.remove('state-empty', 'state-loading', 'state-error');
+  banner.classList.add(`state-${state}`);
+  tag.textContent = tagText;
+  text.textContent = messageText;
+}
+
+function joinRoomWithState() {
+  const codeInput = document.getElementById('roomCodeInput');
+  const code = codeInput ? codeInput.value.trim() : '';
+  if (!/^\d{6}$/.test(code)) {
+    setRoomStatusBanner(
+      'error',
+      'GALAT KODE',
+      'Kode ruang harus terdiri dari 6 angka. Periksa kembali kode dari penyelenggara tayangan.'
+    );
+    focusOtpInput();
+    return;
+  }
+  setRoomStatusBanner(
+    'loading',
+    'MENGHUBUNGKAN',
+    `Menghubungi sinyal ruang ${code}. Menunggu respons jalur video dari penyelenggara...`
+  );
+  joinRoom();
+}
+
 const MOVIE_PRESETS = {
   lalaland: {
-    code: 'LA LA LAND · 60FPS',
-    caption: 'La La Land Night 💃✨',
+    reelTag: 'REEL 01 / LA LA LAND',
+    code: 'LA LA LAND / 60FPS',
+    caption: 'La La Land Night',
     badges: [
-      'LA LA LAND · 00:24:10',
-      'LA LA LAND · 00:52:18',
-      'LA LA LAND · 01:12:40',
-      'LA LA LAND · 01:58:05'
+      'LA LA LAND / 00:24:10',
+      'LA LA LAND / 00:52:18',
+      'LA LA LAND / 01:12:40',
+      'LA LA LAND / 01:58:05'
     ],
-    toast: 'Contoh Film: La La Land (2016) diterapkan ke Photobooth!'
+    toast: 'Rol film La La Land (2016) dimuat ke meja cetak.'
   },
   interstellar: {
-    code: 'INTERSTELLAR · 60FPS',
-    caption: 'Across Gargantua 🪐✨',
+    reelTag: 'REEL 02 / INTERSTELLAR',
+    code: 'INTERSTELLAR / 60FPS',
+    caption: 'Across Gargantua',
     badges: [
-      'INTERSTELLAR · 00:42:15',
-      'INTERSTELLAR · 01:18:30',
-      'INTERSTELLAR · 02:04:15',
-      'INTERSTELLAR · 02:36:50'
+      'INTERSTELLAR / 00:42:15',
+      'INTERSTELLAR / 01:18:30',
+      'INTERSTELLAR / 02:04:15',
+      'INTERSTELLAR / 02:36:50'
     ],
-    toast: 'Contoh Film: Interstellar (2014) diterapkan ke Photobooth!'
+    toast: 'Rol film Interstellar (2014) dimuat ke meja cetak.'
   },
   spiritedaway: {
-    code: 'SPIRITED AWAY · 60FPS',
-    caption: 'Sea Train Memories 🏮🌊',
+    reelTag: 'REEL 03 / SPIRITED AWAY',
+    code: 'SPIRITED AWAY / 60FPS',
+    caption: 'Sea Railway Memories',
     badges: [
-      'SPIRITED AWAY · 00:19:40',
-      'SPIRITED AWAY · 00:54:20',
-      'SPIRITED AWAY · 01:28:12',
-      'SPIRITED AWAY · 01:52:00'
+      'SPIRITED AWAY / 00:19:40',
+      'SPIRITED AWAY / 00:54:20',
+      'SPIRITED AWAY / 01:28:12',
+      'SPIRITED AWAY / 01:52:00'
     ],
-    toast: 'Contoh Film: Spirited Away (2001) diterapkan ke Photobooth!'
+    toast: 'Rol film Spirited Away (2001) dimuat ke meja cetak.'
   },
   bladerunner: {
-    code: 'BLADE RUNNER · 60FPS',
-    caption: 'Tears in Neon Rain 🌧️⚡',
+    reelTag: 'REEL 04 / BLADE RUNNER',
+    code: 'BLADE RUNNER / 60FPS',
+    caption: 'Los Angeles Rooftop Rain',
     badges: [
-      'BLADE RUNNER · 00:31:05',
-      'BLADE RUNNER · 01:14:22',
-      'BLADE RUNNER · 01:48:05',
-      'BLADE RUNNER · 02:21:40'
+      'BLADE RUNNER / 00:31:05',
+      'BLADE RUNNER / 01:14:22',
+      'BLADE RUNNER / 01:48:05',
+      'BLADE RUNNER / 02:21:40'
     ],
-    toast: 'Contoh Film: Blade Runner 2049 (2017) diterapkan ke Photobooth!'
-  },
-  beforesunrise: {
-    code: 'BEFORE SUNRISE · 60FPS',
-    caption: 'Vienna Listening Booth ☕🎶',
-    badges: [
-      'BEFORE SUNRISE · 00:18:12',
-      'BEFORE SUNRISE · 00:39:10',
-      'BEFORE SUNRISE · 01:05:44',
-      'BEFORE SUNRISE · 01:34:20'
-    ],
-    toast: 'Contoh Film: Before Sunrise (1995) diterapkan ke Photobooth!'
+    toast: 'Rol film Blade Runner 2049 (2017) dimuat ke meja cetak.'
   }
 };
 
@@ -1039,10 +1099,13 @@ function selectMoviePreset(movieKey, scrollToStudio = false) {
   const strip = document.getElementById('sampleStripWrap');
   if (strip) {
     strip.classList.remove('preset-lalaland', 'preset-interstellar', 'preset-spiritedaway', 'preset-bladerunner');
-    if (movieKey !== 'lalaland' && movieKey !== 'beforesunrise') {
+    if (movieKey !== 'lalaland') {
       strip.classList.add(`preset-${movieKey}`);
     }
   }
+
+  const reelBadge = document.getElementById('activeReelCode');
+  if (reelBadge) reelBadge.textContent = preset.reelTag;
 
   const topCode = document.getElementById('sampleStripTopCode');
   if (topCode) topCode.textContent = preset.code;
@@ -1058,6 +1121,11 @@ function selectMoviePreset(movieKey, scrollToStudio = false) {
   ['lalaland', 'interstellar', 'spiritedaway', 'bladerunner'].forEach(k => {
     const btn = document.getElementById(`presetBtn-${k}`);
     if (btn) btn.classList.toggle('active', k === movieKey);
+    const card = document.getElementById(`reelCard-${k}`);
+    if (card) {
+      card.classList.toggle('active', k === movieKey);
+      card.setAttribute('aria-pressed', k === movieKey ? 'true' : 'false');
+    }
   });
 
   const capInput = document.getElementById('memoriesCaptionInput');
@@ -1080,7 +1148,7 @@ function scrollToSection(id, e) {
   if (e) e.preventDefault();
   const el = document.getElementById(id);
   if (el) {
-    const yOffset = -56;
+    const yOffset = -68;
     const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
     window.scrollTo({ top: y, behavior: 'smooth' });
     if (id === 'heroSection' || id === 'cooldockHub') {
@@ -1128,23 +1196,23 @@ function setSampleFilter(filter) {
   document.getElementById(`sampleBtn-${filter}`)?.classList.add('active');
 }
 
-function toggleSampleSticker(emoji) {
+function toggleSampleSticker(stampText) {
   const layer = document.getElementById('sampleStickerLayer');
   if (!layer) return;
-  const existing = Array.from(layer.querySelectorAll('.sample-sticker-item')).find(el => el.dataset.emoji === emoji);
+  const existing = Array.from(layer.querySelectorAll('.sample-sticker-item')).find(el => el.dataset.emoji === stampText);
   if (existing) {
     existing.remove();
     return;
   }
   const span = document.createElement('span');
   span.className = 'sample-sticker-item';
-  span.dataset.emoji = emoji;
-  span.textContent = emoji;
+  span.dataset.emoji = stampText;
+  span.textContent = stampText;
   const positions = [
-    { top: '12px', right: '14px', transform: 'rotate(12deg)' },
-    { bottom: '54px', left: '10px', transform: 'rotate(-14deg)' },
-    { top: '44%', right: '8px', transform: 'rotate(8deg)' },
-    { bottom: '18px', right: '18px', transform: 'rotate(-8deg)' }
+    { top: '12px', right: '14px', transform: 'rotate(6deg)' },
+    { bottom: '54px', left: '12px', transform: 'rotate(-8deg)' },
+    { top: '44%', right: '10px', transform: 'rotate(4deg)' },
+    { bottom: '18px', right: '16px', transform: 'rotate(-5deg)' }
   ];
   const pos = positions[layer.children.length % positions.length];
   Object.assign(span.style, pos);
@@ -1155,11 +1223,26 @@ function toggleFaq(btnEl) {
   if (!btnEl) return;
   const itemEl = btnEl.closest('.faq-item') || btnEl;
   const isOpen = itemEl.classList.contains('open');
-  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-item').forEach(el => {
+    el.classList.remove('open');
+    const q = el.querySelector('.faq-question');
+    if (q) q.setAttribute('aria-expanded', 'false');
+  });
   if (!isOpen) {
     itemEl.classList.add('open');
+    btnEl.setAttribute('aria-expanded', 'true');
   }
 }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('memoriesModal');
+    if (modal && modal.classList.contains('active')) {
+      closeMemoriesModal();
+    }
+    closeMobileMenu();
+  }
+});
 
 function showToast(text, type = 'info') {
   const container = document.getElementById('toastContainer');
