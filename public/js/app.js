@@ -956,11 +956,11 @@ function switchTab(mode) {
   const viewerBtn = document.getElementById('tabViewerBtn');
   
   if (hostBtn) {
-    hostBtn.className = isHost ? 'cooldock-pill active' : 'cooldock-pill';
+    hostBtn.className = isHost ? 'sentry-btn-white' : 'sentry-btn-dark-border';
     hostBtn.setAttribute('aria-selected', isHost ? 'true' : 'false');
   }
   if (viewerBtn) {
-    viewerBtn.className = !isHost ? 'cooldock-pill active' : 'cooldock-pill';
+    viewerBtn.className = !isHost ? 'sentry-btn-white' : 'sentry-btn-dark-border';
     viewerBtn.setAttribute('aria-selected', !isHost ? 'true' : 'false');
   }
 
@@ -976,6 +976,27 @@ function switchTab(mode) {
 /* ========================================================
  * 10. Landing Page Interactions (Scroll, Playground, FAQ)
  * ======================================================== */
+function toggleMarketingMode() {
+  const sw = document.getElementById('mktSwitchBtn');
+  const txt = document.getElementById('mktStateText');
+  const heroTitle = document.getElementById('heroMainTitle');
+  const heroSub = document.getElementById('heroSubTitle');
+  if (!sw) return;
+  const isOn = sw.classList.toggle('is-on');
+  if (txt) txt.textContent = isOn ? 'ON' : 'OFF';
+  if (heroTitle && heroSub) {
+    if (isOn) {
+      heroTitle.textContent = 'Wake up babe';
+      heroSub.textContent = 'ScreenCast × Rollbooth baru aja rilis.';
+      showToast('Marketing Mode: ON — Mode santai & seru aktif!');
+    } else {
+      heroTitle.textContent = 'WebRTC 60fps + Canvas 2D';
+      heroSub.textContent = 'P2P MediaStream dengan komposit frame film real-time.';
+      showToast('Marketing Mode: OFF — Mode teknis developer aktif.');
+    }
+  }
+}
+
 function openHeroAction(mode) {
   switchTab(mode);
   scrollToSection('cooldockHub');
