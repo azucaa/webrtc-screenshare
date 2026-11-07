@@ -2183,6 +2183,20 @@ body.darkroom-body [role="button"]:focus-visible {
   gap: 10px;
 }
 
+.dr-signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  background: var(--dr-bg-surface);
+  border: 1px solid var(--dr-border-subtle);
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--dr-ink-secondary);
+}
+
 .dr-theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -2320,6 +2334,22 @@ body.darkroom-body [role="button"]:focus-visible {
   align-items: start;
 }
 
+.dr-eyebrow-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-family: var(--dr-font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--dr-accent-focus);
+}
+
+.dr-mono-sep {
+  color: var(--dr-border-strong);
+}
+
 .dr-hero-title {
   font-family: var(--dr-font-serif);
   font-size: clamp(32px, 4.2vw, 52px);
@@ -2383,12 +2413,108 @@ body.darkroom-body [role="button"]:focus-visible {
   border-color: var(--dr-ink-primary);
 }
 
+.dr-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
 .dr-field-label {
   display: block;
   font-size: 13.5px;
   font-weight: 500;
   color: var(--dr-ink-secondary);
-  margin-bottom: 14px;
+  margin: 0;
+}
+
+.dr-paste-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  background: var(--dr-bg-elevated);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 6px;
+  font-family: var(--dr-font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dr-paste-btn:hover {
+  border-color: var(--dr-ink-primary);
+}
+
+.dr-recent-rooms {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.dr-recent-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dr-ink-secondary);
+}
+
+.dr-recent-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+body.darkroom-body .recent-room-chip {
+  min-height: 32px;
+  padding: 4px 10px;
+  background: var(--dr-bg-elevated);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 4px;
+  font-family: var(--dr-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+body.darkroom-body .recent-room-chip:hover {
+  border-color: var(--dr-accent-focus);
+}
+
+.dr-host-checks {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  background: var(--dr-bg-elevated);
+  border: 1px solid var(--dr-border-subtle);
+  border-radius: 6px;
+}
+
+.dr-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dr-ink-primary);
+  cursor: pointer;
+}
+
+.dr-check-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dr-accent);
+  cursor: pointer;
 }
 
 .dr-otp-grid {
@@ -2661,6 +2787,39 @@ body.darkroom-body .setting-select option {
 .dr-frame-caption span {
   font-size: 11.5px;
   color: #B8B2A6;
+}
+
+.dr-reel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dr-border-subtle);
+  font-size: 11px;
+  color: var(--dr-ink-secondary);
+  flex-wrap: wrap;
+}
+
+.dr-reel-jump-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  background: var(--dr-bg-elevated);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 6px;
+  font-family: var(--dr-font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.dr-reel-jump-btn:hover {
+  border-color: var(--dr-ink-primary);
 }
 
 /* Section 2: Interactive darkroom contact sheet table */
@@ -2980,10 +3139,33 @@ body.darkroom-body .setting-select option {
   font-family: 'Caveat', var(--dr-font-serif);
   font-size: 22px;
   font-weight: 700;
-  margin: 0 0 2px;
+  margin: 0 0 6px;
+}
+
+.sample-barcode {
+  width: 140px;
+  height: 18px;
+  margin: 0 auto 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    currentColor 0px,
+    currentColor 2px,
+    transparent 2px,
+    transparent 5px,
+    currentColor 5px,
+    currentColor 6px,
+    transparent 6px,
+    transparent 9px,
+    currentColor 9px,
+    currentColor 12px,
+    transparent 12px,
+    transparent 14px
+  );
+  opacity: 0.72;
 }
 
 .sample-meta {
+  display: block;
   font-size: 9px;
   letter-spacing: 0.06em;
 }
@@ -3174,6 +3356,83 @@ body.darkroom-body .faq-item.open .faq-answer {
   color: var(--dr-ink-primary);
 }
 
+/* Darkroom overrides for Rollbooth Modal, Countdown, and Toasts */
+body.darkroom-body .rollbooth-modal-card {
+  background: var(--dr-bg-surface);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 10px;
+}
+
+body.darkroom-body .photobooth-modal-header {
+  border-bottom: 1px solid var(--dr-border-subtle);
+}
+
+body.darkroom-body .rollbooth-logo-badge {
+  background: var(--dr-accent);
+  color: var(--dr-accent-ink);
+  font-family: var(--dr-font-mono);
+  border-radius: 4px;
+}
+
+body.darkroom-body .rollbooth-preview-column {
+  background: var(--dr-bg-canvas);
+  border: 1px solid var(--dr-border-subtle);
+  border-radius: 8px;
+}
+
+body.darkroom-body .rollbooth-ctrl-label {
+  font-family: var(--dr-font-mono);
+  color: var(--dr-ink-secondary);
+}
+
+body.darkroom-body .rollbooth-segmented-pills {
+  background: var(--dr-bg-canvas);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 6px;
+}
+
+body.darkroom-body .rollbooth-pill-btn {
+  color: var(--dr-ink-secondary);
+  border-radius: 4px;
+  min-height: 38px;
+}
+
+body.darkroom-body .rollbooth-pill-btn.active {
+  background: var(--dr-ink-primary);
+  color: var(--dr-bg-canvas);
+}
+
+body.darkroom-body .rollbooth-input {
+  background: var(--dr-bg-canvas);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 6px;
+}
+
+body.darkroom-body .countdown-card {
+  background: var(--dr-bg-surface);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 10px;
+}
+
+body.darkroom-body .countdown-badge {
+  background: var(--dr-accent);
+  color: var(--dr-accent-ink);
+  border: none;
+  font-family: var(--dr-font-mono);
+}
+
+body.darkroom-body .toast {
+  background: var(--dr-bg-elevated);
+  color: var(--dr-ink-primary);
+  border: 1px solid var(--dr-border-strong);
+  border-radius: 6px;
+  font-family: var(--dr-font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
 /* Three-state responsive reflow (Desktop -> Tablet -> Mobile per R-03) */
 @media (max-width: 1040px) {
   .dr-hero-grid,
@@ -3183,7 +3442,8 @@ body.darkroom-body .faq-item.open .faq-answer {
     gap: 36px;
   }
 
-  .dr-nav {
+  .dr-nav,
+  .dr-signal-pill {
     display: none;
   }
 

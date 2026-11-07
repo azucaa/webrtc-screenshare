@@ -30,6 +30,7 @@ const rtcConfig = {
 // Auto initialize based on URL params
 window.addEventListener('DOMContentLoaded', () => {
   initWebSocket();
+  initOtpBoxes();
   renderRecentRooms();
   initKeyboardShortcuts();
 
@@ -48,12 +49,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const roomParam = urlParams.get('room');
   if (roomParam) {
     switchTab('viewer');
+    const clean = roomParam.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     const input = document.getElementById('inputRoomCode');
-    if (input) {
-      input.value = roomParam.toUpperCase();
-      updateOtpSlots();
-    }
-    setTimeout(() => joinRoomByInput(), 400);
+    const roomCodeInput = document.getElementById('roomCodeInput');
+    if (input) input.value = clean;
+    if (roomCodeInput) roomCodeInput.value = clean;
+    updateOtpSlots();
+    setTimeout(() => joinRoomWithState(), 400);
   } else {
     updateOtpSlots();
   }
@@ -129,6 +131,7 @@ function initWebSocket() {
         break;
 
       case 'error':
+        setRoomStatusBanner('error', 'GALAT RUANG', data.message || 'Kode ruang tidak ditemukan atau sudah ditutup.');
         showToast(data.message, 'error');
         break;
     }
@@ -444,36 +447,91 @@ function stopHostSharing() {
 /* ========================================================
  * 3. Viewer Logic (Watching & Controls)
  * ======================================================== */
+function initOtpBoxes() {
+  const boxes = Array.from(document.querySelectorAll('#otpGrid .otp-box'));
+  if (boxes.length === 0) return;
+
+  boxes.forEach((box, idx) => {
+    box.addEventListener('input', (e) => {
+      const val = (e.target.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      e.target.value = val.slice(-1);
+      syncOtpBoxesToHiddenInputs();
+      if (e.target.value && idx < boxes.length - 1) {
+        boxes[idx + 1].focus();
+        boxes[idx + 1].select();
+      }
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        if (!box.value && idx > 0) {
+          e.preventDefault();
+          boxes[idx - 1].value = '';
+          boxes[idx - 1].focus();
+          syncOtpBoxesToHiddenInputs();
+        } else {
+          setTimeout(syncOtpBoxesToHiddenInputs, 0);
+        }
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        e.preventDefault();
+        boxes[idx - 1].focus();
+      } else if (e.key === 'ArrowRight' && idx < boxes.length - 1) {
+        e.preventDefault();
+        boxes[idx + 1].focus();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        joinRoomWithState();
+      }
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+      const clean = pasted.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+      if (!clean) return;
+      boxes.forEach((b, i) => {
+        b.value = clean[i] || '';
+      });
+      syncOtpBoxesToHiddenInputs();
+      const nextIdx = Math.min(clean.length, boxes.length - 1);
+      boxes[nextIdx].focus();
+      if (clean.length === 6) {
+        setRoomStatusBanner('empty', 'SIAP', `Kode ${clean} siap dihubungkan ke proyektor ruang.`);
+      }
+    });
+  });
+}
+
+function syncOtpBoxesToHiddenInputs() {
+  const boxes = Array.from(document.querySelectorAll('#otpGrid .otp-box'));
+  const combined = boxes.map(b => (b.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '')).join('').slice(0, 6);
+  const input1 = document.getElementById('inputRoomCode');
+  const input2 = document.getElementById('roomCodeInput');
+  if (input1) input1.value = combined;
+  if (input2) input2.value = combined;
+}
+
 function updateOtpSlots() {
-  const input = document.getElementById('inputRoomCode');
+  const input = document.getElementById('inputRoomCode') || document.getElementById('roomCodeInput');
   if (!input) return;
   const raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
   if (input.value !== raw) {
     input.value = raw;
   }
-  const val = raw;
-  const slots = document.querySelectorAll('.otp-slot');
-  const isFocused = (document.activeElement === input);
+  const roomCodeInput = document.getElementById('roomCodeInput');
+  if (roomCodeInput) roomCodeInput.value = raw;
 
-  slots.forEach((slot, index) => {
-    const char = val[index] || '';
-    const charEl = slot.querySelector('.otp-val');
-    if (charEl) charEl.textContent = char;
-
-    slot.classList.toggle('is-filled', !!char);
-    slot.classList.toggle('is-empty', !char);
-
-    // Active slot: currently editing index, or last slot if full
-    const isActive = isFocused && (index === val.length || (val.length === 6 && index === 5));
-    slot.classList.toggle('is-active', isActive);
+  const boxes = Array.from(document.querySelectorAll('#otpGrid .otp-box'));
+  boxes.forEach((box, index) => {
+    box.value = raw[index] || '';
   });
 }
 
 function focusOtpInput() {
-  const input = document.getElementById('inputRoomCode');
-  if (input) {
-    input.focus();
-    updateOtpSlots();
+  const firstEmpty = Array.from(document.querySelectorAll('#otpGrid .otp-box')).find(b => !b.value);
+  const target = firstEmpty || document.getElementById('otpBox1') || document.getElementById('inputRoomCode');
+  if (target) {
+    target.focus();
   }
 }
 
@@ -945,8 +1003,52 @@ function copyShareLink() {
   if (!activeRoomId) return;
   const link = `${window.location.origin}/?room=${activeRoomId}`;
   navigator.clipboard.writeText(link).then(() => {
-    showToast('Tautan berhasil disalin ke papan klip');
+    showToast('Tautan ruang berhasil disalin ke papan klip.');
   });
+}
+
+function copyRoomCode() {
+  if (!activeRoomId) return;
+  navigator.clipboard.writeText(activeRoomId).then(() => {
+    showToast(`Kode ruang ${activeRoomId} disalin ke papan klip.`);
+  });
+}
+
+function toggleHostChatDrawer() {
+  const drawer = document.getElementById('hostChatDrawer');
+  if (!drawer) return;
+  drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+}
+
+function applyPreset() {
+  const presetEl = document.getElementById('presetSelect');
+  const resEl = document.getElementById('optResolution');
+  const fpsEl = document.getElementById('optFps');
+  const modeEl = document.getElementById('optMode');
+  if (!presetEl) return;
+
+  const val = presetEl.value;
+  if (val === 'cinema') {
+    if (resEl) resEl.value = '1080p';
+    if (fpsEl) fpsEl.value = '60';
+    if (modeEl) modeEl.value = 'motion';
+  } else if (val === 'motion') {
+    if (resEl) resEl.value = '720p';
+    if (fpsEl) fpsEl.value = '60';
+    if (modeEl) modeEl.value = 'motion';
+  } else if (val === 'detail') {
+    if (resEl) resEl.value = '1080p';
+    if (fpsEl) fpsEl.value = '30';
+    if (modeEl) modeEl.value = 'detail';
+  } else if (val === 'native') {
+    if (resEl) resEl.value = 'native';
+    if (fpsEl) fpsEl.value = '60';
+    if (modeEl) modeEl.value = 'motion';
+  }
+}
+
+function startHosting() {
+  startHostSharing();
 }
 
 function switchTab(mode) {
@@ -1024,13 +1126,14 @@ function setRoomStatusBanner(state, tagText, messageText) {
 }
 
 function joinRoomWithState() {
-  const codeInput = document.getElementById('roomCodeInput');
-  const code = codeInput ? codeInput.value.trim() : '';
-  if (!/^\d{6}$/.test(code)) {
+  syncOtpBoxesToHiddenInputs();
+  const codeInput = document.getElementById('inputRoomCode') || document.getElementById('roomCodeInput');
+  const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+  if (!/^[A-Z0-9]{6}$/.test(code)) {
     setRoomStatusBanner(
       'error',
       'GALAT KODE',
-      'Kode ruang harus terdiri dari 6 angka. Periksa kembali kode dari penyelenggara tayangan.'
+      'Kode ruang harus terdiri dari 6 karakter. Periksa kembali kode dari penyelenggara tayangan.'
     );
     focusOtpInput();
     return;
@@ -1040,8 +1143,10 @@ function joinRoomWithState() {
     'MENGHUBUNGKAN',
     `Menghubungi sinyal ruang ${code}. Menunggu respons jalur video dari penyelenggara...`
   );
-  joinRoom();
+  joinRoomByInput();
 }
+
+let activeMoviePresetKey = 'lalaland';
 
 const MOVIE_PRESETS = {
   lalaland: {
@@ -1095,12 +1200,13 @@ const MOVIE_PRESETS = {
 };
 
 function selectMoviePreset(movieKey, scrollToStudio = false) {
-  const preset = MOVIE_PRESETS[movieKey] || MOVIE_PRESETS.lalaland;
+  activeMoviePresetKey = MOVIE_PRESETS[movieKey] ? movieKey : 'lalaland';
+  const preset = MOVIE_PRESETS[activeMoviePresetKey];
   const strip = document.getElementById('sampleStripWrap');
   if (strip) {
     strip.classList.remove('preset-lalaland', 'preset-interstellar', 'preset-spiritedaway', 'preset-bladerunner');
-    if (movieKey !== 'lalaland') {
-      strip.classList.add(`preset-${movieKey}`);
+    if (activeMoviePresetKey !== 'lalaland') {
+      strip.classList.add(`preset-${activeMoviePresetKey}`);
     }
   }
 
@@ -1120,17 +1226,18 @@ function selectMoviePreset(movieKey, scrollToStudio = false) {
 
   ['lalaland', 'interstellar', 'spiritedaway', 'bladerunner'].forEach(k => {
     const btn = document.getElementById(`presetBtn-${k}`);
-    if (btn) btn.classList.toggle('active', k === movieKey);
+    if (btn) btn.classList.toggle('active', k === activeMoviePresetKey);
     const card = document.getElementById(`reelCard-${k}`);
     if (card) {
-      card.classList.toggle('active', k === movieKey);
-      card.setAttribute('aria-pressed', k === movieKey ? 'true' : 'false');
+      card.classList.toggle('active', k === activeMoviePresetKey);
+      card.setAttribute('aria-pressed', k === activeMoviePresetKey ? 'true' : 'false');
     }
   });
 
-  const capInput = document.getElementById('memoriesCaptionInput');
-  if (capInput && !capInput.value) {
-    capInput.placeholder = `Contoh: ${preset.caption}`;
+  rollboothConfig.caption = preset.caption;
+  const rbCapInput = document.getElementById('rollboothCaptionInput');
+  if (rbCapInput) {
+    rbCapInput.value = preset.caption;
   }
 
   if (scrollToStudio) {
@@ -1236,10 +1343,7 @@ function toggleFaq(btnEl) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const modal = document.getElementById('memoriesModal');
-    if (modal && modal.classList.contains('active')) {
-      closeMemoriesModal();
-    }
+    closePhotoboothModal();
     closeMobileMenu();
   }
 });
@@ -1814,13 +1918,164 @@ let rollboothConfig = {
   layout: 'strip',       // 'strip' | 'grid' | 'polaroid'
   frameColor: 'white',   // 'white' | 'cream' | 'noir' | 'pink' | 'matcha'
   filter: 'vintage',     // 'vintage' | 'normal' | 'bw' | 'sunset'
-  caption: 'Movie Night Memories'
+  caption: 'La La Land Night'
 };
 
 let rollboothSnaps = []; // Array of 3 snapshots: [{ movie, cam1, cam2 }, ...]
 let isPhotoboothCountingDown = false;
 let currentPhotoboothBlob = null;
 let currentPhotoboothDataUrl = null;
+let standaloneCamVideoEl = null;
+
+async function openRollboothStudio() {
+  if (!localCamStream && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      localCamStream = stream;
+      isFacecamActive = true;
+      if (!standaloneCamVideoEl) {
+        standaloneCamVideoEl = document.createElement('video');
+        standaloneCamVideoEl.muted = true;
+        standaloneCamVideoEl.playsInline = true;
+        standaloneCamVideoEl.autoplay = true;
+      }
+      standaloneCamVideoEl.srcObject = stream;
+      await standaloneCamVideoEl.play().catch(() => {});
+    } catch (e) {
+      // Proceed using synthesized darkroom portrait + selected movie preset
+    }
+  }
+  triggerPhotobooth();
+}
+
+function renderPresetMovieCanvas(presetKey, poseIndex = 0) {
+  const c = document.createElement('canvas');
+  c.width = 640;
+  c.height = 360;
+  const ctx = c.getContext('2d');
+
+  if (presetKey === 'interstellar') {
+    const g = ctx.createRadialGradient(320, 175, 24, 320, 175, 220);
+    g.addColorStop(0, '#040407');
+    g.addColorStop(0.32, '#050508');
+    g.addColorStop(0.42, '#fff7d6');
+    g.addColorStop(0.58, '#f59e2d');
+    g.addColorStop(0.82, '#6e2b0e');
+    g.addColorStop(1, '#070913');
+    ctx.fillStyle = '#070913';
+    ctx.fillRect(0, 0, 640, 360);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(320, 175, 190, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(320, 175);
+    ctx.rotate(-0.2);
+    ctx.strokeStyle = '#ffdf9e';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 220, 28, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#040407';
+    ctx.beginPath();
+    ctx.arc(320, 175, 56, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (presetKey === 'spiritedaway') {
+    const g = ctx.createLinearGradient(0, 0, 0, 360);
+    g.addColorStop(0, '#183642');
+    g.addColorStop(0.58, '#397367');
+    g.addColorStop(1, '#e89973');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 640, 360);
+    ctx.fillStyle = '#17444c';
+    ctx.fillRect(0, 236, 640, 124);
+    ctx.fillStyle = '#c83e37';
+    ctx.fillRect(64 + poseIndex * 24, 188, 320, 48);
+    ctx.fillStyle = '#f4d58d';
+    ctx.fillRect(64 + poseIndex * 24, 210, 320, 8);
+  } else if (presetKey === 'bladerunner') {
+    const g = ctx.createLinearGradient(0, 0, 640, 360);
+    g.addColorStop(0, '#0d1322');
+    g.addColorStop(0.5, '#2c1638');
+    g.addColorStop(1, '#d95b26');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 640, 360);
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+    ctx.fillRect(90, 0, 140, 360);
+    ctx.fillStyle = 'rgba(255, 42, 133, 0.24)';
+    ctx.fillRect(360, 0, 140, 360);
+  } else {
+    // Default: La La Land
+    const g = ctx.createLinearGradient(0, 0, 0, 360);
+    g.addColorStop(0, '#190e30');
+    g.addColorStop(0.5, '#4e2268');
+    g.addColorStop(0.84, '#b84a72');
+    g.addColorStop(1, '#f09c67');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 640, 360);
+    ctx.fillStyle = '#110920';
+    ctx.fillRect(0, 280, 640, 80);
+    ctx.fillStyle = '#fff7d6';
+    ctx.beginPath();
+    ctx.arc(170, 92, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#110920';
+    ctx.fillRect(166, 104, 8, 176);
+    ctx.fillStyle = '#f5c431';
+    ctx.beginPath();
+    ctx.moveTo(360, 175);
+    ctx.lineTo(392, 255);
+    ctx.lineTo(328, 255);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const preset = MOVIE_PRESETS[presetKey] || MOVIE_PRESETS.lalaland;
+  ctx.fillStyle = 'rgba(10, 9, 14, 0.78)';
+  ctx.fillRect(24, 304, 592, 38);
+  ctx.fillStyle = '#ffe66d';
+  ctx.font = '600 16px ui-monospace, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(preset.badges[poseIndex % preset.badges.length] || preset.code, 320, 329);
+  ctx.textAlign = 'left';
+  return c;
+}
+
+function renderPortraitPlaceholderCanvas(poseIndex = 0) {
+  const c = document.createElement('canvas');
+  c.width = 480;
+  c.height = 360;
+  const ctx = c.getContext('2d');
+  const bgColors = ['#2B2623', '#252B28', '#2D2522'];
+  ctx.fillStyle = bgColors[poseIndex % bgColors.length];
+  ctx.fillRect(0, 0, 480, 360);
+
+  ctx.fillStyle = 'rgba(243, 239, 230, 0.85)';
+  ctx.beginPath();
+  ctx.arc(185, 145, 42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(185, 330, 95, Math.PI, 0);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(243, 239, 230, 0.68)';
+  ctx.beginPath();
+  ctx.arc(305, 156, 38, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(305, 330, 86, Math.PI, 0);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(17, 17, 16, 0.78)';
+  ctx.fillRect(18, 18, 134, 30);
+  ctx.fillStyle = '#F3EFE6';
+  ctx.font = '600 13px ui-monospace, monospace';
+  ctx.fillText(`POSE 0${poseIndex + 1} / 35MM`, 30, 38);
+  return c;
+}
 
 function triggerPhotobooth() {
   if (isPhotoboothCountingDown) return;
@@ -1828,7 +2083,6 @@ function triggerPhotobooth() {
   rollboothSnaps = [];
 
   const overlay = document.getElementById('photoboothCountdownOverlay');
-  const countText = document.getElementById('photoboothCountText');
   const stepBadge = document.getElementById('photoboothStepBadge');
   const hintText = document.getElementById('photoboothHintText');
   const modal = document.getElementById('photoboothModal');
@@ -1837,27 +2091,27 @@ function triggerPhotobooth() {
   if (overlay) overlay.style.display = 'flex';
 
   // Step 1: Snapshot 1 (Bersiap)
-  if (stepBadge) stepBadge.textContent = 'Foto 1 dari 3: Bersiap!';
-  if (hintText) hintText.textContent = 'Pose pertama bersama adegan film!';
+  if (stepBadge) stepBadge.textContent = 'Pose 1 dari 3: Bersiap';
+  if (hintText) hintText.textContent = 'Pose pertama bersama adegan film';
 
   runCountdownStep(3, () => {
-    rollboothSnaps[0] = grabCurrentSnap();
+    rollboothSnaps[0] = grabCurrentSnap(0);
 
     // Step 2: Snapshot 2 (Ganti Pose)
     setTimeout(() => {
-      if (stepBadge) stepBadge.textContent = 'Foto 2 dari 3: Ganti Pose!';
-      if (hintText) hintText.textContent = 'Ganti ekspresi atau gaya baru!';
+      if (stepBadge) stepBadge.textContent = 'Pose 2 dari 3: Ganti Gaya';
+      if (hintText) hintText.textContent = 'Tunjukkan ekspresi terbaik kalian';
 
       runCountdownStep(2, () => {
-        rollboothSnaps[1] = grabCurrentSnap();
+        rollboothSnaps[1] = grabCurrentSnap(1);
 
         // Step 3: Snapshot 3 (Pose Terakhir)
         setTimeout(() => {
-          if (stepBadge) stepBadge.textContent = 'Foto 3 dari 3: Senyum!';
-          if (hintText) hintText.textContent = 'Pose terbaik terakhir!';
+          if (stepBadge) stepBadge.textContent = 'Pose 3 dari 3: Tahan Senyum';
+          if (hintText) hintText.textContent = 'Bidikan terakhir untuk lembar kontak 35mm';
 
           runCountdownStep(2, () => {
-            rollboothSnaps[2] = grabCurrentSnap();
+            rollboothSnaps[2] = grabCurrentSnap(2);
 
             // Finish all 3 snaps
             if (overlay) overlay.style.display = 'none';
@@ -1866,7 +2120,7 @@ function triggerPhotobooth() {
             // Open Rollbooth Studio Modal
             if (modal) modal.style.display = 'flex';
             renderRollboothCanvas();
-            showToast('3 Foto berhasil diambil! Selamat berkreasi di Rollbooth Studio 📸✨');
+            showToast('3 pose selesai dipotret. Sesuaikan kertas dan unduh cetakan Anda.');
           });
         }, 600);
       });
@@ -1886,7 +2140,7 @@ function runCountdownStep(startCount, onFinish) {
       if (countText) countText.textContent = current;
     } else {
       clearInterval(timer);
-      if (countText) countText.textContent = '📸 FLASH!';
+      if (countText) countText.textContent = 'RANA';
 
       // Trigger Flash & Sound
       if (flash) {
@@ -1902,13 +2156,13 @@ function runCountdownStep(startCount, onFinish) {
   }, 900);
 }
 
-function grabCurrentSnap() {
+function grabCurrentSnap(poseIndex = 0) {
   const movieVid = (currentRole === 'host')
     ? document.getElementById('hostPreviewVideo')
     : document.getElementById('viewerVideo');
   const cam1 = (currentRole === 'host')
     ? document.getElementById('hostSelfCamVideo')
-    : document.getElementById('selfFacecamVideo');
+    : (document.getElementById('selfFacecamVideo')?.videoWidth ? document.getElementById('selfFacecamVideo') : standaloneCamVideoEl);
   const cam2 = (currentRole === 'host')
     ? document.getElementById('hostPartnerCamVideo')
     : document.getElementById('partnerFacecamVideo');
@@ -1923,10 +2177,14 @@ function grabCurrentSnap() {
     return c;
   }
 
+  const capturedMovie = copyVideo(movieVid) || renderPresetMovieCanvas(activeMoviePresetKey, poseIndex);
+  const capturedCam1 = copyVideo(cam1) || renderPortraitPlaceholderCanvas(poseIndex);
+  const capturedCam2 = copyVideo(cam2);
+
   return {
-    movie: copyVideo(movieVid),
-    cam1: copyVideo(cam1),
-    cam2: copyVideo(cam2)
+    movie: capturedMovie,
+    cam1: capturedCam1,
+    cam2: capturedCam2
   };
 }
 
@@ -2067,7 +2325,7 @@ function renderRollboothCanvas() {
 
     // Photo 1 (Top: Movie Scene from Snap 1)
     const y1 = padTop;
-    drawFilteredPhoto(ctx, snap1.movie, padX, y1, photoW, photoH, activeFilter, '🎬 ADEGAN FILM');
+    drawFilteredPhoto(ctx, snap1.movie, padX, y1, photoW, photoH, activeFilter, 'ADEGAN FILM');
 
     // Photo 2 (Middle: Reactions from Snap 2)
     const y2 = y1 + photoH + gap;
@@ -2079,7 +2337,7 @@ function renderRollboothCanvas() {
     } else if (snap2.cam1 || snap2.cam2) {
       drawFilteredPhoto(ctx, snap2.cam1 || snap2.cam2, padX, y2, photoW, photoH, activeFilter, 'REAKSI');
     } else {
-      drawFilteredPhoto(ctx, snap2.movie, padX, y2, photoW, photoH, activeFilter, '🎬 FILM SCENE II');
+      drawFilteredPhoto(ctx, snap2.movie, padX, y2, photoW, photoH, activeFilter, 'ADEGAN II');
     }
 
     // Photo 3 (Bottom: Final Pose from Snap 3)
@@ -2091,7 +2349,7 @@ function renderRollboothCanvas() {
     } else if (snap3.cam1 || snap3.cam2) {
       drawFilteredPhoto(ctx, snap3.cam1 || snap3.cam2, padX, y3, photoW, photoH, activeFilter, 'SENYUM');
     } else {
-      drawFilteredPhoto(ctx, snap3.movie, padX, y3, photoW, photoH, activeFilter, '🎬 FILM SCENE III');
+      drawFilteredPhoto(ctx, snap3.movie, padX, y3, photoW, photoH, activeFilter, 'ADEGAN III');
     }
 
     // Strip Footer
@@ -2101,7 +2359,7 @@ function renderRollboothCanvas() {
     // Custom Caption
     ctx.fillStyle = theme.text;
     ctx.font = '700 19px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', W / 2, footerY);
+    ctx.fillText(rollboothConfig.caption || 'La La Land Night', W / 2, footerY);
 
     // Date & Time
     ctx.fillStyle = theme.subtext;
@@ -2138,19 +2396,19 @@ function renderRollboothCanvas() {
 
     // Top Row
     const yTop = pad + 16;
-    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, '🎬 FILM 1');
-    drawFilteredPhoto(ctx, snap2.cam1 || snap1.movie, pad + gridW + gap, yTop, gridW, gridH, activeFilter, 'HOST');
+    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, 'ADEGAN 01');
+    drawFilteredPhoto(ctx, snap2.cam1 || snap1.movie, pad + gridW + gap, yTop, gridW, gridH, activeFilter, 'KAMERA 01');
 
     // Bottom Row
     const yBot = yTop + gridH + gap;
-    drawFilteredPhoto(ctx, snap2.cam2 || snap2.cam1 || snap2.movie, pad, yBot, gridW, gridH, activeFilter, 'VIEWER');
-    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, '🎬 FILM 2');
+    drawFilteredPhoto(ctx, snap2.cam2 || snap2.cam1 || snap2.movie, pad, yBot, gridW, gridH, activeFilter, 'KAMERA 02');
+    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, 'ADEGAN 02');
 
     // Footer
     const footerY = yBot + gridH + 34;
     ctx.fillStyle = theme.text;
     ctx.font = '700 24px -apple-system, sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', pad, footerY);
+    ctx.fillText(rollboothConfig.caption || 'La La Land Night', pad, footerY);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = theme.subtext;
@@ -2178,7 +2436,7 @@ function renderRollboothCanvas() {
     const heroH = Math.round(heroW * (9 / 16)); // ~477px
 
     // Hero Movie Scene
-    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, '🎬 ADEGAN FILM');
+    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, 'ADEGAN FILM');
 
     // Side-by-side reactions
     const reactY = pad + heroH + 20;
@@ -2186,13 +2444,13 @@ function renderRollboothCanvas() {
     const reactH = 440;
 
     drawFilteredPhoto(ctx, snap2.cam1, pad, reactY, halfW, reactH, activeFilter, currentRole === 'host' ? 'Host' : 'Viewer');
-    drawFilteredPhoto(ctx, snap2.cam2 || snap3.cam2, pad + halfW + 20, reactY, halfW, reactH, activeFilter, currentRole === 'host' ? 'Viewer' : 'Host');
+    drawFilteredPhoto(ctx, snap2.cam2 || snap3.cam1, pad + halfW + 20, reactY, halfW, reactH, activeFilter, currentRole === 'host' ? 'Viewer' : 'Host');
 
     // Footer Polaroid
     const footerY = reactY + reactH + 34;
     ctx.fillStyle = theme.text;
     ctx.font = '700 22px -apple-system, sans-serif';
-    ctx.fillText(rollboothConfig.caption || 'Movie Night Memories', pad, footerY);
+    ctx.fillText(rollboothConfig.caption || 'La La Land Night', pad, footerY);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = theme.subtext;
@@ -2235,10 +2493,10 @@ function drawFilteredPhoto(ctx, sourceCanvas, x, y, w, h, filterStr, label) {
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#8b949e';
-    ctx.font = '28px -apple-system, sans-serif';
-    ctx.fillText('📷', x + w / 2, y + h / 2 - 8);
+    ctx.font = '600 13px ui-monospace, monospace';
+    ctx.fillText('35MM FRAME', x + w / 2, y + h / 2 - 6);
     ctx.font = '500 13px -apple-system, sans-serif';
-    ctx.fillText(label || 'Foto', x + w / 2, y + h / 2 + 24);
+    ctx.fillText(label || 'Foto', x + w / 2, y + h / 2 + 18);
     ctx.textAlign = 'left';
   }
 
@@ -2308,7 +2566,7 @@ function downloadPhotoboothPhoto() {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  showToast('Foto Rollbooth berhasil diunduh!');
+  showToast('Cetakan Rollbooth berhasil diunduh.');
 }
 
 async function copyPhotoboothPhoto() {
@@ -2321,7 +2579,7 @@ async function copyPhotoboothPhoto() {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': currentPhotoboothBlob })
       ]);
-      showToast('Foto Strip disalin ke clipboard! Siap di-paste ke WA/Telegram.');
+      showToast('Cetakan strip berhasil disalin ke papan klip.');
     } else {
       downloadPhotoboothPhoto();
     }
@@ -2338,14 +2596,14 @@ async function sharePhotoboothPhoto() {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         title: 'Rollbooth Movie Memories',
-        text: 'Foto strip nobar film di ScreenCast! 🍿📸',
+        text: 'Cetakan strip 35mm dari sesi menonton di ScreenCast.',
         files: [file]
       });
-      showToast('Foto berhasil dibagikan!');
+      showToast('Cetakan berhasil dibagikan.');
     } else if (navigator.share) {
       await navigator.share({
         title: 'Rollbooth Movie Memories',
-        text: 'Foto strip nobar film di ScreenCast! 🍿🎬',
+        text: 'Cetakan strip 35mm dari sesi menonton di ScreenCast.',
         url: window.location.href
       });
     } else {
