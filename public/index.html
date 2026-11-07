@@ -1,1075 +1,583 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
-
+<html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScreenCast. × Rollbooth : Klub Siaran Layar P2P &amp; Studio Cetak 35mm</title>
-  <meta name="description"
-    content="Klub layar bersama dan kamar gelap 35mm di peramban. Bagikan layar dalam 60fps P2P tanpa jeda, lalu cetak strip foto 35mm berdua langsung dari kamera.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=13.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ScreenCast · Siaran Layar PC</title>
+  <link rel="stylesheet" href="css/style.css?v=4.4">
 </head>
+<body>
+  <!-- 21st.dev Mesh Drift Shader Background -->
+  <canvas id="meshDriftCanvas" class="mesh-drift-canvas" aria-hidden="true"></canvas>
 
-<body class="inspo-body">
-  <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
-
-  <!-- ============================================================
-       ARCHETYPE 1: NAV INLINE MINIMAL (Chill Music Club × inspo-mcp nav/inline)
-       Wordmark left, metadata links inline, tighter mono utility cluster right
-       ============================================================ -->
-  <header class="app-header inspo-nav-bar" id="appHeader">
-    <div class="inspo-nav-inner">
-      <a href="#heroSection" class="inspo-wordmark" onclick="switchTab('viewer'); scrollToSection('heroSection', event)">
-        ScreenCast<span class="inspo-accent-dot">.</span>
-        <span class="inspo-wordmark-sub">× Rollbooth Club</span>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </span>
+        <span class="brand-name">ScreenCast</span>
       </a>
 
-      <nav class="inspo-nav-cluster" aria-label="Navigasi Utama">
-        <div class="inspo-nav-links" id="desktopNav">
-          <a href="#reelCatalog" class="text-meta inspo-nav-link" onclick="scrollToSection('reelCatalog', event)">01 / Rak Kaset &amp; Emulsi</a>
-          <a href="#studioShowcase" class="text-meta inspo-nav-link" onclick="scrollToSection('studioShowcase', event)">02 / Meja Cetak</a>
-          <a href="#specSection" class="text-meta inspo-nav-link" onclick="scrollToSection('specSection', event)">03 / Catatan Teknis</a>
-          <a href="#faqSection" class="text-meta inspo-nav-link" onclick="scrollToSection('faqSection', event)">04 / Tanya Jawab</a>
-        </div>
-
-        <div class="inspo-utility-cluster">
-          <div class="inspo-util-chip" title="Status Sinyal WebSocket">
-            <span class="status-indicator online" id="serverStatusDot"></span>
-            <span class="mono" id="serverStatusText">Terhubung</span>
-          </div>
-
-          <button type="button" class="inspo-util-btn" id="themeToggleBtn" onclick="toggleColorTheme()"
-            aria-label="Ganti tema gelap atau terang">
-            <span id="themeToggleLabel">Kamar Gelap</span>
-          </button>
-
-          <button type="button" class="inspo-util-btn inspo-util-cta" onclick="openRollboothStudio()">
-            Studio Kamera
-          </button>
-
-          <button type="button" class="inspo-util-btn inspo-mobile-trigger" id="mobileMenuBtn" onclick="toggleMobileMenu()"
-            aria-expanded="false" aria-controls="mobileNavDrawer">
-            Menu
-          </button>
-        </div>
-      </nav>
+      <div class="server-status" role="status" aria-live="polite">
+        <span class="status-indicator" id="serverStatusDot"></span>
+        <span class="status-label" id="serverStatusText">Menghubungkan...</span>
+      </div>
     </div>
+  </header>
 
-    <!-- Mobile Off-Canvas Drawer -->
-    <nav class="inspo-mobile-drawer" id="mobileNavDrawer" aria-label="Menu Seluler" hidden>
-      <a href="#reelCatalog" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('reelCatalog', event)">01 / Rak Kaset &amp; Emulsi</a>
-      <a href="#studioShowcase" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('studioShowcase', event)">02 / Meja Cetak 35mm</a>
-      <a href="#specSection" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('specSection', event)">03 / Catatan Teknis</a>
-      <a href="#faqSection" class="inspo-mobile-link" onclick="closeMobileMenu(); scrollToSection('faqSection', event)">04 / Tanya Jawab</a>
-      <div class="inspo-mobile-actions">
-        <button type="button" class="inspo-btn-primary" onclick="closeMobileMenu(); openHeroAction('host')">
-          Siarkan Layar
+  <main class="app-main">
+    <!-- Role Switcher Segmented Control -->
+    <nav class="segment-nav" id="tabsBar" aria-label="Mode Aplikasi">
+      <div class="segmented-control" role="tablist">
+        <button class="segment-btn active" id="tabViewerBtn" role="tab" aria-selected="true" onclick="switchTab('viewer')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2"></rect>
+            <line x1="12" y1="18" x2="12" y2="18.01"></line>
+          </svg>
+          <span>Tonton Layar</span>
         </button>
-        <button type="button" class="inspo-btn-ghost" onclick="closeMobileMenu(); openRollboothStudio()">
-          Buka Kamera Rollbooth
+        <button class="segment-btn" id="tabHostBtn" role="tab" aria-selected="false" onclick="switchTab('host')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span>Bagikan Layar</span>
         </button>
       </div>
     </nav>
-  </header>
 
-  <main class="main-stage">
-
-    <!-- ============================================================
-         LANDING VIEW (CHILL MUSIC CLUB × INSPO-MCP SPLIT STUDIO)
-         ============================================================ -->
-    <div class="landing-view" id="landingView">
-
-      <!-- ============================================================
-           ARCHETYPE 2: SPLIT-SCREEN HERO (inspo-mcp hero/split-screen)
-           Left half: Editorial Club Typography + Immediate Room Terminal
-           Right half: Analog Crate Sleeve Panel + 2x2 Emulsion J-Cards
-           ============================================================ -->
-      <section class="inspo-hero-split" id="heroSection">
-        <div class="inspo-split-grid">
-
-          <!-- LEFT HALF: Typography & Room Terminal -->
-          <div class="inspo-split-left">
-            <p class="text-meta">KLUB ANALOG DIGITAL · SIARAN WEBRTC 60FPS &amp; CETAK 35MM</p>
-
-            <h1 class="inspo-display-h1" id="heroMainTitle">
-              Sudut paling tenang di internet untuk <em>berbagi layar &amp; mencetak strip 35mm</em>.
-            </h1>
-
-            <p class="inspo-lead" id="heroSubTitle">
-              Tanpa algoritma, tanpa akun, dan tanpa penyimpanan cloud. Buka ruang pribadi berdua atau bersama teman dalam 60fps, lalu abadikan ekspresi kalian di atas kertas cetak analog langsung dari peramban.
-            </p>
-
-            <!-- Functional Room Terminal (#cooldockHub) -->
-            <div class="inspo-terminal-box" id="cooldockHub">
-              <div class="inspo-terminal-tabs" id="tabsBar" role="tablist" aria-label="Pilih Mode Ruang">
-                <button type="button" class="inspo-tab active" id="tabViewerBtn" role="tab" aria-selected="true"
-                  onclick="switchTab('viewer')">
-                  SISI A / Masuk dengan Kode Ruang
-                </button>
-                <button type="button" class="inspo-tab" id="tabHostBtn" role="tab" aria-selected="false"
-                  onclick="switchTab('host')">
-                  SISI B / Siarkan Layar Anda
-                </button>
-              </div>
-
-              <!-- PANE A: VIEWER JOIN -->
-              <div class="inspo-terminal-pane" id="viewerJoinCard" role="tabpanel">
-                <div class="inspo-field-head">
-                  <label class="text-meta" for="otpBox1">KODE AKSES 6 KARAKTER DARI PENYELENGGARA</label>
-                  <button type="button" class="inspo-inline-action" onclick="pasteRoomCode()" title="Tempel dari papan klip">
-                    [Tempel Kode]
-                  </button>
-                </div>
-
-                <div class="otp-grid inspo-otp-row" id="otpGrid">
-                  <input type="text" id="otpBox1" class="otp-box" maxlength="1"
-                    autocomplete="one-time-code" aria-label="Karakter 1" data-index="0" placeholder="0">
-                  <input type="text" class="otp-box" maxlength="1"
-                    aria-label="Karakter 2" data-index="1" placeholder="0">
-                  <input type="text" class="otp-box" maxlength="1"
-                    aria-label="Karakter 3" data-index="2" placeholder="0">
-                  <span class="otp-sep" aria-hidden="true">/</span>
-                  <input type="text" class="otp-box" maxlength="1"
-                    aria-label="Karakter 4" data-index="3" placeholder="0">
-                  <input type="text" class="otp-box" maxlength="1"
-                    aria-label="Karakter 5" data-index="4" placeholder="0">
-                  <input type="text" class="otp-box" maxlength="1"
-                    aria-label="Karakter 6" data-index="5" placeholder="0">
-                </div>
-
-                <input type="hidden" id="inputRoomCode" value="">
-                <input type="hidden" id="roomCodeInput" value="">
-
-                <!-- Recent Rooms Quick Rejoin -->
-                <div id="viewerRecentRooms" class="inspo-recent-row" style="display: none;">
-                  <span class="text-meta">RUANG TERAKHIR:</span>
-                  <div id="recentRoomsList" class="inspo-recent-chips"></div>
-                </div>
-
-                <!-- Explicit Status Line (Empty / Loading / Error per R-27 & inspo-mcp form-led) -->
-                <div class="inspo-status-line state-empty" id="roomStatusBanner" role="status" aria-live="polite">
-                  <span class="inspo-status-badge" id="roomStatusTag">SIAP</span>
-                  <span class="inspo-status-msg" id="roomStatusText">
-                    Ketik 6 karakter kode ruang dari temanmu, atau buka Studio Kamera untuk mencoba photobooth tanpa kode.
-                  </span>
-                </div>
-
-                <!-- Two-button CTA Archetype (inspo-mcp cta/two-button) -->
-                <div class="inspo-cta-pair">
-                  <button type="button" class="inspo-btn-primary" id="joinBtn" onclick="joinRoomWithState()">
-                    Hubungkan ke Proyektor Ruang
-                  </button>
-                  <button type="button" class="inspo-btn-ghost" onclick="openRollboothStudio()">
-                    Buka Studio Kamera (Tanpa Kode)
-                  </button>
-                </div>
-              </div>
-
-              <!-- PANE B: HOST SETUP -->
-              <div class="inspo-terminal-pane" id="hostSetupCard" role="tabpanel" style="display: none;">
-                <p class="inspo-pane-caption">
-                  Konfigurasikan parameter transmisi sebelum memilih jendela atau layar. Kode 6 karakter dan kode QR akan dibuat otomatis.
-                </p>
-
-                <div class="inspo-settings-matrix">
-                  <div class="inspo-setting-cell">
-                    <label class="text-meta" for="presetSelect">PROFIL TAYANGAN</label>
-                    <select class="setting-select" id="presetSelect" onchange="applyPreset()">
-                      <option value="cinema" selected>Standar HD (1080p · 60fps)</option>
-                      <option value="motion">Gerak Cepat (720p · 60fps)</option>
-                      <option value="detail">Teks Tajam (1080p · 30fps)</option>
-                      <option value="native">Resolusi Asli Layar (60fps)</option>
-                    </select>
-                  </div>
-
-                  <div class="inspo-setting-cell">
-                    <label class="text-meta" for="optResolution">RESOLUSI</label>
-                    <select class="setting-select" id="optResolution">
-                      <option value="1080p" selected>1080p Full HD</option>
-                      <option value="720p">720p HD</option>
-                      <option value="native">Resolusi Asli</option>
-                    </select>
-                  </div>
-
-                  <div class="inspo-setting-cell">
-                    <label class="text-meta" for="optFps">KECEPATAN FRAME</label>
-                    <select class="setting-select" id="optFps">
-                      <option value="60" selected>60 FPS Mulus</option>
-                      <option value="30">30 FPS Stabil</option>
-                    </select>
-                  </div>
-
-                  <div class="inspo-setting-cell">
-                    <label class="text-meta" for="optMode">PRIORITAS GAMBAR</label>
-                    <select class="setting-select" id="optMode">
-                      <option value="motion" selected>Gerak Halus (60fps)</option>
-                      <option value="detail">Ketajaman Teks</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="inspo-checks-strip">
-                  <label class="inspo-check-item">
-                    <input type="checkbox" id="optAudio" checked>
-                    <span>Sertakan audio tab / sistem stereo</span>
-                  </label>
-                  <label class="inspo-check-item">
-                    <input type="checkbox" id="optHardwareAccel" checked>
-                    <span>Akselerasi perangkat keras H.264</span>
-                  </label>
-                </div>
-
-                <div class="inspo-cta-pair">
-                  <button type="button" class="inspo-btn-primary" id="btnStartShare" onclick="startHostSharing()">
-                    Pilih Layar &amp; Mulai Siaran
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGHT HALF: Atmospheric Panel + 2x2 35mm Emulsion Specimen Archive (#reelCatalog) -->
-          <div class="inspo-split-right" id="reelCatalog">
-            <div class="inspo-panel-top">
-              <div>
-                <p class="text-meta">ARSIP EMULSI 35MM · KLIK UNTUK MEMUAT KARAKTER ROL</p>
-                <h2 class="inspo-panel-title">Pilih karakter pencahayaan untuk diuji pada meja cetak di bawah</h2>
-              </div>
-              <span class="inspo-reel-tag mono" id="activeReelCode">ROL 01 / TUNGSTEN 500T</span>
-            </div>
-
-            <!-- Hairline-Ruled 2x2 Contact Sheet Grid -->
-            <div class="inspo-specimen-grid">
-
-              <!-- Specimen 01: Tungsten 500T -->
-              <article class="inspo-specimen-cell active" id="reelCard-lalaland" tabindex="0" role="button"
-                aria-pressed="true" onclick="selectMoviePreset('lalaland', false)"
-                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('lalaland', false);}">
-                <div class="inspo-cell-head">
-                  <span class="mono">01A · VISION3 500T</span>
-                  <span class="mono">ISO 500</span>
-                </div>
-                <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Tungsten 500T">
-                    <defs>
-                      <linearGradient id="lllGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#190e30" />
-                        <stop offset="52%" stop-color="#4e2268" />
-                        <stop offset="100%" stop-color="#f09c67" />
-                      </linearGradient>
-                    </defs>
-                    <rect width="320" height="190" fill="url(#lllGrad)" />
-                    <line x1="0" y1="48" x2="320" y2="48" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
-                    <line x1="0" y1="142" x2="320" y2="142" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
-                    <line x1="160" y1="0" x2="160" y2="190" stroke="rgba(255,255,255,0.14)" stroke-width="1" />
-                    <circle cx="160" cy="95" r="36" fill="none" stroke="#ffe66d" stroke-width="1.5" opacity="0.75" />
-                    <circle cx="160" cy="95" r="6" fill="#ffe66d" />
-                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(10,7,16,0.82)" />
-                    <text x="160" y="169" text-anchor="middle" fill="#ffe66d" font-family="monospace" font-size="10">KODAK 5219 · TUNGSTEN SENJA · 3200K</text>
-                  </svg>
-                </div>
-                <div class="inspo-cell-foot">
-                  <strong>Tungsten 500T</strong>
-                  <span>Gradasi Hangat &amp; Bayangan Pekat</span>
-                </div>
-              </article>
-
-              <!-- Specimen 02: Amber Safelight -->
-              <article class="inspo-specimen-cell" id="reelCard-interstellar" tabindex="0" role="button"
-                aria-pressed="false" onclick="selectMoviePreset('interstellar', false)"
-                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('interstellar', false);}">
-                <div class="inspo-cell-head">
-                  <span class="mono">02A · SAFELIGHT 800T</span>
-                  <span class="mono">ISO 800</span>
-                </div>
-                <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Amber Safelight Kamar Gelap">
-                    <defs>
-                      <radialGradient id="gargantuaGrad" cx="50%" cy="48%" r="54%">
-                        <stop offset="0%" stop-color="#050508" />
-                        <stop offset="38%" stop-color="#050508" />
-                        <stop offset="46%" stop-color="#fff7d6" />
-                        <stop offset="60%" stop-color="#f59e2d" />
-                        <stop offset="82%" stop-color="#6e2b0e" />
-                        <stop offset="100%" stop-color="#070913" />
-                      </radialGradient>
-                    </defs>
-                    <rect width="320" height="190" fill="#070913" />
-                    <circle cx="160" cy="88" r="64" fill="url(#gargantuaGrad)" />
-                    <circle cx="160" cy="88" r="26" fill="#040407" stroke="#ffdf9e" stroke-width="1.5" />
-                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(7,9,19,0.84)" />
-                    <text x="160" y="169" text-anchor="middle" fill="#ffdf9e" font-family="monospace" font-size="10">AMBER HALATION · KONTRAS TINGGI · 2800K</text>
-                  </svg>
-                </div>
-                <div class="inspo-cell-foot">
-                  <strong>Amber Safelight</strong>
-                  <span>Pijar Oranye Kamar Gelap</span>
-                </div>
-              </article>
-
-              <!-- Specimen 03: Daylight 250D -->
-              <article class="inspo-specimen-cell" id="reelCard-spiritedaway" tabindex="0" role="button"
-                aria-pressed="false" onclick="selectMoviePreset('spiritedaway', false)"
-                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('spiritedaway', false);}">
-                <div class="inspo-cell-head">
-                  <span class="mono">03A · ETERNA 250D</span>
-                  <span class="mono">ISO 250</span>
-                </div>
-                <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Daylight 250D">
-                    <defs>
-                      <linearGradient id="seaTrainGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#183642" />
-                        <stop offset="55%" stop-color="#397367" />
-                        <stop offset="100%" stop-color="#e89973" />
-                      </linearGradient>
-                    </defs>
-                    <rect width="320" height="190" fill="url(#seaTrainGrad)" />
-                    <rect x="36" y="42" width="248" height="92" fill="none" stroke="rgba(255,243,176,0.55)" stroke-width="1.5" stroke-dasharray="4 4" />
-                    <circle cx="160" cy="88" r="22" fill="#f4d58d" opacity="0.85" />
-                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(14,36,42,0.84)" />
-                    <text x="160" y="169" text-anchor="middle" fill="#fff3b0" font-family="monospace" font-size="10">FUJI ETERNA · CYAN NATURAL · 5600K</text>
-                  </svg>
-                </div>
-                <div class="inspo-cell-foot">
-                  <strong>Daylight 250D</strong>
-                  <span>Nada Hijau Toska &amp; Koral Lembut</span>
-                </div>
-              </article>
-
-              <!-- Specimen 04: Silver Halide B&W -->
-              <article class="inspo-specimen-cell" id="reelCard-bladerunner" tabindex="0" role="button"
-                aria-pressed="false" onclick="selectMoviePreset('bladerunner', false)"
-                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMoviePreset('bladerunner', false);}">
-                <div class="inspo-cell-head">
-                  <span class="mono">04A · ILFORD HP5</span>
-                  <span class="mono">ISO 400</span>
-                </div>
-                <div class="inspo-cell-art">
-                  <svg viewBox="0 0 320 190" class="dr-scene-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spesimen pencahayaan Ilford HP5 Monokrom">
-                    <defs>
-                      <linearGradient id="br2049Grad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#111110" />
-                        <stop offset="50%" stop-color="#3A3732" />
-                        <stop offset="100%" stop-color="#B8B2A6" />
-                      </linearGradient>
-                    </defs>
-                    <rect width="320" height="190" fill="url(#br2049Grad)" />
-                    <g stroke="rgba(255,255,255,0.22)" stroke-width="1">
-                      <rect x="34" y="34" width="56" height="96" fill="#181715" />
-                      <rect x="98" y="34" width="56" height="96" fill="#3D3A35" />
-                      <rect x="162" y="34" width="56" height="96" fill="#78736A" />
-                      <rect x="226" y="34" width="56" height="96" fill="#D8D2C5" />
-                    </g>
-                    <rect x="20" y="154" width="280" height="22" rx="2" fill="rgba(12,11,10,0.86)" />
-                    <text x="160" y="169" text-anchor="middle" fill="#EDE8DF" font-family="monospace" font-size="10">PERAK HALIDA · SKALA ABU-ABU · BARYTA</text>
-                  </svg>
-                </div>
-                <div class="inspo-cell-foot">
-                  <strong>Perak Ilford HP5</strong>
-                  <span>Monokrom Klasik Kontras Penuh</span>
-                </div>
-              </article>
-
-            </div>
-
-            <!-- Panel Bottom Marginalia Rule (per inspo-mcp HeroSplitScreen) -->
-            <div class="inspo-panel-marginalia">
-              <span class="mono">PANEL SPESIMEN · 4 EMULSI SIAP CETAK</span>
-              <a href="#studioShowcase" class="mono inspo-marginal-link" onclick="scrollToSection('studioShowcase', event)">
-                Buka Meja Cetak 35mm &rarr;
-              </a>
-            </div>
-          </div>
-
+    <!-- VIEWER SECTION (Focused & Default) -->
+    <section id="viewerSection" aria-labelledby="viewerHeading">
+      <!-- Enter Room Code Form (Shown if not yet connected) -->
+      <div class="panel panel-centered" id="viewerJoinCard">
+        <div class="panel-header text-center">
+          <h1 class="panel-title" id="viewerHeading">Tonton Layar</h1>
+          <p class="panel-desc">Masukkan 6-karakter kode ruang siaran yang dibagikan oleh penyiar, atau langsung buka tautan.</p>
         </div>
-      </section>
 
-      <!-- ============================================================
-           ARCHETYPE 3: WORKBENCH (inspo-mcp features/workbench)
-           12-Column Split: 5 Cols Copy & Controls Left, 7 Cols Live Demo Right
-           ============================================================ -->
-      <section class="inspo-section inspo-workbench-section" id="studioShowcase">
-        <div class="inspo-container inspo-grid-12">
-
-          <!-- Left 5 Columns: Copy + Parameter Controls -->
-          <div class="inspo-col-5">
-            <p class="text-meta">02 / MEJA CETAK KONTAK ROLLBOOTH</p>
-            <h2 class="inspo-display-h2">
-              Empat bidikan wajah berdampingan langsung dengan <em>tangkapan layar</em>.
-            </h2>
-            <p class="inspo-body-copy">
-              Setiap kali tombol rana ditekan saat siaran berlangsung, kanvas menggabungkan ekspresi kamera kalian dengan tangkapan layar yang sedang tampil pada detik itu. Uji pengaturan kertas, emulsi optik, dan karakter rol secara langsung di samping.
-            </p>
-
-            <div class="inspo-control-ledger">
-              <!-- Control 01 -->
-              <div class="inspo-ctrl-row">
-                <span class="text-meta">01 · STOK EMULSI ROL</span>
-                <div class="inspo-pill-group" id="moviePresetPills">
-                  <button type="button" class="pg-pill active" id="presetBtn-lalaland" onclick="selectMoviePreset('lalaland')">Tungsten 500T</button>
-                  <button type="button" class="pg-pill" id="presetBtn-interstellar" onclick="selectMoviePreset('interstellar')">Amber 800T</button>
-                  <button type="button" class="pg-pill" id="presetBtn-spiritedaway" onclick="selectMoviePreset('spiritedaway')">Daylight 250D</button>
-                  <button type="button" class="pg-pill" id="presetBtn-bladerunner" onclick="selectMoviePreset('bladerunner')">Ilford HP5</button>
+        <div class="otp-wrapper">
+          <label class="sr-only" for="inputRoomCode">Kode Ruang Siaran</label>
+          <div class="otp-interactive-area" onclick="focusOtpInput()">
+            <input
+              type="text"
+              id="inputRoomCode"
+              class="otp-real-input"
+              maxlength="6"
+              autocomplete="one-time-code"
+              autocapitalize="characters"
+              spellcheck="false"
+              autofocus
+              oninput="updateOtpSlots()"
+              onfocus="updateOtpSlots()"
+              onblur="updateOtpSlots()"
+              onkeydown="if(event.key==='Enter') joinRoomByInput()"
+            >
+            <div class="otp-container" aria-hidden="true">
+              <div class="otp-group">
+                <div class="otp-slot is-active is-empty" data-index="0">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="1">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="2">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
                 </div>
               </div>
-
-              <!-- Control 02 -->
-              <div class="inspo-ctrl-row">
-                <span class="text-meta">02 · FORMAT POTONGAN KERTAS</span>
-                <div class="inspo-pill-group">
-                  <button type="button" class="pg-pill active" id="sampleLayoutStrip" onclick="setSampleLayout('strip')">Strip 4x1</button>
-                  <button type="button" class="pg-pill" id="sampleLayoutGrid" onclick="setSampleLayout('grid')">Kontak 2x2</button>
-                  <button type="button" class="pg-pill" id="sampleLayoutPolaroid" onclick="setSampleLayout('polaroid')">Polaroid Tunggal</button>
+              <div class="otp-separator">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+              <div class="otp-group">
+                <div class="otp-slot is-empty" data-index="3">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="4">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
+                </div>
+                <div class="otp-slot is-empty" data-index="5">
+                  <span class="otp-val"></span>
+                  <span class="otp-caret"></span>
                 </div>
               </div>
-
-              <!-- Control 03 -->
-              <div class="inspo-ctrl-row">
-                <span class="text-meta">03 · FILTER OPTIK</span>
-                <div class="inspo-pill-group">
-                  <button type="button" class="pg-pill active" id="sampleBtn-normal" onclick="setSampleFilter('normal')">Warna Asli</button>
-                  <button type="button" class="pg-pill" id="sampleBtn-bw" onclick="setSampleFilter('bw')">Perak B&amp;W</button>
-                  <button type="button" class="pg-pill" id="sampleBtn-vintage" onclick="setSampleFilter('vintage')">Sepia Hangat</button>
-                  <button type="button" class="pg-pill" id="sampleBtn-cinema" onclick="setSampleFilter('cinema')">Kontras Tinggi</button>
-                </div>
-              </div>
-
-              <!-- Control 04 & 05 -->
-              <div class="inspo-ctrl-split">
-                <div class="inspo-ctrl-row">
-                  <span class="text-meta">04 · KERTAS CETAK</span>
-                  <div class="pg-swatches">
-                    <button type="button" class="pg-swatch active" style="background:#F5F1E8;" onclick="setSampleFrame('#F5F1E8', '#141311', this)" aria-label="Kertas Baryta Terang"></button>
-                    <button type="button" class="pg-swatch" style="background:#141311;" onclick="setSampleFrame('#141311', '#EDE8DF', this)" aria-label="Kertas Karbon Gelap"></button>
-                    <button type="button" class="pg-swatch" style="background:#2A1812;" onclick="setSampleFrame('#2A1812', '#EDE8DF', this)" aria-label="Kertas Vermilion Gelap"></button>
-                    <button type="button" class="pg-swatch" style="background:#E5DEC9;" onclick="setSampleFrame('#E5DEC9', '#141311', this)" aria-label="Kertas Arsip Gading"></button>
-                  </div>
-                </div>
-
-                <div class="inspo-ctrl-row">
-                  <span class="text-meta">05 · CAP ARSIP</span>
-                  <div class="inspo-pill-group">
-                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('35MM')">35MM</button>
-                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('REC')">REC</button>
-                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('60FPS')">60FPS</button>
-                    <button type="button" class="pg-pill" onclick="toggleSampleSticker('A+B')">A+B</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="inspo-ctrl-cta">
-                <button type="button" class="inspo-btn-primary" onclick="openRollboothStudio()">
-                  Nyalakan Kamera &amp; Cetak Strip Asli
-                </button>
-              </div>
             </div>
           </div>
 
-          <!-- Right 7 Columns: Live Contact Sheet Workbench Platen -->
-          <div class="inspo-col-7">
-            <div class="inspo-workbench-platen">
-              <div class="inspo-platen-bar">
-                <span class="mono">SPESIMEN CETAKAN KONTAK · SKALA 1:1</span>
-                <span class="mono" id="sampleStripTopCode">VISION3 500T / 60FPS</span>
-              </div>
-
-              <div class="inspo-platen-stage">
-                <div class="sample-strip-card layout-strip" id="sampleStripWrap">
-                  <div class="sample-strip-top">
-                    <span class="mono" id="sampleStripTopBrand">ROLLBOOTH 35MM PRINT</span>
-                    <span class="mono">KODAK 5219</span>
-                  </div>
-
-                  <div class="sample-strip-StickerLayer" id="sampleStickerLayer"></div>
-
-                  <div class="sample-strip-rows" id="sampleStripRows">
-                    <!-- Cut 01 -->
-                    <div class="sample-row">
-                      <div class="sample-cell cam-cell cam-pose-1">
-                        <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
-                          <circle cx="50" cy="32" r="13" fill="rgba(243,239,230,0.85)" />
-                          <path d="M28 80 Q50 50 72 80 Z" fill="rgba(243,239,230,0.85)" />
-                          <circle cx="92" cy="35" r="12" fill="rgba(243,239,230,0.72)" />
-                          <path d="M72 80 Q92 52 112 80 Z" fill="rgba(243,239,230,0.72)" />
-                        </svg>
-                        <span class="sample-badge">KAMERA 01</span>
-                      </div>
-                      <div class="sample-cell film-cell film-scene-1" id="sampleFilmCell1">
-                        <span class="sample-badge film" id="sampleFilmBadge1">FRAME 01 / 00:14:20</span>
-                      </div>
-                    </div>
-
-                    <!-- Cut 02 -->
-                    <div class="sample-row">
-                      <div class="sample-cell cam-cell cam-pose-2">
-                        <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
-                          <circle cx="48" cy="30" r="13" fill="rgba(243,239,230,0.85)" />
-                          <path d="M26 80 Q48 48 70 80 Z" fill="rgba(243,239,230,0.85)" />
-                          <circle cx="88" cy="32" r="12" fill="rgba(243,239,230,0.75)" />
-                          <path d="M68 80 Q88 50 108 80 Z" fill="rgba(243,239,230,0.75)" />
-                        </svg>
-                        <span class="sample-badge">KAMERA 02</span>
-                      </div>
-                      <div class="sample-cell film-cell film-scene-2" id="sampleFilmCell2">
-                        <span class="sample-badge film" id="sampleFilmBadge2">FRAME 02 / 00:38:10</span>
-                      </div>
-                    </div>
-
-                    <!-- Cut 03 -->
-                    <div class="sample-row">
-                      <div class="sample-cell cam-cell cam-pose-3">
-                        <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
-                          <circle cx="54" cy="32" r="13" fill="rgba(243,239,230,0.85)" />
-                          <path d="M32 80 Q54 50 76 80 Z" fill="rgba(243,239,230,0.85)" />
-                          <circle cx="90" cy="32" r="12" fill="rgba(243,239,230,0.75)" />
-                          <path d="M70 80 Q90 50 110 80 Z" fill="rgba(243,239,230,0.75)" />
-                        </svg>
-                        <span class="sample-badge">KAMERA 03</span>
-                      </div>
-                      <div class="sample-cell film-cell film-scene-3" id="sampleFilmCell3">
-                        <span class="sample-badge film" id="sampleFilmBadge3">FRAME 03 / 01:05:42</span>
-                      </div>
-                    </div>
-
-                    <!-- Cut 04 -->
-                    <div class="sample-row">
-                      <div class="sample-cell cam-cell cam-pose-4">
-                        <svg viewBox="0 0 140 80" class="cam-silhouette-svg" aria-hidden="true">
-                          <circle cx="50" cy="34" r="13" fill="rgba(243,239,230,0.85)" />
-                          <path d="M28 80 Q50 52 72 80 Z" fill="rgba(243,239,230,0.85)" />
-                          <circle cx="88" cy="34" r="12" fill="rgba(243,239,230,0.75)" />
-                          <path d="M68 80 Q88 52 108 80 Z" fill="rgba(243,239,230,0.75)" />
-                        </svg>
-                        <span class="sample-badge">KAMERA 04</span>
-                      </div>
-                      <div class="sample-cell film-cell film-scene-4" id="sampleFilmCell4">
-                        <span class="sample-badge film" id="sampleFilmBadge4">FRAME 04 / 01:29:15</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="sample-strip-footer">
-                    <p class="sample-caption" id="sampleStripCaption">Sesi Kamera 35mm</p>
-                    <div class="sample-barcode" aria-hidden="true"></div>
-                    <span class="sample-meta mono">CETAKAN KONTAK LOKAL · 300 DPI PNG</span>
-                  </div>
-                </div>
-              </div>
-
-              <p class="text-meta inspo-platen-foot">
-                DIREKOMENDASIKAN OLEH INSPO-MCP · ARSITEKTUR SPLIT-STUDIO &amp; WORKBENCH
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ============================================================
-           ARCHETYPE 4: NUMBERED TRIPLET (inspo-mcp features/numbered-triplet)
-           Three equal columns prefaced by heavy top rules & mono ordinals
-           ============================================================ -->
-      <section class="inspo-section inspo-triplet-section" id="specSection">
-        <div class="inspo-container">
-          <p class="text-meta">03 / ARSITEKTUR &amp; PROTOKOL TRANSMISI</p>
-          <h2 class="inspo-display-h2 inspo-triplet-heading">
-            Tiga tahap transmisi langsung, <em>tanpa penyimpanan cloud</em>.
-          </h2>
-
-          <ol class="inspo-triplet-grid">
-            <li class="inspo-triplet-item">
-              <p class="text-meta">TAHAP 01 · JALUR VIDEO P2P</p>
-              <h3 class="inspo-triplet-title">Aliran Layar 1080p 60fps</h3>
-              <p class="inspo-triplet-body">
-                Peramban penyelenggara mengirimkan sinyal video dan audio sistem stereo secara peer-to-peer melalui WebRTC H.264 dengan <code>contentHint="motion"</code> agar pergerakan sinematografi tetap mulus.
-              </p>
-            </li>
-
-            <li class="inspo-triplet-item">
-              <p class="text-meta">TAHAP 02 · SINKRONISASI RANA</p>
-              <h3 class="inspo-triplet-title">Bidikan 3 Pose Beruntun</h3>
-              <p class="inspo-triplet-body">
-                Menekan tombol pintas <code>P</code> atau membuka kamera Rollbooth akan menjalankan hitung mundur 3 pose yang menyalin gambar dari webcam sekaligus membekukan tangkapan layar pada detik tersebut.
-              </p>
-            </li>
-
-            <li class="inspo-triplet-item">
-              <p class="text-meta">TAHAP 03 · CETAK KANVAS LOKAL</p>
-              <h3 class="inspo-triplet-title">Render PNG di Perangkat</h3>
-              <p class="inspo-triplet-body">
-                Seluruh penggabungan foto strip vertikal, grid 2x2, dan polaroid diproses di memori lokal peramban menggunakan <code>HTMLCanvasElement</code> tanpa mengunggah satu pun foto ke server eksternal.
-              </p>
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           ARCHETYPE 5: EDITORIAL FAQ ACCORDION (inspo-mcp faq/accordion)
-           12-Column Intro + Hairline-Ruled Question Rows
-           ============================================================ -->
-      <section class="inspo-section inspo-faq-section" id="faqSection">
-        <div class="inspo-container">
-          <div class="inspo-faq-head inspo-grid-12">
-            <div class="inspo-col-3">
-              <p class="text-meta">04 / PERTANYAAN TEKNIS</p>
-            </div>
-            <div class="inspo-col-9">
-              <h2 class="inspo-display-h2">
-                Hal yang paling sering ditanyakan sebelum memulai sesi.
-              </h2>
-            </div>
-          </div>
-
-          <div class="inspo-faq-list">
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Mengapa suara tidak terdengar di sisi penonton saat saya membagikan layar?</span>
-                <span class="faq-icon mono" aria-hidden="true">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Saat jendela pemilihan layar Chrome atau Edge terbuka, pilih tab peramban atau seluruh layar, lalu pastikan kotak <strong>Bagikan audio tab</strong> (<em>Share tab audio</em> / <em>Share system audio</em>) di sudut kiri bawah sudah dicentang sebelum menekan tombol Bagikan.
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Bagaimana cara agar tangkapan layar ikut tercetak di sebelah foto kamera kami?</span>
-                <span class="faq-icon mono" aria-hidden="true">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Saat sedang berada di dalam ruang siaran aktif, klik tombol <strong>Photobooth (P)</strong> pada bilah kontrol bawah. Setiap kali hitungan mundur mencapai nol, sistem otomatis memotret kamera wajah sekaligus menyalin tangkapan layar yang sedang tampil.
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Apakah saya bisa menggunakan studio cetak foto tanpa membuat ruang siaran terlebih dahulu?</span>
-                <span class="faq-icon mono" aria-hidden="true">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Bisa. Pilih salah satu stok emulsi di bagian atas (misalnya <em>Tungsten 500T</em> atau <em>Ilford HP5</em>), lalu tekan tombol <strong>Buka Studio Kamera (Tanpa Kode)</strong>. Kamera Anda akan memotret 3 pose beruntun di atas kertas cetak analog pilihan Anda.
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button type="button" class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
-                <span class="faq-q-text">Format dan ukuran berkas apa yang dihasilkan oleh cetakan Rollbooth?</span>
-                <span class="faq-icon mono" aria-hidden="true">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Setiap cetakan di-render sebagai berkas PNG beresolusi tinggi (460 x 1380 piksel untuk strip vertikal, 860 x 1080 piksel untuk grid 2x2, dan 920 x 1200 piksel untuk polaroid) lengkap dengan kode bar arsip dan catatan kaki yang Anda ketik.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           ARCHETYPE 6: COLOPHON FOOTER (inspo-mcp footer/colophon)
-           3-Column Magazine End-Credit (Typefaces, Stack, Colophon)
-           ============================================================ -->
-      <footer class="inspo-colophon-footer">
-        <div class="inspo-container inspo-colophon-grid">
-          <div>
-            <p class="text-meta">TIPOGRAFI &amp; SISTEM DESAIN</p>
-            <p class="inspo-colophon-copy">
-              Instrument Serif untuk tajuk utama.<br>
-              Plus Jakarta Sans untuk antarmuka.<br>
-              IBM Plex Mono untuk catatan katalog.
-            </p>
-          </div>
-
-          <div>
-            <p class="text-meta">TUMPUKAN TEKNOLOGI</p>
-            <p class="inspo-colophon-copy">
-              WebRTC Peer-to-Peer 60fps.<br>
-              WebSocket Signaling Node.js.<br>
-              HTML5 Canvas 2D Photobooth.
-            </p>
-          </div>
-
-          <div>
-            <p class="text-meta">KOLOFON &amp; NAVIGASI CEPAT</p>
-            <p class="inspo-colophon-copy">
-              <a href="#cooldockHub" onclick="scrollToSection('cooldockHub', event)">Konsol Ruang</a> ·
-              <a href="#reelCatalog" onclick="scrollToSection('reelCatalog', event)">Rak Emulsi</a> ·
-              <a href="#studioShowcase" onclick="scrollToSection('studioShowcase', event)">Meja Cetak</a> ·
-              <button type="button" class="inspo-colophon-btn" onclick="openRollboothStudio()">Buka Kamera</button><br>
-              <span class="inspo-colophon-muted">© 2026 ScreenCast × Rollbooth Club. Referensi Chill Music Club &amp; Inspo-MCP.</span>
-            </p>
-          </div>
-        </div>
-      </footer>
-
-    </div><!-- /#landingView -->
-
-    <!-- ========================================================
-         ACTIVE WATCHING / STREAMING WORKSPACES (Hidden until active)
-         ======================================================== -->
-
-    <!-- 1. Fullscreen Player Workspace for VIEWER -->
-    <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
-      <div class="player-canvas" id="viewerPlayerWrap">
-        <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
-
-        <!-- Partner Facecam (Host) -->
-        <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <div class="facecam-header" data-drag-handle>
-            <span class="facecam-title">
-              <span class="facecam-status-dot online"></span>
-              <span id="partnerFacecamLabel">Host</span>
-              <span class="speaking-wave" title="Sedang berbicara">
-                <span class="wave-bar"></span>
-                <span class="wave-bar"></span>
-                <span class="wave-bar"></span>
-              </span>
-            </span>
-            <button type="button" class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Sembunyikan" aria-label="Sembunyikan">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <div class="otp-helper-row">
+            <span class="otp-helper-text">6 karakter kode siaran</span>
+            <button type="button" class="otp-paste-btn" onclick="pasteRoomCode()" title="Tempel dari Clipboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              <span>Tempel Kode</span>
             </button>
           </div>
-          <div class="facecam-body">
-            <video id="partnerFacecamVideo" class="facecam-video" autoplay playsinline></video>
-          </div>
         </div>
 
-        <!-- Self Facecam Preview -->
-        <div id="selfFacecamBubble" class="facecam-bubble self-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <div class="facecam-header" data-drag-handle>
-            <span class="facecam-title">
-              <span class="facecam-status-dot online"></span>
-              <span>Anda</span>
-              <span class="speaking-wave" title="Sedang berbicara">
-                <span class="wave-bar"></span>
-                <span class="wave-bar"></span>
-                <span class="wave-bar"></span>
+        <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Mulai Menonton</span>
+        </button>
+
+        <!-- Recent Rooms Quick Rejoin -->
+        <div id="viewerRecentRooms" class="recent-rooms-box" style="display: none;">
+          <span class="recent-rooms-label">Ruang Sebelumnya:</span>
+          <div id="recentRoomsList" class="recent-rooms-list"></div>
+        </div>
+      </div>
+
+      <!-- Active Fullscreen Player Workspace -->
+      <div class="viewer-workspace" id="viewerActiveScreen" style="display: none;">
+        <div class="player-canvas" id="viewerPlayerWrap">
+          <video id="viewerVideo" class="player-video" autoplay playsinline muted onclick="handlePlayerTap(event)"></video>
+
+          <!-- Floating Facecam Bubbles (21st.dev Call Style) -->
+          <!-- 1. Partner's Facecam (Host when viewing) -->
+          <div id="partnerFacecamBubble" class="facecam-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="facecam-header" data-drag-handle>
+              <span class="facecam-title">
+                <span class="facecam-status-dot online"></span>
+                <span id="partnerFacecamLabel">Host</span>
+                <span class="speaking-wave" title="Sedang berbicara">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </span>
               </span>
-            </span>
-            <div class="facecam-tools">
-              <button type="button" class="facecam-tool-btn" id="btnFlipCam" onclick="flipFacecamCamera()" title="Putar Kamera Depan/Belakang" aria-label="Putar Kamera">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-              </button>
-              <button type="button" class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera" aria-label="Tutup Kamera">
+              <button class="facecam-close-btn" onclick="togglePartnerBubbleVisibility()" title="Sembunyikan" aria-label="Sembunyikan">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
-          </div>
-          <div class="facecam-body">
-            <video id="selfFacecamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
-          </div>
-        </div>
-
-        <!-- Top Status Bar Inside Player -->
-        <div class="player-top-bar" id="playerTopBar" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <div class="player-top-left">
-            <span class="stream-badge">
-              <span class="badge-dot"></span>
-              <span>LANGSUNG</span>
-            </span>
-            <span class="player-room-chip" id="viewerCurrentRoom">RUANG: ------</span>
-            <span class="hud-stat" id="viewerStatsPill">Menghubungkan WebRTC...</span>
-          </div>
-          <div class="player-top-right">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="stopViewer()" title="Keluar dari Siaran">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span>Keluar</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Bottom Floating HUD Dock -->
-        <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <div class="hud-actions">
-            <button type="button" class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" data-tooltip="Suara Film (M)" aria-label="Beralih Suara Film">
-              <svg id="audioIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-                <line x1="8" y1="23" x2="16" y2="23"></line>
-              </svg>
-            </button>
-
-            <button type="button" class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" data-tooltip="Mikrofon (D)" aria-label="Beralih Mikrofon">
-              <svg id="hudMicIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-                <line x1="8" y1="23" x2="16" y2="23"></line>
-              </svg>
-            </button>
-
-            <button type="button" class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" data-tooltip="Kamera (C)" aria-label="Beralih Kamera Wajah">
-              <svg id="hudCameraIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-            </button>
-
-            <div class="hud-divider" aria-hidden="true"></div>
-
-            <button type="button" class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" data-tooltip="Obrolan" aria-label="Buka Obrolan">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </button>
-
-            <button type="button" class="hud-btn" id="btnPhotoboothToggle" onclick="triggerPhotobooth()" data-tooltip="Photobooth (P)" aria-label="Abadikan Momen Photobooth">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                <circle cx="12" cy="13" r="4"></circle>
-              </svg>
-            </button>
-
-            <button type="button" class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" data-tooltip="Layar Penuh (F)" aria-label="Layar Penuh">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chat Drawer for Viewer -->
-      <div id="viewerChatDrawer" class="panel chat-panel viewer-chat-drawer" style="display: none;">
-        <div class="chat-bar">
-          <span class="chat-title">Obrolan Siaran</span>
-          <button type="button" class="chat-close-btn" onclick="toggleViewerChatDrawer()" aria-label="Tutup Obrolan">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div class="chat-thread" id="viewerChatBox" aria-live="polite"></div>
-        <div class="chat-compose">
-          <input type="text" id="viewerChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
-          <button type="button" class="btn btn-secondary btn-icon" onclick="sendChat('viewer')" aria-label="Kirim Komentar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Active Broadcast Workspace for HOST -->
-    <div class="broadcast-layout" id="hostActiveDash" style="display: none;">
-      <div class="broadcast-viewport-column">
-        <div class="monitor-card">
-          <div class="monitor-header">
-            <div class="stream-badge">
-              <span class="badge-dot"></span>
-              <span>SIARAN AKTIF</span>
+            <div class="facecam-body">
+              <video id="partnerFacecamVideo" class="facecam-video" autoplay playsinline></video>
             </div>
-            <div class="monitor-meta" id="hostViewerCount">0 Penonton</div>
           </div>
 
-          <div class="video-stage">
-            <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
-
-            <div id="hostPartnerBubble" class="facecam-bubble host-facecam-bubble" style="display: none;">
-              <div class="facecam-header" data-drag-handle>
-                <span class="facecam-title">
-                  <span class="facecam-status-dot online"></span>
-                  <span>Viewer</span>
-                  <span class="speaking-wave" title="Sedang berbicara">
-                    <span class="wave-bar"></span>
-                    <span class="wave-bar"></span>
-                    <span class="wave-bar"></span>
-                  </span>
+          <!-- 2. Self Facecam Preview -->
+          <div id="selfFacecamBubble" class="facecam-bubble self-bubble" style="display: none;" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="facecam-header" data-drag-handle>
+              <span class="facecam-title">
+                <span class="facecam-status-dot online"></span>
+                <span>Anda</span>
+                <span class="speaking-wave" title="Sedang berbicara">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
                 </span>
-              </div>
-              <div class="facecam-body">
-                <video id="hostPartnerCamVideo" class="facecam-video" autoplay playsinline></video>
+              </span>
+              <div class="facecam-tools">
+                <button class="facecam-tool-btn" id="btnFlipCam" onclick="flipFacecamCamera()" title="Putar Kamera Depan/Belakang" aria-label="Putar Kamera">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                </button>
+                <button class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera" aria-label="Tutup Kamera">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
               </div>
             </div>
-
-            <div id="hostSelfBubble" class="facecam-bubble self-bubble" style="display: none;">
-              <div class="facecam-header" data-drag-handle>
-                <span class="facecam-title">
-                  <span class="facecam-status-dot online"></span>
-                  <span>Anda</span>
-                  <span class="speaking-wave" title="Sedang berbicara">
-                    <span class="wave-bar"></span>
-                    <span class="wave-bar"></span>
-                    <span class="wave-bar"></span>
-                  </span>
-                </span>
-                <div class="facecam-tools">
-                  <button type="button" class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera" aria-label="Tutup Kamera">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="facecam-body">
-                <video id="hostSelfCamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
-              </div>
+            <div class="facecam-body">
+              <video id="selfFacecamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
             </div>
           </div>
 
-          <div class="monitor-footer">
-            <div class="monitor-footer-tools">
-              <button type="button" class="btn btn-secondary btn-sm" id="btnHostMicToggle" onclick="toggleSelfMic()" title="Bisu / Nyalakan Mikrofon">
-                <svg id="hostMicIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Top Status Bar Inside Player -->
+          <div class="player-top-bar" id="playerTopBar" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="player-top-left">
+              <span class="stream-badge">
+                <span class="badge-dot"></span>
+                <span>LANGSUNG</span>
+              </span>
+              <span class="player-room-chip" id="viewerCurrentRoom">RUANG: ------</span>
+              <span class="hud-stat" id="viewerStatsPill">Menghubungkan WebRTC...</span>
+            </div>
+            <div class="player-top-right">
+              <button class="btn btn-secondary btn-sm" onclick="stopViewer()" title="Keluar dari Siaran">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Keluar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Floating Liquid Glass HUD Dock (21st.dev Style with Tooltips & Micro-interactions) -->
+          <div class="player-hud" id="playerBottomHud" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="hud-actions">
+              <!-- 1. Suara Film (Speaker Mute / Unmute) -->
+              <button class="hud-btn" id="btnAudioToggle" onclick="toggleViewerAudio()" data-tooltip="Suara Film (M)" aria-label="Beralih Suara Film">
+                <svg id="audioIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                   <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
                   <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
                   <line x1="12" y1="19" x2="12" y2="23"></line>
                   <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
-                <span id="hostMicBtnLabel">Mic: Mati</span>
               </button>
-              <button type="button" class="btn btn-secondary btn-sm" id="btnHostCameraToggle" onclick="toggleFacecam()" title="Nyalakan / Matikan Kamera">
-                <svg id="hostCameraIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <!-- 2. Mikrofon Sendiri (Mic Mute / Unmute) -->
+              <button class="hud-btn is-muted" id="btnMicToggle" onclick="toggleSelfMic()" data-tooltip="Mikrofon (D)" aria-label="Beralih Mikrofon">
+                <svg id="hudMicIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
+
+              <!-- 3. Kamera Sendiri (Camera On / Off) -->
+              <button class="hud-btn" id="btnCameraToggle" onclick="toggleFacecam()" data-tooltip="Kamera (C)" aria-label="Beralih Kamera Wajah">
+                <svg id="hudCameraIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
-                <span id="hostCameraBtnLabel">Kamera: Mati</span>
               </button>
-              <button type="button" class="btn btn-secondary btn-sm" id="btnHostChatToggle" onclick="toggleHostChatDrawer()" title="Obrolan">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <div class="hud-divider" aria-hidden="true"></div>
+
+              <!-- 4. Obrolan (Chat) -->
+              <button class="hud-btn" id="btnChatToggle" onclick="toggleViewerChatDrawer()" data-tooltip="Obrolan" aria-label="Buka Obrolan">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <span>Obrolan</span>
               </button>
-              <button type="button" class="btn btn-secondary btn-sm" id="btnHostPhotobooth" onclick="triggerPhotobooth()" title="Abadikan Momen Photobooth (P)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+              <!-- 5. Photobooth Memories -->
+              <button class="hud-btn" id="btnPhotoboothToggle" onclick="triggerPhotobooth()" data-tooltip="Photobooth (P)" aria-label="Abadikan Momen Photobooth">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                   <circle cx="12" cy="13" r="4"></circle>
                 </svg>
-                <span>Photobooth 35mm</span>
+              </button>
+
+              <!-- 6. Layar Penuh (Fullscreen) -->
+              <button class="hud-btn" id="btnFullscreenToggle" onclick="toggleFullscreen()" data-tooltip="Layar Penuh (F)" aria-label="Layar Penuh">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
               </button>
             </div>
-            <button type="button" class="btn btn-danger btn-sm" onclick="stopHostSharing()">
-              <span>Hentikan Siaran</span>
+          </div>
+        </div>
+
+        <!-- Chat Overlay for Viewer -->
+        <div id="viewerChatDrawer" class="panel chat-panel viewer-chat-drawer" style="display: none;">
+          <div class="chat-bar">
+            <span class="chat-title">Obrolan Siaran</span>
+            <button class="chat-close-btn" onclick="toggleViewerChatDrawer()" aria-label="Tutup Obrolan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-thread" id="viewerChatBox" aria-live="polite"></div>
+          <div class="chat-compose">
+            <input type="text" id="viewerChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('viewer')">
+            <button class="btn btn-secondary btn-icon" onclick="sendChat('viewer')" aria-label="Kirim Komentar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
             </button>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Right: Share Info & QR Code Panel -->
-      <div class="broadcast-sidebar-column">
-        <div class="panel share-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">Bagikan Akses Ruang</h2>
-            <p class="panel-desc">Penonton dapat bergabung menggunakan kode 6 karakter atau memindai kode QR:</p>
-          </div>
+    <!-- HOST SECTION (Hidden by default, accessible via switcher) -->
+    <section id="hostSection" style="display: none;" aria-labelledby="hostSetupHeading">
+      <!-- 1. Setup Card -->
+      <div class="panel" id="hostSetupCard">
+        <div class="panel-header">
+          <h1 class="panel-title" id="hostSetupHeading">Bagikan Layar Perangkat</h1>
+          <p class="panel-desc">
+            Kirimkan tampilan monitor, jendela aplikasi, atau tab peramban langsung ke perangkat lain tanpa perlu memasang aplikasi tambahan.
+          </p>
+        </div>
 
-          <div class="code-card">
-            <span class="code-label">Kode Akses Ruangan:</span>
-            <div class="code-display" id="displayRoomCode">------</div>
-            <button type="button" class="btn btn-secondary btn-sm w-full" onclick="copyRoomCode()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span>Salin Kode</span>
-            </button>
-          </div>
-
-          <div class="direct-link-card">
-            <span class="link-label">Tautan Langsung:</span>
-            <div class="link-display">
-              <a href="#" id="roomDirectLink" target="_blank" rel="noopener noreferrer">Menyiapkan...</a>
+        <div class="config-grid">
+          <div class="field-group">
+            <label class="field-label" for="optMode">Prioritas Aliran</label>
+            <div class="select-wrapper">
+              <select id="optMode" class="form-select">
+                <option value="motion" selected>Prioritas Gerak (Video, Game, Gerak Cepat)</option>
+                <option value="detail">Prioritas Ketajaman (Dokumen, Teks, Kode)</option>
+              </select>
             </div>
-            <div class="link-actions">
-              <button type="button" class="btn btn-secondary btn-sm flex-1" onclick="copyShareLink()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                <span>Salin Tautan</span>
+            <span class="field-hint">Mode gerak menjaga kecepatan bingkai tetap mulus saat layar penuh.</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="optResolution">Batas Resolusi</label>
+            <div class="select-wrapper">
+              <select id="optResolution" class="form-select">
+                <option value="1080p" selected>1080p Full HD (Stabil & Hemat)</option>
+                <option value="720p">720p HD (Koneksi Terbatas)</option>
+                <option value="native">Resolusi Asli Layar</option>
+              </select>
+            </div>
+            <span class="field-hint">Membatasi resolusi ke 1080p disarankan untuk kestabilan framerate.</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="optFps">Target Kecepatan Bingkai</label>
+            <div class="select-wrapper">
+              <select id="optFps" class="form-select">
+                <option value="60" selected>60 FPS (Mulus)</option>
+                <option value="30">30 FPS (Standar)</option>
+              </select>
+            </div>
+            <span class="field-hint">Gunakan 60 FPS untuk pergerakan kursor dan video tanpa jeda.</span>
+          </div>
+        </div>
+
+        <div class="toggles-row">
+          <label class="checkbox-control">
+            <input type="checkbox" id="optAudio" checked>
+            <span class="checkbox-box" aria-hidden="true"></span>
+            <span class="checkbox-text">Sertakan audio sistem atau tab</span>
+          </label>
+          <label class="checkbox-control">
+            <input type="checkbox" id="optHardwareAccel" checked>
+            <span class="checkbox-box" aria-hidden="true"></span>
+            <span class="checkbox-text">Akselerasi perangkat keras GPU (H.264)</span>
+          </label>
+        </div>
+
+        <div class="action-footer">
+          <button class="btn btn-primary btn-lg" id="btnStartShare" onclick="startHostSharing()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Mulai Berbagi Layar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Active Broadcast Workspace -->
+      <div class="broadcast-layout" id="hostActiveDash" style="display: none;">
+        <!-- Left: Monitor & Preview -->
+        <div class="broadcast-viewport-column">
+          <div class="monitor-card">
+            <div class="monitor-header">
+              <div class="stream-badge">
+                <span class="badge-dot"></span>
+                <span>SIARAN AKTIF</span>
+              </div>
+              <div class="monitor-meta" id="hostViewerCount">0 penonton terhubung</div>
+            </div>
+
+            <div class="video-stage">
+              <video id="hostPreviewVideo" class="stage-video" autoplay playsinline muted></video>
+
+              <!-- Floating Facecam for Host (Viewer video & self preview) -->
+              <div id="hostPartnerBubble" class="facecam-bubble host-facecam-bubble" style="display: none;">
+                <div class="facecam-header" data-drag-handle>
+                  <span class="facecam-title">
+                    <span class="facecam-status-dot online"></span>
+                    <span>Viewer</span>
+                    <span class="speaking-wave" title="Sedang berbicara">
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="facecam-body">
+                  <video id="hostPartnerCamVideo" class="facecam-video" autoplay playsinline></video>
+                </div>
+              </div>
+
+              <div id="hostSelfBubble" class="facecam-bubble self-bubble" style="display: none;">
+                <div class="facecam-header" data-drag-handle>
+                  <span class="facecam-title">
+                    <span class="facecam-status-dot online"></span>
+                    <span>Anda</span>
+                    <span class="speaking-wave" title="Sedang berbicara">
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                    </span>
+                  </span>
+                  <div class="facecam-tools">
+                    <button class="facecam-close-btn" onclick="toggleFacecam()" title="Tutup Kamera">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="facecam-body">
+                  <video id="hostSelfCamVideo" class="facecam-video self-video" autoplay playsinline muted></video>
+                </div>
+              </div>
+            </div>
+
+            <div class="monitor-footer">
+              <div class="monitor-footer-tools">
+                <button class="btn btn-secondary btn-sm" id="btnHostMicToggle" onclick="toggleSelfMic()" title="Bisu / Nyalakan Mikrofon">
+                  <svg id="hostMicIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  <span id="hostMicBtnLabel">Mic: Mati</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnHostCameraToggle" onclick="toggleFacecam()" title="Nyalakan / Matikan Kamera">
+                  <svg id="hostCameraIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                  <span id="hostCameraBtnLabel">Kamera: Mati</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="triggerPhotobooth()" title="Abadikan Momen Photobooth (P)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Photobooth</span>
+                </button>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="stopHostSharing()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                </svg>
+                <span>Hentikan Siaran</span>
               </button>
-              <a href="#" id="btnOpenRoomTab" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm flex-1" title="Buka ruang di tab baru">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                <span>Buka Tab</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Join Details & Live Chat -->
+        <aside class="broadcast-aside-column">
+          <div class="panel room-meta-panel">
+            <div class="panel-section-title">Akses Penonton</div>
+            
+            <div class="code-container">
+              <span class="code-label">Kode Akses</span>
+              <div class="code-display" id="displayRoomCode">------</div>
+            </div>
+
+            <!-- Clickable Direct Link -->
+            <div class="direct-link-box">
+              <span class="direct-link-label">Tautan Langsung:</span>
+              <a id="roomDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="direct-link-url" title="Klik untuk membuka siaran">
+                Membuat tautan...
               </a>
             </div>
+
+            <div class="qr-container">
+              <div id="qrcodeBox" class="qr-canvas"></div>
+            </div>
+            
+            <p class="qr-caption">Pindai kode QR atau klik tombol di bawah untuk langsung menonton.</p>
+
+            <div class="room-action-buttons">
+              <!-- Direct Button to Open Room in New Tab -->
+              <a id="btnOpenRoomTab" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" style="text-decoration:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                <span>Buka Siaran Langsung (Tab Baru)</span>
+              </a>
+
+              <button class="btn btn-secondary w-full" onclick="copyShareLink()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Salin Tautan</span>
+              </button>
+            </div>
           </div>
 
-          <div class="qr-container">
-            <span class="qr-label">Pindai dengan Smartphone:</span>
-            <div class="qr-box" id="qrcodeBox"></div>
+          <!-- Chat Sidebar -->
+          <div class="panel chat-panel">
+            <div class="chat-bar">
+              <span class="chat-title">Obrolan Ruang</span>
+            </div>
+            <div class="chat-thread" id="hostChatBox" aria-live="polite"></div>
+            <div class="chat-compose">
+              <input type="text" id="hostChatInput" class="form-input chat-input" placeholder="Kirim pesan..." onkeydown="if(event.key==='Enter') sendChat('host')">
+              <button class="btn btn-secondary btn-icon" onclick="sendChat('host')" aria-label="Kirim Pesan">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
-
-        <!-- Chat Panel for Host -->
-        <div id="hostChatDrawer" class="panel chat-panel" style="display: none;">
-          <div class="chat-bar">
-            <span class="chat-title">Obrolan Penonton</span>
-            <button type="button" class="chat-close-btn" onclick="toggleHostChatDrawer()" aria-label="Tutup Obrolan">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-          <div class="chat-thread" id="hostChatBox" aria-live="polite"></div>
-          <div class="chat-compose">
-            <input type="text" id="hostChatInput" class="form-input chat-input" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter') sendChat('host')">
-            <button type="button" class="btn btn-secondary btn-icon" onclick="sendChat('host')" aria-label="Kirim Komentar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-          </div>
-        </div>
+        </aside>
       </div>
-    </div>
-
+    </section>
   </main>
 
-  <!-- ========================================================
-       PHOTOBOOTH COUNTDOWN & ROLLBOOTH STUDIO MODAL
-       ======================================================== -->
+  <!-- Rollbooth Countdown & Shutter Flash Overlay -->
   <div id="photoboothCountdownOverlay" class="photobooth-countdown-overlay" style="display: none;">
-    <div class="countdown-card">
-      <div class="countdown-badge" id="photoboothStepBadge">Pose 1 dari 3: Bersiap</div>
-      <div class="countdown-big-num" id="photoboothCountText">3</div>
-      <div class="countdown-hint" id="photoboothHintText">Pose pertama bersama tangkapan layar</div>
+    <div class="countdown-badge">
+      <span class="rollbooth-tag">ROLLBOOTH</span>
+      <span id="photoboothStepBadge">Foto 1 dari 3</span>
     </div>
-    <div class="shutter-flash" id="photoboothShutterFlash"></div>
+    <div class="countdown-digit" id="photoboothCountText">3</div>
+    <div class="countdown-hint" id="photoboothHintText">Bersiap dengan pose terbaik Anda!</div>
   </div>
+  <div id="photoboothShutterFlash" class="photobooth-shutter-flash"></div>
 
+  <!-- Rollbooth Studio Preview Modal -->
   <div id="photoboothModal" class="photobooth-modal-backdrop" style="display: none;" onclick="if(event.target===this) closePhotoboothModal()">
-    <div class="rollbooth-modal-card" role="dialog" aria-modal="true" aria-labelledby="rollboothModalTitle">
+    <div class="rollbooth-modal-card">
       <div class="photobooth-modal-header">
         <div class="photobooth-modal-title">
-          <span class="rollbooth-logo-badge">ROLLBOOTH 35MM</span>
-          <span id="rollboothModalTitle">Kamar Gelap &amp; Cetak Strip</span>
+          <span class="rollbooth-logo-badge">ROLLBOOTH</span>
+          <span>Movie Memories Studio</span>
         </div>
-        <button type="button" class="photobooth-modal-close" onclick="closePhotoboothModal()" aria-label="Tutup dialog">
+        <button class="photobooth-modal-close" onclick="closePhotoboothModal()" aria-label="Tutup">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
 
       <div class="rollbooth-studio-layout">
+        <!-- Left: Live Strip Preview with Paper Drop Shadow -->
         <div class="rollbooth-preview-column">
           <div class="rollbooth-strip-container" id="photoboothCardWrap">
-            <img id="photoboothResultImg" class="rollbooth-result-img" alt="Hasil cetak strip Rollbooth" />
+            <img id="photoboothResultImg" class="rollbooth-result-img" alt="Rollbooth Movie Strip" />
           </div>
         </div>
 
+        <!-- Right: Studio Customizer Controls -->
         <div class="rollbooth-controls-column">
+          <!-- 1. Layout Selector -->
           <div class="rollbooth-ctrl-group">
-            <label class="rollbooth-ctrl-label">Tata Letak Kertas</label>
+            <label class="rollbooth-ctrl-label">Tata Letak (Layout)</label>
             <div class="rollbooth-segmented-pills">
               <button type="button" class="rollbooth-pill-btn active" id="layoutBtnStrip" onclick="setRollboothLayout('strip')">
                 <span>Strip Vertikal</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="layoutBtnGrid" onclick="setRollboothLayout('grid')">
-                <span>Grid 2x2</span>
+                <span>Grid 2×2</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="layoutBtnPolaroid" onclick="setRollboothLayout('polaroid')">
                 <span>Polaroid</span>
@@ -1077,67 +585,88 @@
             </div>
           </div>
 
+          <!-- 2. Frame Color Picker -->
           <div class="rollbooth-ctrl-group">
-            <label class="rollbooth-ctrl-label">Warna Kertas Bingkai</label>
+            <label class="rollbooth-ctrl-label">Warna Bingkai (Frame Color)</label>
             <div class="rollbooth-color-swatches">
-              <button type="button" class="color-swatch-btn active" data-color="white" style="background: #ffffff;" onclick="setRollboothColor('white')" title="Baryta Putih"></button>
-              <button type="button" class="color-swatch-btn" data-color="cream" style="background: #f5efe6;" onclick="setRollboothColor('cream')" title="Arsip Gading"></button>
-              <button type="button" class="color-swatch-btn" data-color="noir" style="background: #12151d;" onclick="setRollboothColor('noir')" title="Karbon Gelap"></button>
-              <button type="button" class="color-swatch-btn" data-color="pink" style="background: #ffe5ec;" onclick="setRollboothColor('pink')" title="Merah Muda Pucat"></button>
-              <button type="button" class="color-swatch-btn" data-color="matcha" style="background: #d8e2dc;" onclick="setRollboothColor('matcha')" title="Hijau Arsip"></button>
+              <button type="button" class="color-swatch-btn active" data-color="white" style="background: #ffffff;" onclick="setRollboothColor('white')" title="Classic White"></button>
+              <button type="button" class="color-swatch-btn" data-color="cream" style="background: #f5efe6;" onclick="setRollboothColor('cream')" title="Vintage Cream"></button>
+              <button type="button" class="color-swatch-btn" data-color="noir" style="background: #12151d;" onclick="setRollboothColor('noir')" title="Deep Noir"></button>
+              <button type="button" class="color-swatch-btn" data-color="pink" style="background: #ffe5ec;" onclick="setRollboothColor('pink')" title="Pastel Blossom"></button>
+              <button type="button" class="color-swatch-btn" data-color="matcha" style="background: #d8e2dc;" onclick="setRollboothColor('matcha')" title="Matcha Sage"></button>
             </div>
           </div>
 
+          <!-- 3. Filter Options -->
           <div class="rollbooth-ctrl-group">
-            <label class="rollbooth-ctrl-label">Emulsi Filter</label>
+            <label class="rollbooth-ctrl-label">Filter Vintage</label>
             <div class="rollbooth-segmented-pills">
               <button type="button" class="rollbooth-pill-btn active" id="filterBtnVintage" onclick="setRollboothFilter('vintage')">
-                <span>Sepia 90s</span>
+                <span>Retro 90s</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="filterBtnNormal" onclick="setRollboothFilter('normal')">
-                <span>Warna Asli</span>
+                <span>Normal</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="filterBtnBw" onclick="setRollboothFilter('bw')">
-                <span>Perak B&amp;W</span>
+                <span>B&W Noir</span>
               </button>
               <button type="button" class="rollbooth-pill-btn" id="filterBtnSunset" onclick="setRollboothFilter('sunset')">
-                <span>Senja Hangat</span>
+                <span>Sunset</span>
               </button>
             </div>
           </div>
 
+          <!-- 4. Custom Caption Input -->
           <div class="rollbooth-ctrl-group">
-            <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki / Label Strip</label>
+            <label class="rollbooth-ctrl-label" for="rollboothCaptionInput">Catatan Kaki (Caption)</label>
             <input
               type="text"
               id="rollboothCaptionInput"
               class="form-input rollbooth-input"
-              placeholder="Contoh: Sesi Kamera 35mm"
-              maxlength="36"
-              value="Sesi Kamera 35mm"
+              placeholder="Tulis judul film / pesan manis..."
+              maxlength="32"
+              value="Movie Night Memories"
               oninput="setRollboothCaption(this.value)"
             >
           </div>
 
+          <!-- 5. Action Buttons -->
           <div class="rollbooth-actions">
-            <button type="button" class="inspo-btn-primary w-full" onclick="downloadPhotoboothPhoto()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <button type="button" class="btn btn-primary w-full" onclick="downloadPhotoboothPhoto()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              <span>Unduh Cetakan HD (PNG)</span>
+              <span>Unduh Foto HD (PNG)</span>
             </button>
 
             <div class="rollbooth-sub-actions">
-              <button type="button" class="inspo-btn-ghost flex-1" onclick="copyPhotoboothPhoto()">
-                <span>Salin Gambar</span>
+              <button type="button" class="btn btn-secondary flex-1" onclick="copyPhotoboothPhoto()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Salin</span>
               </button>
-              <button type="button" class="inspo-btn-ghost flex-1" onclick="sharePhotoboothPhoto()">
+
+              <button type="button" class="btn btn-secondary flex-1" id="btnShareMemories" onclick="sharePhotoboothPhoto()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
                 <span>Bagikan</span>
               </button>
-              <button type="button" class="inspo-btn-ghost flex-1" onclick="closePhotoboothModal(); triggerPhotobooth();">
-                <span>Foto Ulang</span>
+
+              <button type="button" class="btn btn-secondary flex-1" onclick="triggerPhotobooth()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Ulang</span>
               </button>
             </div>
           </div>
@@ -1146,8 +675,11 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="/js/app.js?v=13.0"></script>
-</body>
+  <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
+  <!-- Scripts -->
+  <script src="js/qrcode.min.js?v=4.4"></script>
+  <script src="js/app.js?v=4.4"></script>
+  <script src="js/mesh-drift.js?v=4.4"></script>
+</body>
 </html>
