@@ -6,8 +6,11 @@
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>ScreenCast · Siaran Layar PC</title>
-  <link rel="stylesheet" href="css/style.css?v=4.4">
+  <title>ScreenCast · Siaran Layar &amp; Studio Photobooth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=5.0">
 </head>
 <body>
   <!-- 21st.dev Mesh Drift Shader Background -->
@@ -25,16 +28,46 @@
           </svg>
         </span>
         <span class="brand-name">ScreenCast</span>
+        <span class="brand-tag">Rollbooth</span>
       </a>
 
-      <div class="server-status" role="status" aria-live="polite">
-        <span class="status-indicator" id="serverStatusDot"></span>
-        <span class="status-label" id="serverStatusText">Menghubungkan...</span>
+      <nav class="header-nav landing-only" aria-label="Navigasi Halaman">
+        <a href="#consoleSection" class="header-nav-link">Ruang Siaran</a>
+        <a href="#studioSection" class="header-nav-link">Studio Photobooth</a>
+        <a href="#featuresSection" class="header-nav-link">Cara Kerja</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="server-status" role="status" aria-live="polite">
+          <span class="status-indicator" id="serverStatusDot"></span>
+          <span class="status-label" id="serverStatusText">Menghubungkan...</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm header-studio-btn landing-only" onclick="openRollboothStudio()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span>Photobooth</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="app-main">
+  <main class="app-main" id="consoleSection">
+    <!-- Elegant Landing Hero Intro -->
+    <div class="hero-intro landing-only">
+      <div class="hero-badge">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        <span>WEBRTC 60FPS · STUDIO PHOTOBOOTH</span>
+      </div>
+      <h1 class="hero-title">
+        Layar bersama yang jernih, dengan <em>studio photobooth</em> di dalamnya.
+      </h1>
+      <p class="hero-subtitle">
+        Tonton atau bagikan layar langsung dari peramban tanpa instalasi, lengkap dengan kamera reaksi melayang dan cetak foto strip instan.
+      </p>
+    </div>
+
     <!-- Role Switcher Segmented Control -->
     <nav class="segment-nav" id="tabsBar" aria-label="Mode Aplikasi">
       <div class="segmented-control" role="tablist">
@@ -61,7 +94,7 @@
       <!-- Enter Room Code Form (Shown if not yet connected) -->
       <div class="panel panel-centered" id="viewerJoinCard">
         <div class="panel-header text-center">
-          <h1 class="panel-title" id="viewerHeading">Tonton Layar</h1>
+          <h2 class="panel-title" id="viewerHeading">Masuk ke Ruang Siaran</h2>
           <p class="panel-desc">Masukkan 6-karakter kode ruang siaran yang dibagikan oleh penyiar, atau langsung buka tautan.</p>
         </div>
 
@@ -131,12 +164,26 @@
           </div>
         </div>
 
-        <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          <span>Mulai Menonton</span>
-        </button>
+        <div class="room-status-line state-idle" id="roomStatusBanner" role="status" aria-live="polite">
+          Siap terhubung · ketik atau tempel 6 karakter kode ruang
+        </div>
+
+        <div class="join-card-actions">
+          <button class="btn btn-primary btn-lg w-full" onclick="joinRoomByInput()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Mulai Menonton</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary w-full" onclick="openRollboothStudio()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Coba Photobooth Tanpa Kode</span>
+          </button>
+        </div>
 
         <!-- Recent Rooms Quick Rejoin -->
         <div id="viewerRecentRooms" class="recent-rooms-box" style="display: none;">
@@ -310,7 +357,7 @@
       <!-- 1. Setup Card -->
       <div class="panel" id="hostSetupCard">
         <div class="panel-header">
-          <h1 class="panel-title" id="hostSetupHeading">Bagikan Layar Perangkat</h1>
+          <h2 class="panel-title" id="hostSetupHeading">Bagikan Layar Perangkat</h2>
           <p class="panel-desc">
             Kirimkan tampilan monitor, jendela aplikasi, atau tab peramban langsung ke perangkat lain tanpa perlu memasang aplikasi tambahan.
           </p>
@@ -533,7 +580,146 @@
         </aside>
       </div>
     </section>
+
+    <!-- LANDING SECTION 2: Interactive Rollbooth Studio Showcase -->
+    <section class="landing-section landing-only" id="studioSection" aria-labelledby="studioShowcaseHeading">
+      <div class="panel studio-showcase-panel">
+        <div class="studio-showcase-copy">
+          <span class="section-eyebrow">ROLLBOOTH STUDIO</span>
+          <h2 class="section-title" id="studioShowcaseHeading">
+            Abadikan tangkapan layar &amp; ekspresi wajah dalam satu strip.
+          </h2>
+          <p class="section-desc">
+            Tekan <kbd class="kbd-chip">P</kbd> saat menonton bersama untuk memotret 3 pose beruntun lengkap dengan hitung mundur. Pilih tata letak, warna bingkai, dan filter sebelum mengunduh PNG resolusi penuh.
+          </p>
+
+          <div class="studio-demo-controls">
+            <div class="rollbooth-ctrl-group">
+              <span class="rollbooth-ctrl-label">Tata Letak</span>
+              <div class="rollbooth-segmented-pills" role="group" aria-label="Contoh Tata Letak">
+                <button type="button" class="rollbooth-pill-btn active" data-sample-layout="strip" onclick="setSampleLayout('strip')">Strip Vertikal</button>
+                <button type="button" class="rollbooth-pill-btn" data-sample-layout="grid" onclick="setSampleLayout('grid')">Grid 2x2</button>
+                <button type="button" class="rollbooth-pill-btn" data-sample-layout="polaroid" onclick="setSampleLayout('polaroid')">Polaroid</button>
+              </div>
+            </div>
+
+            <div class="rollbooth-ctrl-group">
+              <span class="rollbooth-ctrl-label">Warna Bingkai</span>
+              <div class="rollbooth-color-swatches" role="group" aria-label="Contoh Warna Bingkai">
+                <button type="button" class="color-swatch-btn active" data-sample-frame="white" style="background: #ffffff;" onclick="setSampleFrame('white')" aria-label="Classic White"></button>
+                <button type="button" class="color-swatch-btn" data-sample-frame="cream" style="background: #f5efe6;" onclick="setSampleFrame('cream')" aria-label="Vintage Cream"></button>
+                <button type="button" class="color-swatch-btn" data-sample-frame="noir" style="background: #12151d;" onclick="setSampleFrame('noir')" aria-label="Deep Noir"></button>
+                <button type="button" class="color-swatch-btn" data-sample-frame="pink" style="background: #ffe5ec;" onclick="setSampleFrame('pink')" aria-label="Pastel Blossom"></button>
+                <button type="button" class="color-swatch-btn" data-sample-frame="matcha" style="background: #d8e2dc;" onclick="setSampleFrame('matcha')" aria-label="Matcha Sage"></button>
+              </div>
+            </div>
+
+            <div class="rollbooth-ctrl-group">
+              <span class="rollbooth-ctrl-label">Filter</span>
+              <div class="rollbooth-segmented-pills" role="group" aria-label="Contoh Filter">
+                <button type="button" class="rollbooth-pill-btn active" data-sample-filter="vintage" onclick="setSampleFilter('vintage')">Retro 90s</button>
+                <button type="button" class="rollbooth-pill-btn" data-sample-filter="normal" onclick="setSampleFilter('normal')">Normal</button>
+                <button type="button" class="rollbooth-pill-btn" data-sample-filter="bw" onclick="setSampleFilter('bw')">B&amp;W Noir</button>
+                <button type="button" class="rollbooth-pill-btn" data-sample-filter="sunset" onclick="setSampleFilter('sunset')">Sunset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-showcase-cta">
+            <button type="button" class="btn btn-primary" onclick="openRollboothStudio()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Ambil 3 Pose Sekarang</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="studio-showcase-preview">
+          <div class="sample-strip-card frame-white layout-strip filter-vintage" id="sampleStripCard">
+            <div class="sample-strip-slots">
+              <div class="sample-slot sample-slot-screen">
+                <div class="sample-slot-art art-screen"></div>
+                <span class="sample-slot-tag">POSE 01 · LAYAR UTAMA</span>
+              </div>
+              <div class="sample-slot sample-slot-duo">
+                <div class="sample-duo-half">
+                  <div class="sample-slot-art art-cam-host"></div>
+                  <span class="sample-slot-tag">HOST</span>
+                </div>
+                <div class="sample-duo-half">
+                  <div class="sample-slot-art art-cam-viewer"></div>
+                  <span class="sample-slot-tag">VIEWER</span>
+                </div>
+              </div>
+              <div class="sample-slot sample-slot-final">
+                <div class="sample-slot-art art-cam-final"></div>
+                <span class="sample-slot-tag">POSE 03 · BERSAMA</span>
+              </div>
+            </div>
+            <div class="sample-strip-footer">
+              <div class="sample-strip-caption">ScreenCast Memories</div>
+              <div class="sample-strip-meta">ROLLBOOTH · 3 CUTS · HD PNG</div>
+              <div class="sample-strip-barcode" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LANDING SECTION 3: Restrained 3-Step Workflow -->
+    <section class="landing-section landing-only" id="featuresSection" aria-labelledby="workflowHeading">
+      <div class="section-header-compact">
+        <span class="section-eyebrow">CARA KERJA</span>
+        <h2 class="section-title" id="workflowHeading">Dirancang sederhana untuk langsung digunakan.</h2>
+      </div>
+
+      <div class="steps-grid">
+        <article class="panel step-card">
+          <span class="step-index">01</span>
+          <h3 class="step-title">Bagikan atau Masuk dengan 6 Digit</h3>
+          <p class="step-desc">
+            Penyiar cukup memilih jendela atau layar dengan opsi 60 FPS dan akselerasi H.264. Penonton bergabung seketika menggunakan 6 karakter kode ruang atau tautan QR.
+          </p>
+        </article>
+
+        <article class="panel step-card">
+          <span class="step-index">02</span>
+          <h3 class="step-title">Kamera Melayang &amp; Suara Dua Arah</h3>
+          <p class="step-desc">
+            Nyalakan mikrofon dan kamera wajah kapan saja. Gelembung video dapat digeser bebas di atas layar utama dilengkapi indikator gelombang suara aktif.
+          </p>
+        </article>
+
+        <article class="panel step-card">
+          <span class="step-index">03</span>
+          <h3 class="step-title">Cetak Strip Kenangan di Rollbooth</h3>
+          <p class="step-desc">
+            Buka Rollbooth Studio dari dalam ruang siaran maupun langsung dari halaman utama untuk mengambil 3 foto beruntun dan menyimpannya dalam format PNG tajam.
+          </p>
+        </article>
+      </div>
+    </section>
   </main>
+
+  <!-- Minimalist Landing Footer -->
+  <footer class="landing-footer landing-only">
+    <div class="footer-inner">
+      <div class="footer-brand-col">
+        <span class="footer-brand-name">ScreenCast × Rollbooth</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-copy">Siaran layar WebRTC &amp; studio photobooth instan</span>
+      </div>
+      <div class="footer-shortcuts" aria-label="Pintasan Papan Ketik">
+        <span class="shortcut-pill"><kbd>F</kbd> Layar Penuh</span>
+        <span class="shortcut-pill"><kbd>M</kbd> Suara</span>
+        <span class="shortcut-pill"><kbd>D</kbd> Mic</span>
+        <span class="shortcut-pill"><kbd>C</kbd> Kamera</span>
+        <span class="shortcut-pill"><kbd>P</kbd> Photobooth</span>
+      </div>
+    </div>
+  </footer>
 
   <!-- Rollbooth Countdown & Shutter Flash Overlay -->
   <div id="photoboothCountdownOverlay" class="photobooth-countdown-overlay" style="display: none;">
@@ -678,8 +864,8 @@
   <div class="toast-stack" id="toastContainer" aria-live="assertive"></div>
 
   <!-- Scripts -->
-  <script src="js/qrcode.min.js?v=4.4"></script>
-  <script src="js/app.js?v=4.4"></script>
-  <script src="js/mesh-drift.js?v=4.4"></script>
+  <script src="js/qrcode.min.js?v=5.0"></script>
+  <script src="js/app.js?v=5.0"></script>
+  <script src="js/mesh-drift.js?v=5.0"></script>
 </body>
 </html>

@@ -130,6 +130,7 @@ function initWebSocket() {
 
       case 'error':
         showToast(data.message, 'error');
+        setRoomStatusBanner(data.message || 'Gagal terhubung ke ruang siaran', 'error');
         break;
     }
   };
@@ -267,6 +268,7 @@ async function startHostSharing() {
 
 function handleRoomCreated(roomId) {
   activeRoomId = roomId;
+  document.body.classList.add('is-broadcasting');
   document.getElementById('hostSetupCard').style.display = 'none';
   document.getElementById('hostActiveDash').style.display = 'grid';
   document.getElementById('displayRoomCode').textContent = roomId;
@@ -431,6 +433,7 @@ function stopHostSharing() {
   peerConnections.forEach((pc) => pc.close());
   peerConnections.clear();
 
+  document.body.classList.remove('is-broadcasting');
   document.getElementById('hostActiveDash').style.display = 'none';
   document.getElementById('hostSetupCard').style.display = 'block';
   document.getElementById('hostPreviewVideo').srcObject = null;
@@ -536,14 +539,23 @@ function renderRecentRooms() {
   } catch (e) {}
 }
 
+function setRoomStatusBanner(text, state = 'idle') {
+  const banner = document.getElementById('roomStatusBanner');
+  if (!banner) return;
+  banner.textContent = text;
+  banner.className = 'room-status-line state-' + state;
+}
+
 function joinRoomByInput() {
   const code = document.getElementById('inputRoomCode').value.trim().toUpperCase();
   if (code.length < 4) {
+    setRoomStatusBanner('Masukkan 6 karakter kode ruang yang valid', 'error');
     showToast('Masukkan kode ruang yang valid.');
     return;
   }
   currentRole = 'viewer';
   activeRoomId = code;
+  setRoomStatusBanner('Menghubungkan ke ruang ' + code + '...', 'loading');
 
   ws.send(JSON.stringify({
     type: 'join-room',
@@ -553,6 +565,7 @@ function joinRoomByInput() {
 
 function handleJoinedRoom(roomId, viewerId) {
   saveRecentRoom(roomId);
+  setRoomStatusBanner('Terhubung ke ruang ' + roomId, 'active');
   document.body.classList.add('is-watching');
 
   const roomDisplay = document.getElementById('viewerCurrentRoom');
@@ -1590,7 +1603,7 @@ function triggerPhotobooth() {
             // Open Rollbooth Studio Modal
             if (modal) modal.style.display = 'flex';
             renderRollboothCanvas();
-            showToast('3 Foto berhasil diambil! Selamat berkreasi di Rollbooth Studio 📸✨');
+            showToast('3 Foto berhasil diambil! Selamat berkreasi di Rollbooth Studio.');
           });
         }, 600);
       });
@@ -1610,7 +1623,7 @@ function runCountdownStep(startCount, onFinish) {
       if (countText) countText.textContent = current;
     } else {
       clearInterval(timer);
-      if (countText) countText.textContent = '📸 FLASH!';
+      if (countText) countText.textContent = 'FLASH!';
 
       // Trigger Flash & Sound
       if (flash) {
@@ -1624,6 +1637,44 @@ function runCountdownStep(startCount, onFinish) {
       setTimeout(onFinish, 120);
     }
   }, 900);
+}
+
+function createAtmosphericFallbackCanvas(stepIdx) {
+  const c = document.createElement('canvas');
+  c.width = 640;
+  c.height = 480;
+  const ctx = c.getContext('2d');
+
+  const palettes = [
+    ['#0b132b', '#1c2541', '#1f6feb'],
+    ['#0f172a', '#1e3a8a', '#388bfd'],
+    ['#111827', '#1d4ed8', '#58a6ff']
+  ];
+  const pal = palettes[stepIdx % palettes.length];
+
+  const grad = ctx.createLinearGradient(0, 0, c.width, c.height);
+  grad.addColorStop(0, pal[0]);
+  grad.addColorStop(0.55, pal[1]);
+  grad.addColorStop(1, pal[2]);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  // Subtle ambient glow
+  const radial = ctx.createRadialGradient(c.width * 0.72, c.height * 0.3, 20, c.width * 0.72, c.height * 0.3, 240);
+  radial.addColorStop(0, 'rgba(121, 192, 255, 0.32)');
+  radial.addColorStop(1, 'rgba(121, 192, 255, 0)');
+  ctx.fillStyle = radial;
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  ctx.fillStyle = 'rgba(240, 246, 252, 0.88)';
+  ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('SCREENCAST × ROLLBOOTH', c.width / 2, c.height / 2 - 6);
+  ctx.fillStyle = 'rgba(156, 167, 180, 0.85)';
+  ctx.font = '500 14px ui-monospace, Menlo, Consolas, monospace';
+  ctx.fillText('POSE 0' + ((stepIdx % 3) + 1) + ' · STUDIO PREVIEW', c.width / 2, c.height / 2 + 22);
+  ctx.textAlign = 'left';
+  return c;
 }
 
 function grabCurrentSnap() {
@@ -1647,11 +1698,72 @@ function grabCurrentSnap() {
     return c;
   }
 
+  const movieCanvas = copyVideo(movieVid);
+  const cam1Canvas = copyVideo(cam1);
+  const cam2Canvas = copyVideo(cam2);
+  const fallback = (!movieCanvas && !cam1Canvas && !cam2Canvas)
+    ? createAtmosphericFallbackCanvas(rollboothSnaps.length)
+    : null;
+
   return {
-    movie: copyVideo(movieVid),
-    cam1: copyVideo(cam1),
-    cam2: copyVideo(cam2)
+    movie: movieCanvas || cam1Canvas || fallback,
+    cam1: cam1Canvas || movieCanvas || fallback,
+    cam2: cam2Canvas
   };
+}
+
+async function openRollboothStudio() {
+  // If user is on the landing page without an active camera, try starting webcam for real 3-pose photos
+  if (!localCamStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      localCamStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      });
+      isCameraActive = true;
+      const selfVideo = (currentRole === 'host')
+        ? document.getElementById('hostSelfCamVideo')
+        : document.getElementById('selfFacecamVideo');
+      if (selfVideo) {
+        selfVideo.srcObject = localCamStream;
+        await selfVideo.play().catch(() => {});
+      }
+      updateCameraButtonsUI(true);
+    } catch (e) {
+      // Proceed with atmospheric studio fallback canvas if camera permission is declined
+    }
+  }
+  triggerPhotobooth();
+}
+
+function setSampleLayout(layout) {
+  const card = document.getElementById('sampleStripCard');
+  if (!card) return;
+  card.classList.remove('layout-strip', 'layout-grid', 'layout-polaroid');
+  card.classList.add('layout-' + layout);
+  document.querySelectorAll('[data-sample-layout]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-sample-layout') === layout);
+  });
+}
+
+function setSampleFrame(frame) {
+  const card = document.getElementById('sampleStripCard');
+  if (!card) return;
+  card.classList.remove('frame-white', 'frame-cream', 'frame-noir', 'frame-pink', 'frame-matcha');
+  card.classList.add('frame-' + frame);
+  document.querySelectorAll('[data-sample-frame]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-sample-frame') === frame);
+  });
+}
+
+function setSampleFilter(filter) {
+  const card = document.getElementById('sampleStripCard');
+  if (!card) return;
+  card.classList.remove('filter-vintage', 'filter-normal', 'filter-bw', 'filter-sunset');
+  card.classList.add('filter-' + filter);
+  document.querySelectorAll('[data-sample-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-sample-filter') === filter);
+  });
 }
 
 function playShutterSound() {
@@ -1791,7 +1903,7 @@ function renderRollboothCanvas() {
 
     // Photo 1 (Top: Movie Scene from Snap 1)
     const y1 = padTop;
-    drawFilteredPhoto(ctx, snap1.movie, padX, y1, photoW, photoH, activeFilter, '🎬 ADEGAN FILM');
+    drawFilteredPhoto(ctx, snap1.movie, padX, y1, photoW, photoH, activeFilter, 'LAYAR UTAMA');
 
     // Photo 2 (Middle: Reactions from Snap 2)
     const y2 = y1 + photoH + gap;
@@ -1803,7 +1915,7 @@ function renderRollboothCanvas() {
     } else if (snap2.cam1 || snap2.cam2) {
       drawFilteredPhoto(ctx, snap2.cam1 || snap2.cam2, padX, y2, photoW, photoH, activeFilter, 'REAKSI');
     } else {
-      drawFilteredPhoto(ctx, snap2.movie, padX, y2, photoW, photoH, activeFilter, '🎬 FILM SCENE II');
+      drawFilteredPhoto(ctx, snap2.movie, padX, y2, photoW, photoH, activeFilter, 'ADEGAN II');
     }
 
     // Photo 3 (Bottom: Final Pose from Snap 3)
@@ -1815,7 +1927,7 @@ function renderRollboothCanvas() {
     } else if (snap3.cam1 || snap3.cam2) {
       drawFilteredPhoto(ctx, snap3.cam1 || snap3.cam2, padX, y3, photoW, photoH, activeFilter, 'SENYUM');
     } else {
-      drawFilteredPhoto(ctx, snap3.movie, padX, y3, photoW, photoH, activeFilter, '🎬 FILM SCENE III');
+      drawFilteredPhoto(ctx, snap3.movie, padX, y3, photoW, photoH, activeFilter, 'ADEGAN III');
     }
 
     // Strip Footer
@@ -1862,13 +1974,13 @@ function renderRollboothCanvas() {
 
     // Top Row
     const yTop = pad + 16;
-    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, '🎬 FILM 1');
+    drawFilteredPhoto(ctx, snap1.movie, pad, yTop, gridW, gridH, activeFilter, 'LAYAR 1');
     drawFilteredPhoto(ctx, snap2.cam1 || snap1.movie, pad + gridW + gap, yTop, gridW, gridH, activeFilter, 'HOST');
 
     // Bottom Row
     const yBot = yTop + gridH + gap;
     drawFilteredPhoto(ctx, snap2.cam2 || snap2.cam1 || snap2.movie, pad, yBot, gridW, gridH, activeFilter, 'VIEWER');
-    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, '🎬 FILM 2');
+    drawFilteredPhoto(ctx, snap3.movie || snap3.cam1, pad + gridW + gap, yBot, gridW, gridH, activeFilter, 'LAYAR 2');
 
     // Footer
     const footerY = yBot + gridH + 34;
@@ -1902,7 +2014,7 @@ function renderRollboothCanvas() {
     const heroH = Math.round(heroW * (9 / 16)); // ~477px
 
     // Hero Movie Scene
-    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, '🎬 ADEGAN FILM');
+    drawFilteredPhoto(ctx, snap1.movie, pad, pad, heroW, heroH, activeFilter, 'LAYAR UTAMA');
 
     // Side-by-side reactions
     const reactY = pad + heroH + 20;
@@ -1959,10 +2071,10 @@ function drawFilteredPhoto(ctx, sourceCanvas, x, y, w, h, filterStr, label) {
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#8b949e';
-    ctx.font = '28px -apple-system, sans-serif';
-    ctx.fillText('📷', x + w / 2, y + h / 2 - 8);
+    ctx.font = '700 14px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillText('ROLLBOOTH', x + w / 2, y + h / 2 - 6);
     ctx.font = '500 13px -apple-system, sans-serif';
-    ctx.fillText(label || 'Foto', x + w / 2, y + h / 2 + 24);
+    ctx.fillText(label || 'Foto', x + w / 2, y + h / 2 + 18);
     ctx.textAlign = 'left';
   }
 
@@ -2062,14 +2174,14 @@ async function sharePhotoboothPhoto() {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         title: 'Rollbooth Movie Memories',
-        text: 'Foto strip nobar film di ScreenCast! 🍿📸',
+        text: 'Foto strip kebersamaan di ScreenCast!',
         files: [file]
       });
       showToast('Foto berhasil dibagikan!');
     } else if (navigator.share) {
       await navigator.share({
         title: 'Rollbooth Movie Memories',
-        text: 'Foto strip nobar film di ScreenCast! 🍿🎬',
+        text: 'Foto strip kebersamaan di ScreenCast!',
         url: window.location.href
       });
     } else {

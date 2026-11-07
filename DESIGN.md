@@ -1,37 +1,60 @@
-# DESIGN.md : ScreenCast × Rollbooth (Chill Music Club × Inspo-MCP Analog Club Edition)
+# ScreenCast × Rollbooth · Design System & Architecture (`DESIGN.md`)
 
-## 1. Visual Direction & Domain Exemplars
-- **Primary Reference**: **Chill Music Club** (`https://www.lapa.ninja/post/chillmusic-club/`) combined with **`inspo-mcp`** (`split-studio` macrostructure + `daydream1820-com` / `atomixnyc-com` warm analog paper exemplars).
-- **Aesthetic Persona**: *"The intimate analog lounge & 35mm darkroom club"*, inspired by independent record sleeves, cassette J-cards, and tactile contact sheets. Warm oat/cardboard paper ground (`#F4EFE6`), deep ink-blot charcoal (`#181614`), burnt terracotta stamp (`#B03E1A`), and zero generic movie franchise references.
-- **Anti-Slop Decisions (`R-31`)**:
-  - **One-line Palette Decision**: Warm analog sleeve paper `#F4EFE6` (`--color-paper`), pressed cardboard surface `#EAE2D3` (`--color-surface`), ink-blot charcoal `#181614` (`--color-ink`, `15.76:1` AAA), warm muted slate `#544E46` (`--color-muted`, `7.18:1` AAA), and burnt terracotta stamp `#B03E1A` (`--color-accent`, `5.17:1` AA on paper, `#FAF6F0` text on `#B03E1A` = `5.49:1` AA), with a toggleable Darkroom mode (`#121110` canvas, `#EDE8DF` ink `15.46:1` AAA).
-  - **One-line Typography Decision**: Editorial display serif `Instrument Serif` (tight tracking `-0.025em`, line-height `0.98`, italic terracotta highlights) paired with geometric grotesk `Plus Jakarta Sans` for UI copy and `IBM Plex Mono` for J-card catalog numbers, room codes, and technical metadata.
-  - **One-line Layout Decision**: `inspo-mcp` **Split Studio (`split-studio`)** 50/50 first-viewport split hero (`HeroSplitScreen`) with an analog Club J-Card Room Console on the left and a 2x2 Tactile Emulsion Crate (`#reelCatalog`) on the right, followed by a 12-column 35mm Contact Sheet Workbench (`FeaturesWorkbench`), a 3-column Numbered Protocol Triplet (`FeaturesNumberedTriplet`), an Editorial FAQ Accordion (`FaqAccordion`), and a 3-column Magazine Colophon (`FooterColophon`).
+## 1. Aesthetic Direction & Core Philosophy
+- **Aesthetic**: **Liquid Frosted Glass & WebGL Mesh Drift Shader**
+- **Inspiration**: Original `ScreenCast` dark frosted-glass utility (`commit 0e2ee8b`), elevated with a restrained, high-craft landing structure that preserves the signature full-viewport WebGL gradient shader (`#meshDriftCanvas`) and immediate 6-slot OTP entry console.
+- **Design Intent**: Keep the interface simple, focused, and atmospheric. The landing page opens directly with an elegant typographic introduction above the `Tonton Layar` / `Bagikan Layar` segmented console, followed by an interactive **Rollbooth Studio** preview card and a concise 3-step workflow guide. When a user joins or broadcasts a room (`body.is-watching` or `body.is-broadcasting`), all landing sections (`.landing-only`) automatically hide so the stream workspace has 100% focus.
 
 ---
 
-## 2. Color Tokens (WCAG 2.1 AA/AAA Verified via `contrast-check.py`)
+## 2. Color Palette & WCAG 2.1 Contrast Verification (`R-21`)
+All text/surface pairings were verified using `contrast-check.py`:
 
-### Default Theme: Warm Analog Club Paper (`data-theme="light"`)
-| Token | Hex | Role | Contrast Ratio |
-| :--- | :--- | :--- | :--- |
-| `--color-paper` | `#F4EFE6` | Warm oat / vinyl sleeve background | Base canvas |
-| `--color-surface` | `#EAE2D3` | Pressed cardboard card & workbench surface | Surface |
-| `--color-elevated` | `#FAF7F2` | Elevated J-card & input platen | Elevated |
-| `--color-ink` | `#181614` | Primary ink-blot charcoal text | **15.76:1** on `#F4EFE6` (AAA) |
-| `--color-muted` | `#544E46` | Secondary liner-notes copy | **7.18:1** on `#F4EFE6` / **6.39:1** on `#EAE2D3` (AAA) |
-| `--color-rule` | `#D5CBB8` | Hairline J-card & grid divider (`1px solid`) | Structural rule |
-| `--color-rule-strong` | `#7A7267` | Active control & input border | **4.22:1** UI component (AA) |
-| `--color-accent` | `#B03E1A` | Burnt terracotta club stamp & primary CTA | **5.49:1** with `#FAF6F0` text (AA) |
-| `--color-accent-text` | `#B03E1A` | Italic serif highlight & active mono tag | **5.17:1** on `#F4EFE6` (AA) |
+| Token | Hex / Value | Surface | Contrast Ratio | WCAG 2.1 Level | Role |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `--bg-canvas` | `#0D1117` | Base viewport | N/A | N/A | Deep obsidian base behind `#meshDriftCanvas` |
+| `--bg-panel` | `#12161F` (`rgba(18, 22, 31, 0.76)`) | Frosted glass card | N/A | N/A | Primary liquid frosted-glass panel (`blur(24px)`) |
+| `--text-primary` | `#F0F6FC` | `#0D1117` / `#12161F` | `17.39:1` / `16.63:1` | **AAA** | Headlines, active controls, OTP digits |
+| `--text-secondary` | `#9CA7B4` | `#12161F` | `7.41:1` | **AAA** | Subtitles, body copy, form labels |
+| `--text-tertiary` | `#8B949E` | `#12161F` | `5.88:1` | **AA** | Metadata, helper text, keyboard shortcut hints |
+| `--brand-accent` | `#1F6FEB` | `#FFFFFF` text | `4.63:1` | **AA** | Primary interactive CTA button fill |
+| `--border-active` | `#58A6FF` | `#0B0E14` text | `7.65:1` | **AAA** | Active pill buttons, focus rings (`:focus-visible`), OTP active slot |
+| `--accent-Ice` | `#79C0FF` | `#12161F` | `9.31:1` | **AAA** | Subtle badge highlights and eyebrow labels |
 
-### Secondary Theme: Nocturnal Listening & Darkroom (`data-theme="dark"`)
-| Token | Hex | Role | Contrast Ratio |
-| :--- | :--- | :--- | :--- |
-| `--color-paper` | `#121110` | Deep nocturnal booth background | Base canvas |
-| `--color-surface` | `#1B1917` | Dark sleeve surface | Surface |
-| `--color-elevated` | `#24211E` | Elevated control platen | Elevated |
-| `--color-ink` | `#EDE8DF` | Warm silver halide white | **15.46:1** on `#121110` (AAA) |
-| `--color-muted` | `#A8A196` | Muted warm stone | **6.85:1** on `#1B1917` (AAA) |
-| `--color-accent` | `#B03E1A` | Burnt terracotta CTA fill | **5.49:1** with `#FAF6F0` text (AA) |
-| `--color-accent-text` | `#F28B66` | Warm amber coral highlight | **7.78:1** on `#121110` (AAA) |
+---
+
+## 3. Typography & Scannable Hierarchy (`R-11`, `R-12`)
+- **Primary UI & Headlines (`--font-sans`)**: `'Plus Jakarta Sans'`, `-apple-system`, `BlinkMacSystemFont`, sans-serif.
+- **Editorial Accent (`--font-serif`)**: `'Instrument Serif'`, Georgia, serif (used selectively in italic for the hero title accent *"studio photobooth"*).
+- **Technical & OTP Codes (`--font-mono`)**: `'JetBrains Mono'`, `ui-monospace`, `SFMono-Regular`, monospace (`font-variant-numeric: tabular-nums` for the 6-slot room code, WebRTC telemetry, and Rollbooth timestamps).
+- **Type Scale**:
+  - Hero Headline (`.hero-title`): `clamp(2rem, 3.8vw, 2.85rem)`, `font-weight: 700`, `line-height: 1.14`, `letter-spacing: -0.025em`.
+  - Section Title (`.section-title`): `clamp(1.35rem, 2.4vw, 1.75rem)`, `font-weight: 600`, `letter-spacing: -0.02em`.
+  - Panel Title (`.panel-title`): `1.35rem`, `font-weight: 600`.
+  - Body Copy (`.panel-desc`, `.hero-subtitle`): `0.94rem` to `1.02rem`, `line-height: 1.6`, `max-width: 58ch`.
+
+---
+
+## 4. Layout Architecture & Viewport Budget (`R-13`, `R-14`, `R-28`, `R-29`)
+- **Background Layer**: Fixed `#meshDriftCanvas` WebGL shader (`public/js/mesh-drift.js`) rendering organic navy, royal-blue, cyan, and indigo waves with subtle film grain.
+- **Sticky Glass Header (`.app-header`)**: Brand logo (`ScreenCast` + `Rollbooth` pill), anchor links (`Ruang Siaran`, `Studio Photobooth`, `Cara Kerja`), live WebSocket status indicator (`#serverStatusDot` + `#serverStatusText`), and quick action button (`Buka Photobooth`).
+- **Fold 1 · Hero Intro & Immediate Console (`#consoleSection`)**:
+  - Compact centered hero intro (`.hero-intro.landing-only`) with eyebrow badge, headline, and 1-sentence subtitle.
+  - Role switcher (`.segment-nav`) toggling between **Tonton Layar** (`#viewerSection`) and **Bagikan Layar** (`#hostSection`).
+  - Centered frosted-glass card (`#viewerJoinCard`, `max-width: 460px`) with 6-slot OTP input (`#inputRoomCode`), `Tempel Kode`, explicit 4-state status feedback (`#roomStatusBanner` for idle, loading, error, active), primary `Mulai Menonton` CTA, secondary `Coba Photobooth Tanpa Kode` button, and recent rooms chips (`#viewerRecentRooms`).
+- **Fold 2 · Interactive Rollbooth Studio Showcase (`#studioSection.landing-only`)**:
+  - 2-column frosted-glass panel (`.studio-showcase-panel`, `max-width: 920px`) where users can test **Tata Letak** (`Strip Vertikal`, `Grid 2x2`, `Polaroid`), **Warna Bingkai** (`White`, `Cream`, `Noir`, `Pink`, `Matcha`), and **Filter** (`Retro 90s`, `Normal`, `B&W Noir`, `Sunset`) with a live visual strip preview (`#sampleStripCard`), or launch the real webcam photobooth (`Ambil 3 Pose Sekarang`).
+- **Fold 3 · Restrained 3-Step Workflow (`#featuresSection.landing-only`)**:
+  - 3 balanced frosted-glass cards (`max-width: 920px`) explaining `01 / Masuk atau Bagikan Layar`, `02 / Kamera Melayang & Suara Jernih`, and `03 / Cetak Foto Strip HD`.
+- **Responsive Breakpoints (`R-28`)**:
+  - Desktop (`> 960px`): 2-column studio showcase, 3-column workflow grid.
+  - Tablet (`641px - 960px`): Stacked single-column studio showcase, 2-column workflow grid, hidden header nav links on narrow tablets.
+  - Mobile (`<= 640px`): Fluid full-width panels, responsive OTP slots (`42px × 50px`), 44×44px minimum touch targets (`R-23`).
+
+---
+
+## 5. One-Line Design Decisions (`R-31`)
+1. **Kept `#meshDriftCanvas` and `.panel` frosted glass (`rgba(18, 22, 31, 0.76)`, `blur(24px)`)**: Preserves the exact atmospheric gradient + dark glass identity the user requested while elevating typography and layout hierarchy.
+2. **Kept the 6-slot OTP console in Fold 1**: Returning users can paste or type a 6-character room code immediately without scrolling past marketing filler (`R-13`).
+3. **Interactive Rollbooth preview on the landing page**: Demonstrates the built-in 3-pose photobooth and lets visitors test frame colors, layouts, and standalone camera capture even before joining a stream.
+4. **Automatic `.landing-only` suppression on active stream**: Adding `body.is-watching` or `body.is-broadcasting` hides the hero intro, studio showcase, workflow cards, and footer so the video player or broadcast dashboard gets 100% of the viewport.
